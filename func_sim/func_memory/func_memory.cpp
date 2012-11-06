@@ -10,36 +10,63 @@
 #include <cstdlib>
 
 // Generic C++
+#include <iostream>
 #include <string> 
+#include <sstream>
 
 // uArchSim modules
 #include <func_memory.h>
+#include <elf_parser.h>
+
+using namespace std;
 
 FuncMemory::FuncMemory( const char* executable_file_name,
                         const char* const elf_sections_names[],
                         short num_of_elf_sections)
 {
-    // Change it with your implementation.
-    assert(0);
+    assert( num_of_elf_sections > 0);
+
+    for ( short i = 0; i < num_of_elf_sections; ++i) {
+        ElfSection* section = new ElfSection(executable_file_name, 
+            elf_sections_names[i]);
+        sections[section->startAddr()] = section;
+    }
 }
 
 FuncMemory::~FuncMemory()
 {
-    // Change it with your implementation.
-    assert(0);
+    for ( ConstIter it = sections.begin(); it != sections.end(); it++) {
+        delete it->second;
+    }
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
-    // Change it with your implementation.
-    assert(0);
-    return NO_VAL64; 
+    assert( num_of_bytes > 0);
+
+    for ( ConstIter it = sections.begin(); it != sections.end(); it++) {
+        ElfSection *section = it->second;
+        if ( section->isInside( addr, num_of_bytes)) {
+            return section->read( addr, num_of_bytes);
+        }
+    }
+
+    cerr << "ERROR: address doesn't belong to any section: " 
+         << hex << addr << endl;
+    exit( EXIT_FAILURE);
+
+    return 0; 
 }
 
 string FuncMemory::dump( string indent) const
 {
-    // Change it with your implementation
-    assert(0);
-    return " ";
+    ostringstream oss;
+
+    for ( ConstIter it = sections.begin(); it != sections.end(); it++) {
+        ElfSection *section = it->second;
+        oss << section->dump() << endl;
+    }
+
+    return oss.str();
 }
 
