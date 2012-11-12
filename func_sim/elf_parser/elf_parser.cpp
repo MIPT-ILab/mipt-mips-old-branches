@@ -4,7 +4,7 @@
  * Copyright 2012 uArchSim iLab project
  */
 
-// Genereic C
+// Genereric C
 #include <libelf.h>
 #include <cstdio>
 #include <unistd.h>
@@ -114,7 +114,6 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
             offset = ( uint64)shdr.sh_offset;
             size = ( uint64)shdr.sh_size;
             start_addr = ( uint64)shdr.sh_addr;
-            
             return;
         }
     }
@@ -126,23 +125,51 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64; 
+    assert( num_of_bytes > 0);
+    assert( this->isInside( addr, num_of_bytes) == true);
+
+    // temp stream is used to convert numbers into the output string
+    ostringstream oss;
+    oss << hex;
+	
+    // convert each byte into 2 hex digits 
+    // read since the end in order to recieve the right order of bytes
+    for( short i = num_of_bytes - 1; i >= 0; --i)
+    {
+        oss.width( 2); // because we need two hex symbols to print a byte (e.g. "ff")
+        oss.fill( '0'); // thus, number 8 will be printed as "08"
+        
+        short offset = (short) (addr - this->start_addr) + i;
+
+        // need converting to uint16
+        // to be not printed as an alphabet symbol	
+        oss << (uint16) *( this->content + offset); 
+    }
+
+    istringstream iss( oss.str()); // make input stream from output stream
+    
+    uint64 read_value;
+    iss >> hex >> read_value;
+
+    return read_value;
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return false;
+    assert( num_of_bytes > 0);
+
+    if ( ( addr < this->start_addr) ||
+         ( ( addr + num_of_bytes) > ( this->start_addr + this->size)))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 uint64 ElfSection::startAddr() const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64;
+    return this->start_addr;
 }
 
 string ElfSection::dump( string indent) const
@@ -182,7 +209,7 @@ string ElfSection::strByBytes() const
         
         // print a value of 
         oss << (uint16) *( this->content + i); // need converting to uint16
-                                               // to be not preinted as an alphabet symbol	
+                                               // to be not printed as an alphabet symbol
     }
     
     return oss.str();
