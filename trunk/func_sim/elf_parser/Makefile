@@ -15,8 +15,8 @@ vpath %.h $(TRUNK)/common
 INCL= -I ./ -I $(TRUNK)common/
 
 #options for static linking of boost Unit Test library
-INCL_GTEST= -I $(TRUNK)/libs/gtest-1.6.0/include
-GTEST_LIB= $(TRUNK)/libs/gtest-1.6.0/libgtest.a
+INCL_GTEST= -I $(TRUNK)../libs/gtest-1.6.0/include
+GTEST_LIB= $(TRUNK)../libs/gtest-1.6.0/libgtest.a
 
 #
 # Enter for building elf_parser stand alone program
