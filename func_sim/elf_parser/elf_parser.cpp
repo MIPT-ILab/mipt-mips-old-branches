@@ -141,7 +141,7 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
     assert( num_of_bytes);
-    return ( this->start_addr <= addr && this->start_addr + this->size >= addr + num_of_bytes)? true: false;
+    return this->start_addr <= addr && this->start_addr + this->size >= addr + num_of_bytes;
 }
 
 uint64 ElfSection::startAddr() const
