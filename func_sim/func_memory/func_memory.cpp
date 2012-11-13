@@ -10,6 +10,7 @@
 #include <cstdlib>
 
 // Generic C++
+#include <set>
 #include <iostream>
 #include <string> 
 #include <sstream>
@@ -26,45 +27,64 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 {
     assert( num_of_elf_sections > 0);
 
-    for ( short i = 0; i < num_of_elf_sections; ++i) {
-        ElfSection* section = new ElfSection(executable_file_name, 
+    set<string> section_names;
+    for ( short i = 0; i < num_of_elf_sections; ++i) 
+    {
+        if (section_names.find( elf_sections_names[i]) == section_names.end()) 
+        {
+            section_names.insert( elf_sections_names[i]);
+        } else {
+            cerr << "ERROR: multiple sections with the same name are requested."
+                 << endl;
+            exit( EXIT_FAILURE);
+        }
+    }
+
+    for ( short i = 0; i < num_of_elf_sections; ++i) 
+    {
+        ElfSection* section = new ElfSection( executable_file_name, 
             elf_sections_names[i]);
-        sections[section->startAddr()] = section;
+        sections.push_back( section);
     }
 }
 
 FuncMemory::~FuncMemory()
 {
-    for ( ConstIter it = sections.begin(); it != sections.end(); it++) {
-        delete it->second;
-    }
+    for ( ConstIter it = sections.begin(); it != sections.end(); it++) 
+    {
+        delete *it;
+    }   
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
     assert( num_of_bytes > 0);
 
-    for ( ConstIter it = sections.begin(); it != sections.end(); it++) {
-        ElfSection *section = it->second;
-        if ( section->isInside( addr, num_of_bytes)) {
+    bool address_in_some_section = false;
+    for ( ConstIter it = sections.begin(); it != sections.end(); it++) 
+    {
+        ElfSection *section = *it;
+        if ( section->isInside( addr, num_of_bytes)) 
+        {
             return section->read( addr, num_of_bytes);
         }
     }
 
-    cerr << "ERROR: address doesn't belong to any section: " 
-         << hex << addr << endl;
-    exit( EXIT_FAILURE);
+    assert( address_in_some_section);
 
     return 0; 
 }
 
 string FuncMemory::dump( string indent) const
 {
+    cerr << indent << "Memory dump:" << endl;
+
     ostringstream oss;
 
-    for ( ConstIter it = sections.begin(); it != sections.end(); it++) {
-        ElfSection *section = it->second;
-        oss << section->dump() << endl;
+    for ( ConstIter it = sections.begin(); it != sections.end(); it++) 
+    {
+        ElfSection *section = *it;
+        oss << section->dump( indent) << endl;
     }
 
     return oss.str();

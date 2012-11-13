@@ -131,7 +131,8 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 
     uint64 res = 0;
     uint64 offset = addr - start_addr;
-    for ( short byte_offset = 0; byte_offset < num_of_bytes; byte_offset++) {
+    for ( short byte_offset = 0; byte_offset < num_of_bytes; byte_offset++) 
+    {
         uint8 t = *(content + offset + byte_offset);
         res |= ((uint64)(t) << (byte_offset * 8));
     }
