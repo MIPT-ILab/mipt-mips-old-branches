@@ -4,7 +4,7 @@
  * Copyright 2012 uArchSim iLab project
  */
 
-// Genereric C
+// Generic C
 #include <libelf.h>
 #include <cstdio>
 #include <unistd.h>
@@ -22,6 +22,9 @@
 
 // uArchSim modules
 #include <elf_parser.h>
+
+// for converting data
+const short CARRY = 256;
 
 using namespace std;
 
@@ -125,46 +128,33 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
-    assert( num_of_bytes > 0);
-    assert( this->isInside( addr, num_of_bytes) == true);
+    assert( ( num_of_bytes > 0) && ( num_of_bytes <= sizeof( uint64)));
+    assert( this->isInside( addr, num_of_bytes));
 
-    // temp stream is used to convert numbers into the output string
-    ostringstream oss;
-    oss << hex;
-	
-    // convert each byte into 2 hex digits 
+    uint8* offset_start_read = ( uint8*) ( this->content + 
+                                           addr - 
+                                           this->start_addr);
+
+    uint64 read_data = 0;
+
     // read since the end in order to recieve the right order of bytes
     for( short i = num_of_bytes - 1; i >= 0; --i)
     {
-        oss.width( 2); // because we need two hex symbols to print a byte (e.g. "ff")
-        oss.fill( '0'); // thus, number 8 will be printed as "08"
-        
-        short offset = (short) (addr - this->start_addr) + i;
-
-        // need converting to uint16
-        // to be not printed as an alphabet symbol	
-        oss << (uint16) *( this->content + offset); 
+        read_data = read_data * CARRY + *( offset_start_read + i); 
     }
-
-    istringstream iss( oss.str()); // make input stream from output stream
     
-    uint64 read_value;
-    iss >> hex >> read_value;
-
-    return read_value;
+    return read_data;
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
     assert( num_of_bytes > 0);
 
-    if ( ( addr < this->start_addr) ||
-         ( ( addr + num_of_bytes) > ( this->start_addr + this->size)))
-    {
-        return false;
-    }
+    bool is_inside = ( ( addr >= this->start_addr) &&
+                       ( ( addr + num_of_bytes) <= 
+                         ( this->start_addr + this->size)));
 
-    return true;
+    return is_inside;
 }
 
 uint64 ElfSection::startAddr() const
