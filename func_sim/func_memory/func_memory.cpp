@@ -52,6 +52,7 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     {
         this->sections[ i] = new ElfSection( executable_file_name, elf_sections_names[ dif_elf_sect_num[ i]]);
     }
+    delete [] dif_elf_sect_num;
 }
 
 FuncMemory::~FuncMemory()
