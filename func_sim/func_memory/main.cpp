@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 int main (int argc, char* argv[])
 {
     // Only one argumnt is required, the name of an executable file 
@@ -20,12 +19,12 @@ int main (int argc, char* argv[])
         // set the name of the executable file
         const char * file_name = argv[1];        
         
-        // define the list of setion to extract from the file 
+        // define the list of section to extract from the file 
         // into the functional memory
         short num_of_sections = 2;
         const char * const section_names[] = {".text", ".reginfo"};
 
-        // create the functiona memory
+        // create the functional memory
         FuncMemory func_mem( file_name, section_names, num_of_sections);
         
         // print content of the memory
@@ -46,3 +45,4 @@ int main (int argc, char* argv[])
 
     return 0;
 }
+

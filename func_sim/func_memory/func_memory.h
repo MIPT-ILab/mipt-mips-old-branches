@@ -22,6 +22,8 @@ using namespace std;
 class FuncMemory
 {
     map<uint64 /*start addr*/, ElfSection *> sections;
+    map<uint64 /*start addr*/, ElfSection *> all_sections;
+
     typedef map<uint64, ElfSection *>::iterator Iter;
     typedef map<uint64, ElfSection *>::const_iterator ConstIter;
     
@@ -43,3 +45,4 @@ public:
 };
 
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
+
