@@ -71,7 +71,6 @@ uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
     }
 
     assert( address_in_some_section);
-
     return 0; 
 }
 
