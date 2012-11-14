@@ -24,35 +24,20 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 {
     assert( num_of_elf_sections > 0);
 
-    //Extracting different section names
-    short num_of_dif_elf_sections = 0; //Number of different section names
-    short *dif_elf_sect_num = new short[ num_of_elf_sections]; //Array of indexes of different section names
-                                                               //in input array
-    for( int i = 0; i < num_of_elf_sections; i++)
+    for( int i = 0; i < num_of_elf_sections - 1; i++)
     {
-        int dif_flag = 1;
-        for( int k = 0; k < i; k++)
+        for( int k = i + 1; k < num_of_elf_sections; k++)
         {
-            if( !strcmp( elf_sections_names[ i], elf_sections_names[ k]))
-            {
-                dif_flag = 0;
-                break;
-            }
-        }
-        if( dif_flag)
-        {
-            dif_elf_sect_num[ num_of_dif_elf_sections] = i;
-            num_of_dif_elf_sections++;
+            assert( strcmp( elf_sections_names[ i], elf_sections_names[ k]));
         }
     }
 
-    this->num_of_sections = num_of_dif_elf_sections;
-    this->sections = new ElfSection*[ num_of_dif_elf_sections];
-    for( int i = 0; i < num_of_dif_elf_sections; i++)
+    this->num_of_sections = num_of_elf_sections;
+    this->sections = new ElfSection*[ num_of_elf_sections];
+    for( int i = 0; i < num_of_elf_sections; i++)
     {
-        this->sections[ i] = new ElfSection( executable_file_name, elf_sections_names[ dif_elf_sect_num[ i]]);
+        this->sections[ i] = new ElfSection( executable_file_name, elf_sections_names[ i]);
     }
-    delete [] dif_elf_sect_num;
 }
 
 FuncMemory::~FuncMemory()
@@ -76,7 +61,7 @@ uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
         }
     }
 
-    assert( !"Could not read!");
+    assert( !"There are no section with requested data!");
 
     return NO_VAL64; 
 }

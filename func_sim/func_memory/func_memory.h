@@ -11,7 +11,6 @@
 
 // Generic C++
 #include <string>
-#include <map>
 
 // uArchSim modules
 #include <types.h>
