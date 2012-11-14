@@ -21,9 +21,8 @@ using namespace std;
 
 class FuncMemory
 {
-    map<uint64 /*start addr*/, ElfSection *> sections;
-    typedef map<uint64, ElfSection *>::iterator Iter;
-    typedef map<uint64, ElfSection *>::const_iterator ConstIter;
+    ElfSection **sections; //Replaced STL code with
+    short num_of_sections; //array of pointers
     
     // You could not create the object
     // using this default constructor
