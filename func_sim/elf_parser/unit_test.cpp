@@ -51,8 +51,8 @@ TEST( Elf_parser, Read_Method_Test)
     ASSERT_EQ( sect.read( sect.startAddr() + 1, 3), right_ret);
     
     // read 2 bytes from the section start addr + 2
-    right_ret = 0x0232;
-    ASSERT_EQ( sect.read( sect.startAddr() + 2, 2), right_ret);
+    right_ret = 0x32;
+    ASSERT_EQ( sect.read( sect.startAddr() + 2, 1), right_ret);
     
     // read 1 bytes from the section start addr + 3
     right_ret = 0x02;
