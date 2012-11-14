@@ -29,7 +29,7 @@ ElfSection::ElfSection( const char* elf_file_name, const char* section_name)
 {
     // open the binary file, we have to use C-style open,
     // because it is required by elf_begin function
-    int file_descr = open( elf_file_name, O_RDONLY); 
+    int file_descr = open( elf_file_name, O_RDONLY);
     if ( file_descr < 0)
     {
         cerr << "ERROR: Could not open file " << elf_file_name << ": "
@@ -44,8 +44,8 @@ ElfSection::ElfSection( const char* elf_file_name, const char* section_name)
              <<  elf_errmsg( elf_errno()) << endl;
         exit( EXIT_FAILURE);
     }
-   
-    // open the file in ELF format 
+
+    // open the file in ELF format
     Elf* elf = elf_begin( file_descr, ELF_C_READ, NULL);
     if ( !elf)
     {
@@ -54,11 +54,11 @@ ElfSection::ElfSection( const char* elf_file_name, const char* section_name)
              <<  elf_errmsg( elf_errno()) << endl;
         exit( EXIT_FAILURE);
     }
-    
+
     // set the name of the sections
     this->name = new char[ strlen( section_name) + 1];
     strcpy( this->name, section_name);
-    
+
     // set the size, start address and offset
     uint64 offset = NO_VAL64;
     this->extractSectionParams( elf, section_name,
@@ -66,7 +66,7 @@ ElfSection::ElfSection( const char* elf_file_name, const char* section_name)
 
     // allocate place for the content
     this->content = new uint8[ this->size + 1];
-    
+
     lseek( file_descr, offset, SEEK_SET);
     FILE *file = fdopen( file_descr, "r");
     if ( !file )
@@ -75,10 +75,10 @@ ElfSection::ElfSection( const char* elf_file_name, const char* section_name)
              << strerror(errno) << endl;
         exit( EXIT_FAILURE);
     }
-    
+
     // fill the content by the section data
     fread( this->content, sizeof( uint8), this->size, file);
-    
+
     // close all used files
     fclose( file);
     elf_end( elf);
@@ -105,7 +105,7 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
         GElf_Shdr shdr;
         gelf_getshdr( section, &shdr);
         char* name = elf_strptr( elf, shstrndx, shdr.sh_name);
-        
+
         // if a section with the decired name
         // then set its start address, size and offset
         // and return back from the function.
@@ -114,11 +114,11 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
             offset = ( uint64)shdr.sh_offset;
             size = ( uint64)shdr.sh_size;
             start_addr = ( uint64)shdr.sh_addr;
-            
+
             return;
         }
     }
-    
+
     cerr << "ERROR: Could not find section " << section_name
          << " in ELF file!" << endl;
     exit( EXIT_FAILURE);
@@ -127,22 +127,36 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
     // insert here your implementation
-    assert(0);
-    return NO_VAL64; 
+    assert (( num_of_bytes > 0) && ( num_of_bytes <= sizeof(uint64)));
+    assert ( isInside( addr, num_of_bytes));
+    uint i;
+    uint64 sum = 0;
+    uint8 byteval;
+    uint8 *cons = addr - start_addr + content;
+    for( i = 0; i < num_of_bytes; ++i)
+    {
+        byteval = *( i + cons );
+        sum = sum | ( (uint64) byteval << 8 * i );
+    }
+    return sum;
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
     // insert here your implementation
-    assert(0);
-    return false;
+    bool isin;
+    assert(num_of_bytes > 0);
+    isin = true;
+    if ( (addr < start_addr) || ((addr + num_of_bytes) > (start_addr + size))) isin = false;
+    //assert(0);
+    return isin;
 }
 
 uint64 ElfSection::startAddr() const
 {
     // insert here your implementation
-    assert(0);
-    return NO_VAL64;
+    //assert(0);
+    return start_addr;
 }
 
 string ElfSection::dump( string indent) const
@@ -153,13 +167,13 @@ string ElfSection::dump( string indent) const
         << indent << "  size = " << this->size << " Bytes" << endl
         << indent << "  start_addr = 0x" << hex << this->start_addr << dec << endl
         << indent << "  Content:" << endl;
-     
+
     string str = this->strByBytes();
 
     // split the contents into words of 4 bytes
     for ( size_t offset = 0; offset < this->size; offset += sizeof( uint32))
     {
-        oss << indent << "    0x" << hex << ( this->start_addr + offset) 
+        oss << indent << "    0x" << hex << ( this->start_addr + offset)
             << indent << ":    " << str.substr( 2 * offset, // 2 hex digits is need per byte
                                                 sizeof( uint64))
 	        << endl;
@@ -173,18 +187,18 @@ string ElfSection::strByBytes() const
     // temp stream is used to convert numbers into the output string
     ostringstream oss;
     oss << hex;
-	
-    // convert each byte into 2 hex digits 
+
+    // convert each byte into 2 hex digits
     for( size_t i = 0; i < this->size; ++i)
     {
         oss.width( 2); // because we need two hex symbols to print a byte (e.g. "ff")
         oss.fill( '0'); // thus, number 8 will be printed as "08"
-        
-        // print a value of 
+
+        // print a value of
         oss << (uint16) *( this->content + i); // need converting to uint16
-                                               // to be not preinted as an alphabet symbol	
+                                               // to be not preinted as an alphabet symbol
     }
-    
+
     return oss.str();
 }
 
@@ -199,10 +213,10 @@ string ElfSection::strByWords() const
     {
         oss.width( 8); // because we need 8 hex symbols to print a word (e.g. "ffffffff")
         oss.fill( '0'); // thus, number a44f will be printed as "0000a44f"
-        
+
         oss << *( ( uint32*)this->content + i);
     }
-    
+
     return oss.str();
 }
 
