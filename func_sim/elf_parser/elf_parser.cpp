@@ -126,23 +126,31 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64; 
+    assert( isInside( addr, num_of_bytes));
+    uint64 l_addr = addr - startAddr();
+    uint64 answer = 0;
+    for ( uint64 byte_lug = 0; byte_lug < num_of_bytes; byte_lug++)
+    {
+        answer = answer + ( content[ l_addr + byte_lug ] << ( byte_lug * 8));
+    }
+    return answer; 
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return false;
+    assert( num_of_bytes > 0);
+    if ( !( addr - startAddr() < 0) || !( addr - startAddr() >= size))
+    {
+        return false;
+    }else
+        {
+            return true;
+        } 
 }
 
 uint64 ElfSection::startAddr() const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64;
+    return start_addr;
 }
 
 string ElfSection::dump( string indent) const
