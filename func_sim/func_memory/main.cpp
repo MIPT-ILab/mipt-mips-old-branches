@@ -29,6 +29,29 @@ int main (int argc, char* argv[])
         
         // print content of the memory
         cout << func_mem.dump() << endl;
+
+
+        // check method read
+        uint64 valid_addr_of_sect_text = 0x400090;
+        uint64 valid_addr_of_sect_reginfo = 0x400088;
+
+        num_of_sections = 1;
+        const char* const section_reginfo_name[] = {".reginfo"};
+
+        // create the functional memory
+        FuncMemory func_mem_reginfo( file_name,
+                                     section_reginfo_name,
+                                     num_of_sections);
+
+        // will be printed
+        cout << "0x" << hex << valid_addr_of_sect_reginfo << ": "
+             << func_mem_reginfo.read( valid_addr_of_sect_reginfo) << dec
+             << endl;
+
+        // will be aborted
+        cout << "0x" << hex << valid_addr_of_sect_text << ": "
+             << func_mem_reginfo.read( valid_addr_of_sect_text) << dec
+             << endl;
  
     } else if ( argc - 1 > num_of_args)
     {
