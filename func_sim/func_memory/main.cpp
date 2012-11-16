@@ -25,7 +25,7 @@ int main (int argc, char* argv[])
         short num_of_sections = 2;
         const char * const section_names[] = {".text", ".reginfo"};
 
-        // create the functiona memory
+        // create the functional memory 
         FuncMemory func_mem( file_name, section_names, num_of_sections);
         
         // print content of the memory

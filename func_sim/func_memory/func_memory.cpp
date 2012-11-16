@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string> 
 #include <sstream>
+#include <algorithm>
 
 // uArchSim modules
 #include <func_memory.h>
@@ -33,17 +34,16 @@ FuncMemory::FuncMemory( const char* executable_file_name,
         if (section_names.find( elf_sections_names[i]) == section_names.end()) 
         {
             section_names.insert( elf_sections_names[i]);
-        } else {
-            cerr << "ERROR: multiple sections with the same name are requested."
-                 << endl;
+        } else 
+        {
+            cerr << "ERROR: section '" << elf_sections_names[i] 
+                 << "' requested several times." << endl;
             exit( EXIT_FAILURE);
         }
-    }
 
-    for ( short i = 0; i < num_of_elf_sections; ++i) 
-    {
         ElfSection* section = new ElfSection( executable_file_name, 
             elf_sections_names[i]);
+
         sections.push_back( section);
     }
 }
@@ -55,6 +55,18 @@ FuncMemory::~FuncMemory()
         delete *it;
     }   
 }
+
+struct SectionComp 
+{
+    SectionComp( uint64 address) : addr(address) {} 
+    bool operator() ( ElfSection * const &s1, ElfSection * const &s2)
+    {
+        return s1->startAddr() < addr;
+    }
+
+private:
+    uint64 addr;
+};
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
@@ -83,7 +95,7 @@ string FuncMemory::dump( string indent) const
     for ( ConstIter it = sections.begin(); it != sections.end(); it++) 
     {
         ElfSection *section = *it;
-        oss << section->dump( indent) << endl;
+        oss << section->dump( indent + "    ") << endl;
     }
 
     return oss.str();

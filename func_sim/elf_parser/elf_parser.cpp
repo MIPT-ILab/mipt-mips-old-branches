@@ -131,10 +131,11 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 
     uint64 res = 0;
     uint64 offset = addr - start_addr;
+    uint64 content_with_offset = ( uint64)content + offset;
     for ( short byte_offset = 0; byte_offset < num_of_bytes; byte_offset++) 
     {
-        uint8 t = *(content + offset + byte_offset);
-        res |= ((uint64)(t) << (byte_offset * 8));
+        uint8 t = *(( uint8*)( content_with_offset + byte_offset));
+        res |= ( ( uint64)( t) << ( byte_offset * 8));
     }
 
     return res; 
@@ -143,7 +144,7 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
     assert( num_of_bytes > 0);
-    return (addr >= start_addr) && (addr + num_of_bytes <= start_addr + size);
+    return ( addr >= start_addr) && ( addr + num_of_bytes <= start_addr + size);
 }
 
 uint64 ElfSection::startAddr() const
