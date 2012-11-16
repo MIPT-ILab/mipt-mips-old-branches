@@ -10,19 +10,15 @@
 
 // Generic C++
 #include <sstream>
-#include <string>
-#include <map>
 
 // uArchSim modules
 #include <func_memory.h>
-#include <types.h>
-#include <elf_parser.h>
 
 FuncMemory::FuncMemory( const char* executable_file_name,
                         const char* const elf_sections_names[],
                         short num_of_elf_sections)
 {
-    //validity check of arguments
+    // validity check of arguments
     assert( num_of_elf_sections);
     assert( elf_sections_names);
     assert( executable_file_name);
@@ -32,7 +28,9 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     {
         ElfSection* section_pointer = new ElfSection( executable_file_name,
                                                       elf_sections_names[ i]);
-       
+        // duplicate section name check 
+        assert( this->sections.count( section_pointer->startAddr()) == 0);
+
         // fill the map
         this->sections[ section_pointer->startAddr()] = section_pointer;
     }
@@ -41,50 +39,43 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 FuncMemory::~FuncMemory()
 {
     // delete each mapped value, i.e. ElfSection* 
-    for ( Iter it = ( this->sections).begin();
-          it != ( this->sections).end();
+    for ( Iter it = this->sections.begin();
+          it != this->sections.end();
           ++it)
     {
         delete it->second;
     }
-    
-    //free map
-    ( this->sections).clear();
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
-    //validity check of arguments
+    // validity check of arguments
     assert( ( num_of_bytes > 0) && ( num_of_bytes <= sizeof( uint64)));
-    assert( addr);
 
-    // look through all given sections and try to find section which contains
-    // the address addr and read from the one
-    for ( ConstIter it = ( this->sections).begin();
-          it != ( this->sections).end();
-          ++it)
-    {
-        // belonging check of only address addr
-        if ( ( it->second)->isInside( addr, 1))
-        {
-            return ( it->second)->read( addr, num_of_bytes);
-        }
-    }
+    /*
+     * get iterator which point to a section
+     * whose start address is greater than addr
+     */
+    ConstIter itup = this->sections.upper_bound( addr);
 
-    // it will be executed
-    // if address addr does not belong to any section from given
-    assert( 0);
+    // abort if addr is less than start address of the first section
+    assert( itup != this->sections.begin());
+
+    // decrease to recieve a pointer to a section which can consist of addr
+    itup--;
+
+    return itup->second->read( addr, num_of_bytes);
 }
 
 string FuncMemory::dump( string indent) const
 {
     ostringstream oss;
 
-    for ( ConstIter it = ( this->sections).begin();
-          it != ( this->sections).end();
+    for ( ConstIter it = this->sections.begin();
+          it != this->sections.end();
           ++it)
     {
-        oss << ( it->second)->dump( indent) << endl;
+        oss << it->second->dump( indent) << endl;
     }
 
     return oss.str();
