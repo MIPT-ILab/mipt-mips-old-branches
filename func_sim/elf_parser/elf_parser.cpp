@@ -128,9 +128,11 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
     assert( num_of_bytes <= sizeof( uint64));
     assert( isInside( addr, num_of_bytes));
-    short the_num_of_byte = addr - this->start_addr;
-    uint64 data = *(uint64*)(this->content + the_num_of_byte); 
-    data &= (unsigned(-1) >> 8 * (sizeof( uint64) - num_of_bytes));
+    //we don't need in following two variables but
+    //it makes code reading lighter.
+    short start_content_byte = addr - this->start_addr;
+    short shift = 8 * (sizeof( uint64) - num_of_bytes);
+    uint64 data = (*(uint64*)(this->content + start_content_byte)) & (uint64(-1) >> shift);
     return data; 
 }
 
