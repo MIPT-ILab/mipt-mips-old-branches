@@ -18,7 +18,7 @@ int main (int argc, char* argv[])
     if ( argc == num_of_args && strcmp(argv[1],"--help"))
     {
         // parse and dump .reginfo section
-        ElfSection section( argv[1], ".reginfo");
+        ElfSection section( argv[1], ".text");
         cout << section.dump() << endl;
 
     } else if ( argc != num_of_args)

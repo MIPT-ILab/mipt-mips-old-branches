@@ -24,7 +24,7 @@
 #include <elf_parser.h>
 
 // for converting data
-const short CARRY = 256;
+const short BYTE = 8;
 
 using namespace std;
 
@@ -131,17 +131,19 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
     assert( ( num_of_bytes > 0) && ( num_of_bytes <= sizeof( uint64)));
     assert( this->isInside( addr, num_of_bytes));
 
-    uint8* offset_start_read = ( uint8*) ( this->content + 
-                                           addr - 
-                                           this->start_addr);
+    uint64* offset_start_read = ( uint64*)( this->content + addr
+                                             - this->start_addr);
 
     uint64 read_data = 0;
 
-    // read since the end in order to recieve the right order of bytes
-    for( short i = num_of_bytes - 1; i >= 0; --i)
-    {
-        read_data = read_data * CARRY + *( offset_start_read + i); 
-    }
+    // get sizeof( uint64) bytes
+    read_data = *( offset_start_read);
+
+    // remove needless bytes left
+    read_data <<= ( BYTE * ( sizeof( uint64) - num_of_bytes));
+    
+    // remove appeared zero bytes right
+    read_data >>= ( BYTE * ( sizeof( uint64) - num_of_bytes));
     
     return read_data;
 }
