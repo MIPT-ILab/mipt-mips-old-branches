@@ -11,6 +11,7 @@
 
 // Generic C++
 #include <string>
+#include <vector>
 
 // uArchSim modules
 #include <types.h>
@@ -22,8 +23,11 @@ class FuncMemory
 {
     // You could not create the object
     // using this default constructor
-    FuncMemory(){}
 
+    vector<ElfSection*> sections;
+    size_t cout_sections;
+    string file_name; 
+    FuncMemory(){}
 public:
     
     FuncMemory( const char* executable_file_name,
