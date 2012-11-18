@@ -23,59 +23,58 @@
 
 using namespace std;
 
-typedef map<uint64, ElfSection *>::const_iterator my_iter;
+typedef map<uint64, ElfSection& >::const_iterator my_iter_const;
+typedef map<uint64, ElfSection& >::iterator my_iter;
 
 FuncMemory::FuncMemory( const char* executable_file_name,
                         const char* const elf_sections_names[],
                         short num_of_elf_sections)
 {
     assert( executable_file_name);
-    assert( num_of_elf_sections > 0);
-    //remember in FuncMemory class member the name of executable file
-    name = executable_file_name; 
+    
+    func_memory_name = executable_file_name; //remember the name of executable file
     for ( short i = 0; i < num_of_elf_sections; ++i)
     {
         assert( elf_sections_names[i]);
         ElfSection *tmp = new ElfSection( executable_file_name, elf_sections_names[i]);
-        sect_stor[tmp->startAddr()] = tmp;
+        
+        pair<my_iter, bool> insert_ret = sect_stor.insert
+        ( pair<uint64, ElfSection& >( tmp->startAddr(), *tmp));
+        if ( insert_ret.second == false)
+        {
+            perror( "twice written sections in the list of names!");
+            exit( EXIT_FAILURE);
+        }       
     }
 }
 
 FuncMemory::~FuncMemory()
 {
-    for (my_iter it = sect_stor.begin(); it != sect_stor.end(); ++it)
+    for ( my_iter it = sect_stor.begin(); it != sect_stor.end(); ++it)
     {
-        delete (*it).second;
+        delete &( it->second);
     }
-}
-
-string FuncMemory::getName() const
-{
-    return name;
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
-    short i = 0;
-    for( my_iter it = sect_stor.begin(); it != sect_stor.end(); it++)
+    my_iter_const it = sect_stor.upper_bound( addr);
+    if ( it != sect_stor.begin())
     {
-        if( (*it).second->isInside(addr, num_of_bytes))
-        {
-            return (*it).second->read(addr, num_of_bytes);
-        } else ++i;
-    }   
+        return (--it)->second.read( addr, num_of_bytes); //read from elf_parser check addr itself
+    }
     perror( "right section isn't found!");
-    exit(0);
+    exit( EXIT_FAILURE);
 }
 
 string FuncMemory::dump( string indent) const
 {
     ostringstream oss;
     
-    oss << indent << "Dump FuncMemory of file\t\"" << this->getName() << "\"" << endl;
-    for( my_iter it = sect_stor.begin(); it != sect_stor.end(); it++)
+    oss << indent << endl << "Dump FuncMemory of file\t\"" << this->func_memory_name << "\"" << endl;
+    for( my_iter_const it = sect_stor.begin(); it != sect_stor.end(); it++)
     {
-        oss << indent << (*it).second->dump( indent) << endl;
+        oss << indent << it->second.dump( indent) << endl;
     }
     return oss.str();
         

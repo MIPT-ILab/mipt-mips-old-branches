@@ -131,8 +131,8 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
     //we don't need in following two variables but
     //it makes code reading lighter.
     short start_content_byte = addr - this->start_addr;
-    short shift = 8 * (sizeof( uint64) - num_of_bytes);
-    uint64 data = (*(uint64*)(this->content + start_content_byte)) & (uint64(-1) >> shift);
+    short clear_mask = 8 * (sizeof( uint64) - num_of_bytes);
+    uint64 data = (*(uint64*)(this->content + start_content_byte)) & (uint64(-1) >> clear_mask);
     return data; 
 }
 

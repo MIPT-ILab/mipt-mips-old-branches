@@ -21,8 +21,8 @@ using namespace std;
 
 class FuncMemory
 {
-    string name; //name of executable file
-    map <uint64 /*section address*/, ElfSection *> sect_stor;
+    string func_memory_name; //name of executable file
+    map <uint64 /*section address*/, ElfSection& > sect_stor;
 
     // You could not create the object
     // using this default constructor
@@ -35,8 +35,6 @@ public:
                 short num_of_elf_sections);
 
     virtual ~FuncMemory();
-    
-    string getName() const;
 
     uint64 read( uint64 addr, short num_of_bytes = 4) const;
   
