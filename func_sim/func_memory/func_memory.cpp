@@ -37,6 +37,7 @@ FuncMemory::~FuncMemory()
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
     ConstIter it = this->sections.find( addr);
+    
     return it->second->read( addr, num_of_bytes);
 }
 
