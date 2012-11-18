@@ -10,36 +10,39 @@
 #include <cstdlib>
 
 // Generic C++
-#include <string> 
+#include <string>
+#include <sstream> 
 
 // uArchSim modules
 #include <func_memory.h>
-
 FuncMemory::FuncMemory( const char* executable_file_name,
                         const char* const elf_sections_names[],
                         short num_of_elf_sections)
 {
-    // Change it with your implementation.
-    assert(0);
+    assert (num_of_elf_sections > 0);
+    for (short i = 0; i < num_of_elf_sections; i++)
+    {
+         ElfSection *es = new ElfSection ( executable_file_name, elf_sections_names[i]);
+         this->sections[ es->startAddr()] = es;
+    }
+
+
 }
 
 FuncMemory::~FuncMemory()
 {
-    // Change it with your implementation.
-    assert(0);
+    for ( ConstIter it = this->sections.begin(); it != this->sections.end(); it++) delete it->second;
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
-    // Change it with your implementation.
-    assert(0);
-    return NO_VAL64; 
+    ConstIter it = this->sections.find( addr);
+    return it->second->read( addr, num_of_bytes);
 }
 
 string FuncMemory::dump( string indent) const
 {
-    // Change it with your implementation
-    assert(0);
-    return " ";
+    ostringstream oss;
+    for (  ConstIter it = this->sections.begin(); it != this->sections.end(); it++) oss << it->second->dump( indent) <<endl;
+    return oss.str();
 }
-

@@ -130,7 +130,7 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
     assert ( isInside ( addr, num_of_bytes));
     uint64 resul = 0;
     uint64 offset = addr - this->start_addr;
-    for ( short offset_in_byte = 0; offset_in_byte <= num_of_bytes; offset_in_byte++)
+    for ( short offset_in_byte = 0; offset_in_byte < num_of_bytes; offset_in_byte++)
     {
         uint8 h = *( this->content + offset + offset_in_byte );
         resul = ((uint64)(h) << ( offset_in_byte * 8))  + resul ;
