@@ -31,10 +31,8 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     set<string> section_names;
     for ( short i = 0; i < num_of_elf_sections; ++i) 
     {
-        if (section_names.find( elf_sections_names[i]) == section_names.end()) 
-        {
-            section_names.insert( elf_sections_names[i]);
-        } else 
+	pair<set<string>::iterator, bool> res = section_names.find( elf_sections_names[i]);
+	if ( !res.second)
         {
             cerr << "ERROR: section '" << elf_sections_names[i] 
                  << "' requested several times." << endl;
@@ -55,18 +53,6 @@ FuncMemory::~FuncMemory()
         delete *it;
     }   
 }
-
-struct SectionComp 
-{
-    SectionComp( uint64 address) : addr(address) {} 
-    bool operator() ( ElfSection * const &s1, ElfSection * const &s2)
-    {
-        return s1->startAddr() < addr;
-    }
-
-private:
-    uint64 addr;
-};
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
