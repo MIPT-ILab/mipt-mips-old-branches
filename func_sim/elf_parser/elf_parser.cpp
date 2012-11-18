@@ -131,12 +131,11 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
     assert ( isInside( addr, num_of_bytes));
     uint i;
     uint64 sum = 0;
-    uint8 byteval;
     uint8 *cons = addr - start_addr + content;
     for( i = 0; i < num_of_bytes; ++i)
     {
-        byteval = *( i + cons );
-        sum = sum | ( (uint64) byteval << 8 * i );
+
+        sum |= ( (uint64) cons[i] << ( 8 * i));
     }
     return sum;
 }
@@ -144,12 +143,8 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
     // insert here your implementation
-    bool isin;
-    assert(num_of_bytes > 0);
-    isin = true;
-    if ( (addr < start_addr) || ((addr + num_of_bytes) > (start_addr + size))) isin = false;
-    //assert(0);
-    return isin;
+    assert( num_of_bytes > 0);
+    return ( !( (addr < start_addr) || ((addr + num_of_bytes) > (start_addr + size))));
 }
 
 uint64 ElfSection::startAddr() const
