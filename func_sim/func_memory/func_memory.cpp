@@ -11,8 +11,9 @@
 
 // Generic C++
 #include <string> 
-#include <vector>
+#include <map>
 #include <sstream>
+#include <iostream>
 
 // uArchSim modules
 #include <func_memory.h>
@@ -27,7 +28,12 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     for( short i = 0; i < num_of_elf_sections; ++i)
     {
         ElfSection *current = new ElfSection( executable_file_name, elf_sections_names[ i]);
-        sections.push_back( current);
+        if ( ( sections.insert( make_pair( current->startAddr(), current))).second == false)
+        {
+           cout << "ERROR: Section " << elf_sections_names[ i] << " is mentioned twice." 
+                << endl;
+           exit( EXIT_FAILURE);
+        }
     }
 }
 
@@ -35,22 +41,20 @@ FuncMemory::~FuncMemory()
 {
     for ( Iter it = sections.begin(); it != sections.end(); ++it)
     {
-        delete *it;
+        delete ( *it).second;
     } 
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
     assert( num_of_bytes > 0);
-    for ( ConstIter it = sections.begin(); it != sections.end(); ++it)
+    ConstIter it = sections.upper_bound( addr);
+    it--;
+    if ( ( ( *it).second)->isInside( addr, num_of_bytes))
     {
-        if ( ( *it)->isInside( addr, num_of_bytes))
-        {
-            return ( *it)->read( addr, num_of_bytes);
-        }
+        return ( ( *it).second)->read( addr, num_of_bytes);
     }
     assert( 0);
-    exit( EXIT_FAILURE);
 }
 
 string FuncMemory::dump( string indent) const
@@ -59,7 +63,7 @@ string FuncMemory::dump( string indent) const
     oss << indent << "Dump FuncMemory : " << endl;  
     for( ConstIter it = sections.begin(); it != sections.end(); ++it)
     {
-        oss << ( *it)->dump( indent) << endl;
+        oss << ( ( *it).second)->dump( indent + " ") << endl;
     }
     return oss.str();
 }

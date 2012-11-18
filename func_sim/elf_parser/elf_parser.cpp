@@ -126,12 +126,13 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
-    assert( num_of_bytes > 0 && num_of_bytes <= 8);
+    assert( num_of_bytes > 0 && num_of_bytes <= sizeof(uint64));
     assert( this->isInside( addr, num_of_bytes));
     uint64 value = 0;
+    uint64 section_beg = ( uint64)this->content + addr - this->start_addr;
     for ( short i = 0; i < num_of_bytes; ++i)
     {
-        uint8 tmp = *( this->content + addr - this->start_addr + i);
+        uint8 tmp = *( ( uint8*)section_beg + i);
         value |= ( uint64)tmp << 8 * i;
     }
     return value;
