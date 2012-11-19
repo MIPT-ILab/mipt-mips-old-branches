@@ -129,38 +129,29 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
     if ( isInside( addr, num_of_bytes))
     {
-        uint64 curr_addr = addr;
+        uint64 curr_addr;
 	uint64 val = 0;
-	short dig=2;
-        while ( curr_addr - addr < ( uint64) num_of_bytes) 
+        for ( curr_addr = addr; curr_addr - addr < ( uint64) num_of_bytes; curr_addr++) 
         {
-	    uint8* new_cont = content + addr - start_addr;
-	    uint64 delta = *( new_cont + curr_addr - addr) 
-                * ( uint64) pow ( 16, dig * (curr_addr - addr));
+	    uint64 delta = *( content + curr_addr - start_addr) 
+	        << 8 * ( curr_addr - addr);
 	    val += delta;
-	    curr_addr++;
 	}
     return val;  
     }
     assert(0);
-    return NO_VAL64; 
+    return NO_VAL64;
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
     assert ( num_of_bytes > 0);
-    if (( addr >= start_addr) && (( addr + ( uint64) num_of_bytes) <= ( start_addr + size))) 
-    return true;
-    else return false;
-    assert(0);
-    return false;
+    return (( addr >= start_addr) && (( addr + ( uint64) num_of_bytes) <= ( start_addr + size)));
 }
 
 uint64 ElfSection::startAddr() const
 {
     return start_addr;
-    assert(0);
-    return NO_VAL64;
 }
 
 string ElfSection::dump( string indent) const
