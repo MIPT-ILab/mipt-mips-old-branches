@@ -14,7 +14,8 @@ using namespace std;
 int main (int argc, char* argv[])
 {
     const int num_of_args = 2;
-    
+     
+   
     if ( argc == num_of_args && strcmp(argv[1],"--help"))
     {
         // parse and dump .reginfo section

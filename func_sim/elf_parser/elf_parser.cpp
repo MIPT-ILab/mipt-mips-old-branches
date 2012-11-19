@@ -129,23 +129,15 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
     assert( isInside( addr, num_of_bytes));
     uint64 l_addr = addr - startAddr();
     uint64 answer = 0;
-    for ( uint64 byte_lug = 0; byte_lug < num_of_bytes; byte_lug++)
-    {
-        answer = answer + ( content[ l_addr + byte_lug ] << ( byte_lug * 8));
-    }
+    answer = *(uint64*)( &content[ l_addr]) << ( sizeof(uint64) - num_of_bytes);
+    answer = answer >> ( sizeof(uint64) - num_of_bytes);
     return answer; 
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
-    assert( num_of_bytes > 0);
-    if ( !( addr - startAddr() < 0) || !( addr - startAddr() >= size))
-    {
-        return false;
-    }else
-        {
-            return true;
-        } 
+    assert(( num_of_bytes > 0) && ( num_of_bytes <= sizeof(uint64)));
+    return (( addr - startAddr() >= 0) && ( addr - startAddr() + num_of_bytes > size));
 }
 
 uint64 ElfSection::startAddr() const
