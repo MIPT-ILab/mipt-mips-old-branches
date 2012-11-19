@@ -20,6 +20,9 @@ using namespace std;
 
 class FuncMemory
 {
+    string name;
+    ElfSection** curr_sect;
+    short num_of_sect;
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
