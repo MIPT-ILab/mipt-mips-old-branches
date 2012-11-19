@@ -24,6 +24,7 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 {
     assert( num_of_elf_sections > 0);
 
+    //Check if there are several identical section names
     for( int i = 0; i < num_of_elf_sections - 1; i++)
     {
         for( int k = i + 1; k < num_of_elf_sections; k++)
@@ -31,13 +32,14 @@ FuncMemory::FuncMemory( const char* executable_file_name,
             assert( strcmp( elf_sections_names[ i], elf_sections_names[ k]));
         }
     }
-
+    
     this->num_of_sections = num_of_elf_sections;
     this->sections = new ElfSection*[ num_of_elf_sections];
     for( int i = 0; i < num_of_elf_sections; i++)
     {
         this->sections[ i] = new ElfSection( executable_file_name, elf_sections_names[ i]);
     }
+    this->elf_file_name = executable_file_name;
 }
 
 FuncMemory::~FuncMemory()
