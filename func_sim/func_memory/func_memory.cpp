@@ -31,7 +31,7 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     set<string> section_names;
     for ( short i = 0; i < num_of_elf_sections; ++i) 
     {
-	pair<set<string>::iterator, bool> res = section_names.find( elf_sections_names[i]);
+	pair<set<string>::iterator, bool> res = section_names.insert( elf_sections_names[i]);
 	if ( !res.second)
         {
             cerr << "ERROR: section '" << elf_sections_names[i] 
