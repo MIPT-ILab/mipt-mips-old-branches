@@ -11,6 +11,7 @@
 
 // Generic C++
 #include <string>
+#include <vector>
 
 // uArchSim modules
 #include <types.h>
@@ -20,6 +21,10 @@ using namespace std;
 
 class FuncMemory
 {
+    vector<ElfSection *> sections;
+    typedef vector<ElfSection *>::iterator Iter;
+    typedef vector<ElfSection *>::const_iterator ConstIter;
+    
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
