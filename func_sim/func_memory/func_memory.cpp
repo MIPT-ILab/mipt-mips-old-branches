@@ -15,31 +15,48 @@
 // uArchSim modules
 #include <func_memory.h>
 
+using namespace std;
+
 FuncMemory::FuncMemory( const char* executable_file_name,
                         const char* const elf_sections_names[],
                         short num_of_elf_sections)
 {
-    // Change it with your implementation.
-    assert(0);
+    assert( num_of_elf_sections > 0);
+    ElfSection current;
+    for( short i = 0; i < num_of_elf_sections; ++i)
+    {
+        current = ElfSection( executable_file_name, elf_sections_names[i]);
+        sections[ current->startAddr()] = current;
+    }
 }
 
 FuncMemory::~FuncMemory()
 {
-    // Change it with your implementation.
-    assert(0);
+    ~sections();
 }
 
 uint64 FuncMemory::read( uint64 addr, short num_of_bytes) const
 {
-    // Change it with your implementation.
-    assert(0);
-    return NO_VAL64; 
+    assert( num_of_bytes > 0);
+    for ( ConstIter it = sections.begin(); it != sections.end(); ++it)
+    {
+      if ( it->isInside( addr, num_of_bytes))
+      {
+        return it->read( addr, num_of_bytes);
+      }
+    }
+    cerr << "ERROR: Sequence doen't belong any section. Address : " 
+         << addr << " num_of_bytes : " << num_of_bytes << endl;
+    exit( EXIT_FAILURE);
 }
 
 string FuncMemory::dump( string indent) const
 {
-    // Change it with your implementation
-    assert(0);
-    return " ";
+    ostringstream oss;
+    for( ConstIter it = sections.begin(); it != sections.end(); ++it)
+    {
+      oss << it->dump() << endl;
+    }
+    return oss.str();
 }
 
