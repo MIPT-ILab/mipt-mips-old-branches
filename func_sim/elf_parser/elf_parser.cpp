@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cassert>
+#include <cmath>
 
 // Generic C++
 #include <iostream>
@@ -126,23 +127,31 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
+    if ( isInside( addr, num_of_bytes))
+    {
+        uint64 curr_addr;
+	uint64 val = 0;
+        for ( curr_addr = addr; curr_addr - addr < ( uint64) num_of_bytes; curr_addr++) 
+        {
+	    uint64 delta = *( content + curr_addr - start_addr) 
+	        << 8 * ( curr_addr - addr);
+	    val += delta;
+	}
+    return val;  
+    }
     assert(0);
-    return NO_VAL64; 
+    return NO_VAL64;
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return false;
+    assert ( num_of_bytes > 0);
+    return (( addr >= start_addr) && (( addr + ( uint64) num_of_bytes) <= ( start_addr + size)));
 }
 
 uint64 ElfSection::startAddr() const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64;
+    return start_addr;
 }
 
 string ElfSection::dump( string indent) const
