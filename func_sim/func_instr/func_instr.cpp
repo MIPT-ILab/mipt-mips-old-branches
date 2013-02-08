@@ -4,9 +4,8 @@
  * Copyright 2012 uArchSim iLab project
  */
 
-//Generic C
+//Generic
 #include <assert.h>
-#include <string.h>
 
 //Generic C++
 #include <iostream>
@@ -17,124 +16,100 @@
 #include <func_instr.h>
 #include <types.h>
 
-FuncInstr::InstrInfo::InstrInfo( std::string instrName, Instruction instrInstr, PrintType printType, 
-                      FormatType instrType, uint32 instrOpcode, uint32 instrFunct)
-{
-	name = instrName;
-	instr = instrInstr;
-	type = instrType;
-	pType = printType;
-	opcode = instrOpcode;
-	funct = instrFunct;
-}
-
 void FuncInstr::convertInstr( FormatType type, uint32 instr) // Decoding instr as type 
 {	
-	Convert data;
-	memcpy( &data, &instr, sizeof(uint32)); 
-	switch( type)
+	Convert *data = ( Convert*) &instr;
+    opcode = data->asR.opcode;
+    type   = getType( opcode);
+    funct  = 0;
+    switch( type)
 	{
-		case RType:
-			source = ( Register)data.asR.s;
-			target = ( Register)data.asR.t;
-			dest = ( Register)data.asR.d;
-			shamt = data.asR.shamt;
-			return;
-		case IType:
-			source = ( Register)data.asI.s;
-			target = ( Register)data.asI.t;
-			iConstVal = data.asI.iConst;
-			return;
-		case JType:
-			address = data.asJ.addr;
+		case TYPE_R:
+			source    = ( Register) data->asR.s;
+			target    = ( Register) data->asR.t;
+			dest      = ( Register) data->asR.d;
+			shamt     = data->asR.shamt;
+			funct     = data->asR.funct;
+            return;
+		case TYPE_I:
+			source    = ( Register)data->asI.s;
+			target    = ( Register)data->asI.t;
+			iConstVal = data->asI.iConst;
+            return;
+		case TYPE_J:
+			address   = data->asJ.addr;
 			return;
 	}
 	assert( 0);
 }		
 
-uint32 FuncInstr::getOpcode( uint32 bytes)
-{
-    return ( bytes & 0xFC000000) >> 26;
-}
+const char * FuncInstr::myRegNames[] = { "$zero", "$at", "$v0", "$v1", "$a0", "$a1",
+                                         "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", 
+                                         "$t4", "$t5", "$t6", "$t7", "$s0", "$s1", 
+                                         "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", 
+                                         "$t8", "$t9", "$k0", "$k1", "$gp", "$sp", 
+                                         "$fp", "$ra"};
+FuncInstr::InstrInfo FuncInstr::ISA[] = { 
+    { "add",   INSTR_ADD,   PRINT_DST, TYPE_R, 0, 20 }, 
+    { "addu",  INSTR_ADDU,  PRINT_DST, TYPE_R, 0, 21 },
+    { "sub",   INSTR_SUB,   PRINT_DST, TYPE_R, 0, 22 },
+    { "subu",  INSTR_SUBU,  PRINT_DST, TYPE_R, 0, 23 },
+    { "addi",  INSTR_ADDI,  PRINT_TSC, TYPE_I, 8, 0  }, 
+    { "addiu", INSTR_ADDIU, PRINT_TSC, TYPE_I, 9, 0  }, 
+    { "sll",   INSTR_SLL,   PRINT_DTC, TYPE_R, 0, 0  }, 
+    { "srl",   INSTR_SRL,   PRINT_DTC, TYPE_R, 0, 2  }, 
+    { "beq",   INSTR_BEQ,   PRINT_STC, TYPE_I, 4, 0  }, 
+    { "bne",   INSTR_BNE,   PRINT_STC, TYPE_I, 5, 0  }, 
+    { "j",     INSTR_J,     PRINT_C,   TYPE_J, 2, 0  }, 
+    { "jr",    INSTR_JR,    PRINT_S,   TYPE_R, 0, 8  }
+}; 
 
-uint32 FuncInstr::getFunct( uint32 bytes)
-{
-    return bytes & 0x3F;
-}
+const uint32 NUM_OF_INSTR = sizeof( FuncInstr::ISA) / sizeof( FuncInstr::ISA[0]);
 
 FuncInstr::FormatType FuncInstr::getType( uint32 opcode)
 {
-    switch( opcode)
+    for( int i = 0; i < NUM_OF_INSTR; i++)
     {
-        case 0: 
-            return RType;
-        case 2:
-            return JType;
-        case 4:
-        case 5:
-        case 8:
-        case 9:
-            return IType;
-    }
+        if ( opcode == ISA[i].opcode)
+        {
+            return ISA[i].type;
+        }
+    } 
     assert( 0);
 }
 
-const char * FuncInstr::myRegNames[ 32] = { "$zero", "$at", "$v0", "$v1", "$a0", "$a1",
-                                            "$a2", "$a3", "$t0", "$t1", "$t2", "$t3", 
-                                            "$t4", "$t5", "$t6", "$t7", "$s0", "$s1", 
-                                            "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", 
-                                            "$t8", "$t9", "$k0", "$k1", "$gp", "$sp", 
-                                            "$fp", "$ra"};
-FuncInstr::InstrInfo FuncInstr::ISA[NUM_OF_INSTR] = { 
-    InstrInfo( "add", add, dst, RType, 0, 20), 
-    InstrInfo( "addu", addu, dst, RType, 0, 21),
-    InstrInfo( "sub", sub, dst, RType, 0, 22),
-    InstrInfo( "subu", subu, dst, RType, 0, 23),
-    InstrInfo( "addi", addi, tsc, IType, 8, 0), 
-    InstrInfo( "addiu", addiu, tsc, IType, 9, 0), 
-    InstrInfo( "sll", sll, dtc, RType, 0, 0), 
-    InstrInfo( "srl", srl, dtc, RType, 0, 2), 
-    InstrInfo( "beq", beq, stc,  IType, 4, 0), 
-    InstrInfo( "bne", bne, stc, IType, 5, 0), 
-    InstrInfo( "j", j, c, JType, 2, 0), 
-    InstrInfo( "jr", jr, s, RType, 0, 8)
-}; 
 
 FuncInstr::FuncInstr( uint32 bytes)
 {
-    uint32 opcode = getOpcode( bytes);
-    uint32 funct = getFunct( bytes);    
-    type = getType( opcode);
     convertInstr( type, bytes);
     for (int i = 0; i < NUM_OF_INSTR; i++)
     {
-		if (type == ISA[i].type && opcode == ISA[i].opcode && funct == ISA[i].funct)
+		if ( type == ISA[i].type && opcode == ISA[i].opcode && funct == ISA[i].funct)
 		{
-			name = ISA[i].name;
+			name  = ISA[i].name;
 			instr = ISA[i].instr;
 			pType = ISA[i].pType;
 			break;
 		}
 	}
 	/* Add pseudoinstructions */
-    if ( instr == addiu && iConstVal == 0)
+    if ( instr == INSTR_ADDIU && iConstVal == 0)
     {
-        instr = move;
-        name = "move";
-        pType = ts;
+        instr = INSTR_MOVE;
+        name  = "move";
+        pType = PRINT_TS;
     }
-    if ( instr == addu && source == zero && dest == zero)
+    if ( instr == INSTR_ADDU && source == REG_ZERO && dest == REG_ZERO)
     {
-        instr = clear;
-        name = "clear";
-        pType = t;
+        instr = INSTR_CLEAR;
+        name  = "clear";
+        pType = PRINT_T;
     }
-    
-    if ( instr == sll && dest == zero && target == zero && shamt == 0)
+    if ( instr == INSTR_SLL && dest == REG_ZERO && target == REG_ZERO && shamt == 0)
     {
-        instr = nop;
-        name = "nop";
-        pType = none;
+        instr = INSTR_NOP;
+        name  = "nop";
+        pType = PRINT_NONE;
     }
 }
 
@@ -144,39 +119,35 @@ std::string FuncInstr::Dump( std::string indent) const
     oss << std::hex << indent << name << " ";
     switch( pType)
     {
-        case dst:
-            oss << myRegNames[ dest] << " " << myRegNames[ source] << " " 
-                      << myRegNames[ target];
+        case PRINT_DST:
+            oss << myRegNames[ dest]   << " " << myRegNames[ source] << " " << myRegNames[ target];
             break;
-        case tsc:
-            oss << myRegNames[ target] << " " << myRegNames[ source] << " " 
-                      << iConstVal;
+        case PRINT_TSC:
+            oss << myRegNames[ target] << " " << myRegNames[ source] << " " << iConstVal;
             break;
-        case stc:
-            oss << myRegNames[ source] << " " << myRegNames[ target] << " " 
-                      << iConstVal;
+        case PRINT_STC:
+            oss << myRegNames[ source] << " " << myRegNames[ target] << " " << iConstVal;
             break;
-        case dtc:
-            oss << myRegNames[ dest] << " " << myRegNames[ target] << " " << shamt;
+        case PRINT_DTC:
+            oss << myRegNames[ dest]   << " " << myRegNames[ target] << " " << shamt;
           break;
-        case c:
+        case PRINT_C:
             oss << address;
             break;
-        case s:
+        case PRINT_S:
             oss << myRegNames[ source];
             break;
-        case ts:
+        case PRINT_TS:
             oss << myRegNames[ target] << " " << myRegNames[ source]; 
             break;
-        case t:
+        case PRINT_T:
             oss << myRegNames[ target];
             break;
-        case none:
+        case PRINT_NONE:
             break;
         default:
             assert( 0);
     }
-    oss << std::endl;
     return oss.str();
 }
     

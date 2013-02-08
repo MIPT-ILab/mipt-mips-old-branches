@@ -42,7 +42,7 @@ ElfSection::ElfSection( const char* elf_file_name, const char* section_name)
     {
         cerr << "ERROR: Could not set ELF library operating version:"
              <<  elf_errmsg( elf_errno()) << endl;
-        exit( EXIT_FAcILURE);
+        exit( EXIT_FAILURE);
     }
    
     // open the file in ELF format 
@@ -129,7 +129,7 @@ uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
     uint64 value = 0;
     for ( short i = 0; i < num_of_bytes; ++i)
     {
-      value += this->content + addr - this->start_addr + i;
+      value += *(content + addr - this->start_addr + i);
       value << sizeof( uint8);
     }
     return value;
