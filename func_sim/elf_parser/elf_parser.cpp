@@ -126,23 +126,26 @@ void ElfSection::extractSectionParams( Elf* elf, const char* section_name,
 
 uint64 ElfSection::read( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64; 
+    assert( num_of_bytes <= sizeof( uint64) && num_of_bytes > 0);
+    assert( this->isInside( addr, num_of_bytes));
+
+    uint64 result = ( ( *( ( uint64*)( this->content + addr - this->start_addr))) 
+                    << ( 8 * ( sizeof( uint64) - num_of_bytes))) 
+                    >> ( 8 * ( sizeof( uint64) - num_of_bytes));
+
+    return result;
 }
 
 bool ElfSection::isInside( uint64 addr, short num_of_bytes) const
 {
-    // insert here your implementation
-    assert(0);
-    return false;
+    assert( num_of_bytes > 0);
+
+    return ( addr >= this->start_addr) && ( addr + num_of_bytes <= this->start_addr + this->size);
 }
 
 uint64 ElfSection::startAddr() const
 {
-    // insert here your implementation
-    assert(0);
-    return NO_VAL64;
+    return this->start_addr;
 }
 
 string ElfSection::dump( string indent) const
@@ -162,7 +165,7 @@ string ElfSection::dump( string indent) const
         oss << indent << "    0x" << hex << ( this->start_addr + offset) 
             << indent << ":    " << str.substr( 2 * offset, // 2 hex digits is need per byte
                                                 sizeof( uint64))
-	        << endl;
+            << endl;
     }
 
     return oss.str();
@@ -173,7 +176,7 @@ string ElfSection::strByBytes() const
     // temp stream is used to convert numbers into the output string
     ostringstream oss;
     oss << hex;
-	
+    
     // convert each byte into 2 hex digits 
     for( size_t i = 0; i < this->size; ++i)
     {
@@ -182,7 +185,7 @@ string ElfSection::strByBytes() const
         
         // print a value of 
         oss << (uint16) *( this->content + i); // need converting to uint16
-                                               // to be not preinted as an alphabet symbol	
+                                               // to be not preinted as an alphabet symbol  
     }
     
     return oss.str();
@@ -205,4 +208,3 @@ string ElfSection::strByWords() const
     
     return oss.str();
 }
-
