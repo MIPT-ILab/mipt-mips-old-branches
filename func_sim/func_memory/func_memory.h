@@ -11,6 +11,7 @@
 
 // Generic C++
 #include <string>
+#include <map>
 
 // uArchSim modules
 #include <types.h>
@@ -20,6 +21,9 @@ using namespace std;
 
 class FuncMemory
 {
+    string func_memory_name; //name of executable file
+    map <uint64 /*section address*/, ElfSection& > sect_stor;
+
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
@@ -31,7 +35,7 @@ public:
                 short num_of_elf_sections);
 
     virtual ~FuncMemory();
-    
+
     uint64 read( uint64 addr, short num_of_bytes = 4) const;
   
     string dump( string indent = "") const;
