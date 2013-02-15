@@ -1,15 +1,13 @@
 /**
  * func_instr.cpp - the module implementing
  * instruction decoder and disassembler.
- * 
- * 
- * 
  */
 
 // Generic C
 #include <cassert>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 
 //Generic C++
 #include <sstream>
@@ -19,274 +17,173 @@
 //uArchSim modules
 #include <func_instr.h>
 
-//const for gettin' codes
-#define opcode_const 4227858432 // 0-5 bits.
-#define rs_const 65011712 // 6-10 bits.
-#define rt_const 2031616 // 11 - 15 bits.
-#define rd_const 63488 //16-20 bits.
-#define sh_const 1984 //21-25 bits.
-#define imm_const 65535 // last 16 bits.
-#define addr_const 134217727 //last 26 bits = 2^27-1.
-//funct_const = 2^6-1 = 63.
-
 FuncInstr::FuncInstr ( uint32 bytes)
 {
-    get_form_type ( bytes);    
+    instr_output.clear();
+    opcode = bytes >> 26;
+    funct = bytes & 03F;
+    rs = ( reg_addr) ( bytes & 0x03E00000) >> 20;
+    rt = ( reg_addr) ( bytes & 0x1F0000) >> 15;
+    rd = ( reg_addr) ( bytes & 0x0F800) >> 10;
+    shmt = ( bytes & 0x07C0) >> 5;
+    imm = ( bytes & 0x0FFFF);
+    addr = ( bytes & 0x07FFFFFF);
+    fType = get_type( bytes);
+
+    Curr_Instr = match_to_ISA();
+    check_for_pseudo( Curr_Instr);
 };
 
-uint32 FuncInstr::get_opcode ( uint32 bytes)
-{
-    return ( bytes >> 26);
+
+static const InstrTempl ISA[12] = {
+    { "add", 0, 0x20, R_TYPE, ADD, 1, 1, 1, 1, 0, 0, 0},
+    { "addu", 0, 0x21, R_TYPE, ADDU, 1, 1, 1, 1, 0, 0, 0},
+    { "sub", 0, 0x22, R_TYPE, SUB, 1, 1, 1, 1, 0, 0, 0},
+    { "subu", 0, 0x23, R_TYPE, SUBU, 1, 1, 1, 1, 0, 0, 0},
+    { "addi", 8, 0x0, I_TYPE, ADDI, 0, 1, 1, 0, 0, 1, 0},
+    { "addiu", 9, 0x0, I_TYPE, ADDIU, 0, 1, 1, 0, 0, 1, 0},
+    { "sll", 0, 0x0, R_TYPE, SLL, 1, 0, 1, 1, 1, 0, 0},
+    { "srl", 0, 0x2, R_TYPE, SRL, 1, 0, 1, 1, 1, 0, 0},
+    { "beq", 4, 0x0, I_TYPE, BEQ, 0, 1, 1, 0, 0, 1, 0},
+    { "bne", 5, 0x0, I_TYPE, BNE, 0, 1, 1, 0, 0, 1, 0},
+    { "j", 2, 0x0, J_TYPE, J, 0, 0, 0, 0, 0, 0, 1},
+    { "jr", 0, 0x8, R_TYPE, JR, 1, 1, 0, 0, 0, 0, 0},
 };
 
-uint32 FuncInstr::get_funct ( uint32 bytes)
-{
-    return ( bytes & 63); 
+static const InstrTempl pseudo_ISA[3] = {
+    { "move", 8, 0x0, I_TYPE, MOVE, 0, 1, 1, 0, 0, 0, 0},
+    { "clear", 0, 0x21, R_TYPE, CLEAR, 1, 0, 1, 0, 0, 0, 0},
+    { "nop", 0, 0x0, R_TYPE, NOP, 1, 0, 0, 0, 0, 0, 0}
 };
 
-uint32 FuncInstr::get_rs ( uint32 bytes)
+form_type FuncInstr::get_type ( uint32 bytes)
 {
-    return (( bytes & rs_const) >> 20);
-};
-
-uint32 FuncInstr::get_rt ( uint32 bytes)
-{
-    return (( bytes & rt_const) >> 15);
-};
-
-uint32 FuncInstr::get_rd ( uint32 bytes)
-{
-    return (( bytes & rd_const) >> 10);
-};
-
-uint32 FuncInstr::get_shmt ( uint32 bytes)
-{
-    return (( bytes & sh_const) >> 5);
-}
-
-uint32 FuncInstr::get_imm ( uint32 bytes)
-{
-    return (( bytes & imm_const));
-};
-
-uint32 FuncInstr::get_addr ( uint32 bytes)
-{
-    return ( bytes & addr_const);
-};
-
-void FuncInstr::get_form_type ( uint32 bytes)
-{
-	opcode = get_opcode ( bytes);
-	switch ( opcode)
-	{
-	    case 0: 
-	    fType = R;
-            get_R_name ( bytes);
-	    break;   //AL and shift
-        case 2: 
-            fType = J;
-            addr = get_addr ( bytes);
-            InstrName = j;  // jump
-            break;  
+    switch ( opcode)
+    {
+        case 0: return R_TYPE;
+        case 2: return J_TYPE;
         case 4:
-            fType = I;
-            reg = get_rs ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rd ( bytes);
-            reg2 = get_reg( reg);
-            imm = get_imm ( bytes);
-            InstrName = beq; // branch on equal
-            break;
         case 5:
-            fType = I;
-            reg = get_rs ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rd ( bytes);
-            reg2 = get_reg( reg);
-            imm = get_imm ( bytes);            
-            InstrName = bne;  // branch on not equal
-            break;
         case 8:
-            fType = I;
-            reg = get_rs ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rd ( bytes);
-            reg2 = get_reg( reg);
-            imm = get_imm ( bytes); 
-            InstrName = addi; // add immediate
-            break;
-        case 9:
-            fType = I;
-            reg = get_rs ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rd ( bytes);
-            reg2 = get_reg( reg);
-            imm = get_imm ( bytes);  
-            if ( imm == 0) InstrName = move;           
-            else InstrName = addiu;  // add imm. unsigned
-            break;
-        default:
-            cout << "This instruction isn't supported yet" << endl;
-            exit ( -1);
-            break;
-	}
+        case 9: return I_TYPE;
+        default: 
+            cerr << "This instruction isn't supported yet" << endl;
+            exit(-1);
+    }
 };
 
-//gettin' operands also.
-void FuncInstr::get_R_name ( uint32 bytes)
+struct InstrTempl FuncInstr::match_to_ISA()
 {
-    funct = get_funct ( bytes);
-    switch ( funct)
+    int cnt;
+    for ( cnt = 0; cnt<12; cnt++)
     {
-        case 0: 
-            reg = get_rd ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rs ( bytes);
-            reg2 = get_reg ( reg);
-            shmt = get_shmt ( bytes);
-            if (( shmt == 0) && ( reg1 == $zero) && ( reg2 == $zero))
+        if ( opcode == ISA[cnt].instr_opcode)
+            if ( fType == R_TYPE)
             {
-                InstrName = nop;
-                reg1 = empty;
-                reg2 = empty;
+                if ( funct == ISA[cnt].instr_funct) Curr_Instr = ISA[cnt];
+                else continue;
             }
-            else InstrName = sll; //shift left logical;
-            reg3 = empty;
-            break;
-        case 2:
-            InstrName = srl;  // shift right logical;
-            reg = get_rd ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rs ( bytes);
-            reg2 = get_reg ( reg);
-            shmt = get_shmt ( bytes);
-            reg3 = empty;
-            break;
-        case 8:
-            InstrName = jr;  // jump to register
-            reg = get_rs ( bytes);
-            reg1 = get_reg ( reg);
-            break;
-        case 20:
-            InstrName = add;  // no comments.
-            reg = get_rd ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rs ( bytes);
-            reg2 = get_reg ( reg);
-            reg = get_rt ( bytes);
-            reg3 = get_reg ( bytes);
-            break;
-        case 21:
-            reg = get_rd ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rs ( bytes);
-            reg2 = get_reg ( reg);
-            reg = get_rt ( bytes);
-            reg3 = get_reg ( bytes);
-            if (( reg1 == $zero) && ( reg2 == $zero))
-	    {
-		InstrName = clear;
-                reg1 = reg3;
-                reg2 = empty;
-                reg3 = empty;
-            }
-            else InstrName = addu; // add unsigned;
-            break;
-        case 22:
-            InstrName = sub; //substract.
-            reg = get_rd ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rs ( bytes);
-            reg2 = get_reg ( reg);
-            reg = get_rt ( bytes);
-            reg3 = get_reg ( bytes);
-            break;
-        case 23:
-            InstrName = subu; // sub unsigned.  
-            reg = get_rd ( bytes);
-            reg1 = get_reg ( reg);
-            reg = get_rs ( bytes);
-            reg2 = get_reg ( reg);
-            reg = get_rt ( bytes);
-            reg3 = get_reg ( bytes);
-            break;
+            Curr_Instr = ISA[cnt];
+    }
+};
+
+void FuncInstr::check_for_pseudo( struct InstrTempl &Example)
+{
+    if ( Example.instr_out_name == "addiu")
+    {
+        if (imm == 0) Example = pseudo_ISA[0]; 
+    }
+    if ( Example.instr_out_name == "addu")
+    {
+        if (( rs == ZERO) && ( rd == ZERO)) Example = pseudo_ISA[1];
+    }
+    if ( Example.instr_out_name == "sll")
+    {
+        if (( rd == ZERO) && ( rt == ZERO) && ( imm == 0) Example = pseudo_ISA[2];
+    }
+};
+
+//write the output of the registers
+
+string FuncInstr::reg_out ( reg_addr reg)
+{
+    switch( reg)
+    {
+        case ZERO: return "$zero";
+        case AT: return "$at";
+        case V0: return "$v0";
+        case V1: return "$v1";
+        case A0: return "$a0";
+        case A1: return "$a1";
+        case A2: return "$a2";
+        case A3: return "$a3";
+        case T0: return "$t0";
+        case T1: return "$t1";
+        case T2: return "$t2";
+        case T3: return "$t3";
+        case T4: return "$t4";
+        case T5: return "$t5";
+        case T6: return "$t6";
+        case T7: return "$t7";
+        case S0: return "$s0";
+        case S1: return "$s1";
+        case S2: return "$s2";
+        case S3: return "$s3";
+        case S4: return "$s4";
+        case S5: return "$s5";
+        case S6: return "$s6";
+        case S7: return "$s7";
+        case T8: return "$t8";
+        case T9: return "$t9";
+        case K0: return "$k0";
+        case K1: return "$k1";
+        case GP: return "$gp";
+        case SP: return "$sp";
+        case FP: return "$fp";
+        case RA: return "$ra";
         default:
-            cout << "Undef.functor. This instruction isn't supported yet" << endl;
-            exit ( -1);
-            break;     
+            cerr << "error with register output has occured";
+            exit (-1);
     }
 };
 
-reg_addr FuncInstr::get_reg ( uint32 reg)
+std::string FuncInstr::Dump( string indent)
 {
-    switch ( reg)
-    {
-        case 0: return $zero; break;
-        case 1: return $at; break;
-        case 2: return $v0; break;
-        case 3: return $v1; break;
-        case 4: return $a0; break;
-        case 5: return $a1; break;
-        case 6: return $a2; break;
-        case 7: return $a3; break;
-        case 8: return $t0; break;
-        case 9: return $t1; break;
-        case 10: return $t2; break;
-        case 11: return $t3; break;
-        case 12: return $t4; break;
-        case 13: return $t5; break;
-        case 14: return $t6; break;
-        case 15: return $t7; break;
-        case 16: return $s0; break;
-        case 17: return $s1; break;
-        case 18: return $s2; break;
-        case 19: return $s3; break;
-        case 20: return $s4; break;
-        case 21: return $s5; break;
-        case 22: return $s6; break;
-        case 23: return $s7; break;
-        case 24: return $t8; break;
-        case 25: return $t9; break;
-        case 26: return $k0; break;
-        case 27: return $k1; break;
-        case 28: return $gp; break;
-        case 29: return $sp; break;
-        case 30: return $fp; break;
-        case 31: return $ra; break;
-        default: break;   // can be no exceptions because
-                          // reg can't be >= 32
-    }
-};
-
-
-string FuncInstr::Dump ( string indent) const
-{
+    if ( instr_output.empty())
+    {    
     ostringstream oss;
-    oss << indent << this->InstrName << indent;
-    if ( this->fType == R)
+    string sep_op = ", "
+    oss << indent << Curr_Instr.instr_out_name << "    ";
+    if (( Curr_Instr.form == R_TYPE) || ( Curr_Instr.form == J_TYPE))
     {
-        if ( this->reg1 != empty) oss << this->reg1 << indent;
-        if ( this->reg2 != empty) oss << this->reg2 << indent;
-        if ( this->reg3 != empty) oss << this->reg3 << indent;
-        else if ( this->shmt) oss << this->shmt;
-        //return oss.str();
+        if ( usage_rd) oss << reg_out( rd);
+        if ( usage_rs) oss << sep_op << reg_out( rs);
+        if ( usage_rt) oss << sep_op << reg_out( rt); 
+        if ( usage_shmt) oss << sep_op << "0x" << hex << shmt;
+        if ( usage_addr) oss << "0x" << hex << addr;
     }
-    else if ( this->fType == I)
+    else if ( Curr_Instr.form == I_TYPE)
     {
-        oss << this->reg1 << indent << this->reg2 << indent;
-        if ( this->imm) oss << this->imm;
-        //return oss.str();
+        if ( Curr_Instr.instr_opcode <= 5)
+        {
+            if ( usage_rs) oss << reg_out( rs);
+            if ( usage_rt) oss << sep_op << reg_out( rt);
+            if ( usage_imm) oss << sep_op << "0x" << hex << imm;
+        }
+        else 
+        {
+            if ( usage_rt) oss << reg_out( rt);
+            if ( usage_rs) oss << sep_op << reg_out( rs);
+            if ( usage_imm) oss << sep_op << "0x" << hex << imm;
+        }
     }
-    else if ( this->fType == J)
-    {
-        oss << this->addr;
-        //return oss.str();
+    instr_output.assign( oss.str());
     };
-    return oss.str();
+    return instr_output;
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr)
 {
-    out << instr.Dump(string indent = " ");
-    return out.str();
+    out << instr.Dump( indent = " ");
+    return out;
 };
