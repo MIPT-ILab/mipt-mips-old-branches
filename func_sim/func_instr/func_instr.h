@@ -74,6 +74,15 @@ class FuncInstr
             uint32 opcode: 6;
         } asJ;
     };
+    enum PrintOrder
+    {
+        DST_ORDER,
+        TS_ORDER,
+        DT_ORDER,
+        ST_ORDER,
+        S_ORDER,
+        NO_REG
+    };
     //contain information about instruction
     struct InstrInfo
     {
@@ -81,6 +90,7 @@ class FuncInstr
         string name;
         uint32 opcode;
         uint32 funct;
+        PrintOrder reg_order;
     };
     
     struct TurnPseudo
@@ -107,6 +117,8 @@ class FuncInstr
     uint32 shamt: 5;
     uint32 immed: 16;
     uint32 jump: 26;
+    PrintOrder reg_order;
+
     //You can't create object with this default constructor
     FuncInstr();
 public:

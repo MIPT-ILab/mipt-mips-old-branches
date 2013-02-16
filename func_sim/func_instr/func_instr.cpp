@@ -19,18 +19,18 @@
 
 const FuncInstr::InstrInfo FuncInstr::ISA[ MAX_NUM_OF_INSTR] = 
 {
-                { I_TYPE,  "addi",  ADDI,  0x0 },
-                { I_TYPE, "addiu", ADDIU,  0x0 },
-                { I_TYPE,   "beq",   BEQ,  0x0 },
-                { I_TYPE,   "bne",   BNE,  0x0 },
-                { J_TYPE,     "j",  JUMP,  0x0 },
-                { R_TYPE,   "add",   0x0,  ADD },
-                { R_TYPE,  "addu",   0x0, ADDU },
-                { R_TYPE,   "sub",   0x0,  SUB },
-                { R_TYPE,  "subu",   0x0, SUBU },
-                { R_TYPE,   "sll",   0x0,  SLL },
-                { R_TYPE,   "srl",   0x0,  SRL },
-                { R_TYPE,    "jr",   0x0,   JR }
+                { I_TYPE,  "addi",  ADDI,  0x0,  TS_ORDER },
+                { I_TYPE, "addiu", ADDIU,  0x0,  TS_ORDER },
+                { I_TYPE,   "beq",   BEQ,  0x0,  ST_ORDER },
+                { I_TYPE,   "bne",   BNE,  0x0,  ST_ORDER },
+                { J_TYPE,     "j",  JUMP,  0x0,    NO_REG },
+                { R_TYPE,   "add",   0x0,  ADD, DST_ORDER },
+                { R_TYPE,  "addu",   0x0, ADDU, DST_ORDER },
+                { R_TYPE,   "sub",   0x0,  SUB, DST_ORDER },
+                { R_TYPE,  "subu",   0x0, SUBU, DST_ORDER },
+                { R_TYPE,   "sll",   0x0,  SLL,  DT_ORDER },
+                { R_TYPE,   "srl",   0x0,  SRL,  DT_ORDER },
+                { R_TYPE,    "jr",   0x0,   JR,   S_ORDER }
 };
 
 const string FuncInstr::REGNAME[ MAX_NUM_OF_REG] = 
@@ -65,9 +65,10 @@ void FuncInstr::setNameForRtype()
     {
         if ( ISA[ i].opcode == NULL_VAL && this->convert.asR.funct == ISA[ i].funct)
         {
-            this->name   = ISA[ i].name;
-            this->opcode = ISA[ i].opcode;
-            this->funct  = ISA[ i].funct;
+            this->name      = ISA[ i].name;
+            this->opcode    = ISA[ i].opcode;
+            this->funct     = ISA[ i].funct;
+            this->reg_order = ISA[ i].reg_order;
         }
     }
 }
@@ -81,6 +82,7 @@ void FuncInstr::setNameForIandJtypes()
             this->name   = ISA[ i].name;
             this->opcode = ISA[ i].opcode;
             this->funct  = ISA[ i].funct;
+            this->reg_order = ISA[ i].reg_order;
         }
     }   
 }    
@@ -175,6 +177,31 @@ string FuncInstr::Dump( string indent) const
     } else
     {
         os << indent << this->name << ' ';
+        switch ( this->reg_order)
+        {
+            case DST_ORDER: os << this->dest   << ", "
+                               << this->source << ", "
+                               << this->target << endl;
+                break;
+            case DT_ORDER: os  << this->dest   << ", "
+                               << this->target << ", "
+                               << this->shamt  << endl;
+                break;
+            case TS_ORDER: os  << this->target << ", "
+                               << this->source << ", "
+                               << this->immed  << endl;
+                break;
+            case ST_ORDER: os  << this->source << ", "
+                               << this->target << ", "
+                               << this->immed  << endl;
+                break;
+            case S_ORDER: os   << this->source << endl;
+                break;
+            case NO_REG: os    << this->jump   << endl;
+                break;
+            default: assert( 0);
+        }
+/*
         switch ( this->type)
         {
             case J_TYPE: os << this->jump << endl;
@@ -206,6 +233,7 @@ string FuncInstr::Dump( string indent) const
                 break;
             default: assert( 0);
         }
+*/
     }
     return os.str();
 }
