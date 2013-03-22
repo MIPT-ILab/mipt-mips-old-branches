@@ -26,7 +26,7 @@
 #include <cache_tag_array.h>
 
 // Parameters for the simulation
-const int associativity[] = { 1, 2, 4, 8, 16, -1 };
+const int associativity[] = { 1, 2, 4, 8, 16, 262144 };
 const int cache_size_in_kb[] = { 1, 2, 4, 8, 16, 32, 64, 
 								 128, 256, 512, 1024 }; 
 
@@ -34,7 +34,7 @@ int main( int argc, char **argv)
 {
 	if ( argc != 3) 
 	{
-		std::cerr << "Usage: " << argv[ 0] << "<memory-trace-file> "
+		std::cerr << "Usage: " << argv[ 0] << " <memory-trace-file> "
 			 	  << "<output-csv-file>" << std::endl;
 		exit( EXIT_FAILURE);
 	}

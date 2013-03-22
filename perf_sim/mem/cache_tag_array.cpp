@@ -10,7 +10,7 @@
 #include <cache_tag_array.h>
 
 CacheTagArray::CacheTagArray( unsigned int size_in_bytes,
-                              unsigned short ways,
+                              unsigned int ways,
                               unsigned short block_size_in_bytes, 
                               unsigned short addr_size_in_bits)
 {

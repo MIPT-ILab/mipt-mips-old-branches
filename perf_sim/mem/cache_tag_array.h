@@ -23,8 +23,7 @@ public:
      *    i.e. if the block size is 16 Bytes then the number of data blocks in 
      *      the cache is size_in_bytes/16.
      * 2) ways is a number of associative ways in a set, i.e. how many blocks are 
-     *      referred by the same index. If ways is -1, it means infinite
-     *      number of ways, in other words the cache is fully-associative.
+     *      referred by the same index. 
      * 3) block_size_in_bytes is a number of Bytes in a data block
      * 4) addr_size_in_bit is a number of bits in the physical address.
      *
@@ -36,7 +35,7 @@ public:
      * 
      */
     CacheTagArray( unsigned int size_in_bytes,
-                   unsigned short ways,
+                   unsigned int ways,
                    unsigned short block_size_in_bytes, 
                    unsigned short addr_size_in_bits);
     /**
