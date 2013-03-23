@@ -9,12 +9,21 @@
 #ifndef MEM__CACHE_TAG_ARRAY_H
 #define MEM__CACHE_TAG_ARRAY_H
 
+// Generic C++
+#include <vector>
+
 // uArchSim modules
 #include <types.h>
 
 class CacheTagArray
 {
-   
+  struct CacheBlock
+  {
+    bool valid;
+    unsigned tag;
+    unsigned last_access_time;
+  };
+
 public:
     /**
      * Constructor params:
@@ -34,8 +43,8 @@ public:
      *   http://en.wikipedia.org/wiki/CPU_cache#Cache_entry_structure
      * 
      */
-    CacheTagArray( unsigned int size_in_bytes,
-                   unsigned int ways,
+    CacheTagArray( unsigned size_in_bytes,
+                   unsigned ways,
                    unsigned short block_size_in_bytes, 
                    unsigned short addr_size_in_bits);
     /**
@@ -49,6 +58,19 @@ public:
      * is stored in the cache.
      */
     void write( uint64 addr);
+
+private:
+    unsigned short bits_for_index;
+    unsigned short bits_for_offset;
+    unsigned short bits_for_tag;
+
+    unsigned ways;
+    unsigned number_of_blocks;
+    unsigned number_of_sets;
+
+    unsigned mem_access_counter;
+
+    std::vector< std::vector< CacheBlock>> sets;
 };
 
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
