@@ -12,7 +12,7 @@
 // Generic C++
 #include <string>
 #include <vector>
-#include <list>
+#include <set>
 
 // Generic uarch-sim
 #include <types.h>
@@ -23,7 +23,7 @@ class CacheTagArray
     unsigned int tag_len; //a number of bits in a tag of block
     unsigned int index_len; //a number of bits in an index of set
     unsigned int offset_len; //a number of bits in a offset of block
-    std::vector< std::list< unsigned int> > tag_array; //lists of tags inside an array of sets;
+    std::vector< std::set< unsigned int> > tag_array; //set of tags inside an array of sets;
     
     //You could not create object using this default constructor
     CacheTagArray();

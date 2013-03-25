@@ -72,7 +72,7 @@ int main (int argc, char* argv[])
         ifstream inp_file( input.c_str());
         CacheTagArray cache( j, j / BLOCK_SIZE, BLOCK_SIZE, ADDR_SIZE);
         out_file << eval_miss_rate( inp_file, cache) << ", ";
-        cout << "for " << j << "done\n";
+        cout << "for " << j << " done\n";
         inp_file.close();
     }
     out_file.close();

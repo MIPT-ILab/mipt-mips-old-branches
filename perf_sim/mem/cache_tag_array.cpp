@@ -8,11 +8,13 @@
 // Generic C
 #include <cassert>
 #include <cmath> //link with -lm
+#include <ctime>
 
 // Generic C++
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <set>
 
 // uArchSim modules
 #include <cache_tag_array.h>
@@ -54,14 +56,12 @@ bool CacheTagArray::read( uint64 addr)
     bool is_finded = false;
     unsigned int tag   = tagOf( addr);
     unsigned int index = indexOf( addr);
-    list< unsigned int> this_set = tag_array[ index]; 
-    list< unsigned int>::iterator to_remove = find( this_set.begin(), this_set.end(), tag);
-    if ( to_remove != this_set.end())
+    set< unsigned int>::iterator this_set = tag_array[ index].find( tag);
+    if ( this_set != tag_array[ index].end())
     {
-        remove( to_remove, to_remove, tag);
-        this_set.push_front( tag);
         is_finded = true;
-    } else
+        tag_array[ index].insert( tag_array[ index].begin(), tag);
+    } else 
     {
         write( addr);
     } 
@@ -75,8 +75,8 @@ void CacheTagArray::write( uint64 addr)
 
     if ( tag_array[ index].size() == this->num_of_ways)
     {
-        tag_array[ index].pop_back();
+        tag_array[ index].erase( --tag_array[ index].end()); 
     } 
-    tag_array[ index].push_front( tag);
+    tag_array[ index].insert( tag_array[ index].begin(), tag);
 } 
 
