@@ -13,7 +13,6 @@
 // Generic C++
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <set>
 
 // uArchSim modules
