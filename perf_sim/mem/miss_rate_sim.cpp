@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 #include <cache_tag_array.h>
 
@@ -20,7 +21,6 @@ int main( int argc, char* argv[])
         cout << "Error: need 2 arguments" << endl;
         exit( EXIT_FAILURE);
     }
-    
     ifstream input( argv[ 1]);
     ofstream output( argv[ 2]);
     if ( !input)
@@ -33,18 +33,18 @@ int main( int argc, char* argv[])
         cout << "Error: can't open file " << argv[ 2] << endl;
         exit( EXIT_FAILURE);
     }
-    input >> hex;
-    
+    input >> hex;    
     for ( int way = 1; way <= 16; way *= 2)
     {
         for ( int cache_size = 1; cache_size <= 1024; cache_size *= 2) // size of cache from 1kb to 1024 kb
         {
+            cout << "Test performance for cache_size = " << cache_size << " kb, way = " << way << endl;
             CacheTagArray myCache( cache_size * 1024, way);
             input.clear();
             input.seekg( 0, input.beg);
             int request_number = 0;
             int miss_number = 0;
-            int addr;       
+            uint64 addr;
             while ( input >> addr)
             {
                 request_number++;
@@ -57,15 +57,17 @@ int main( int argc, char* argv[])
         }
         output << endl;
     }
+    
     /* Full associative cache */
     for ( int cache_size = 1; cache_size <= 1024; cache_size *= 2) // size of cache from 1kb to 1024 kb
     {
+        cout << "Test performance for cache_size = " << cache_size << " kb, full associativity" << endl;
         CacheTagArray myCache( cache_size * 1024, cache_size * 256);
         input.clear();
         input.seekg( 0, input.beg);
         int request_number = 0;
         int miss_number = 0;
-        int addr;       
+        uint64 addr;       
         while ( input >> addr)
         {
             request_number++;

@@ -7,13 +7,17 @@
 #ifndef CACHE_TAG_ARRAY_H
 #define CACHE_TAG_ARRAY_H
 
+#include <list>
+#include <vector>
+
 #include <types.h>
+
+using namespace std;
 
 class CacheTagArray
 {
     struct CacheLine
     {
-         short age_bit;  // zero if line wasn't used recently, one if it was used 
          short used_bit; // zero if line is free, one - contains actual information
          uint64 tag;     // tag of stored data
     };
@@ -24,7 +28,7 @@ class CacheTagArray
     unsigned int   number_of_ways;
     unsigned int   number_of_set;
     uint64         mask_for_index;
-    uint64         mask_for_tag;
+    vector< list <int> > when_used; // list with ordered ways
     CacheLine    **cache;
     
     uint64 getTag( uint64 addr); // returns tag of addr

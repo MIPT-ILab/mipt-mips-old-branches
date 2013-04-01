@@ -29,20 +29,21 @@ CacheTagArray::CacheTagArray( unsigned int size_in_bytes,
     offset_size_in_bits  = getLog( block_size_in_bytes);
     tag_size_in_bits     = addr_size_in_bits - index_size_in_bits - offset_size_in_bits;
     mask_for_index       = ( ( 1 << index_size_in_bits) - 1) << offset_size_in_bits;
-    mask_for_tag         = ( ( 1 << tag_size_in_bits) - 1) << ( offset_size_in_bits + index_size_in_bits);
     assert( tag_size_in_bits > 0);
-    
+
     cache = new CacheLine* [ number_of_set];
     for ( unsigned int i = 0; i < number_of_set; i++)
     {
         cache[ i] = new CacheLine [ number_of_ways];
+        list < int> temp;
         for ( unsigned int j = 0; j < number_of_ways; j++)
         {
-            cache[ i][ j].age_bit  = 0;
+            temp.push_back( j);
             cache[ i][ j].used_bit = 0;
             cache[ i][ j].tag      = 0;
         }
-    }   
+        when_used.push_back( temp);
+    }
 }
 
 bool CacheTagArray::read( uint64 addr)
@@ -76,31 +77,22 @@ void CacheTagArray::write( uint64 addr)
             return;
         }
     }
-    /* No free places, find LRU line and replace it */
-    for( unsigned int i = 0; i < number_of_ways; i++)
-    {
-        if ( cache[ index][ i].age_bit == 0)
-        {
-            cache[ index][ i].used_bit = 1;
-            cache[ index][ i].tag      = current_tag;
-            updateLRU( index, i);
-            return;
-        }
-    }
-    cache[ index][ 0].used_bit = 1;
-    cache[ index][ 0].tag      = current_tag;
-    updateLRU( index, 0);
+    /* No free places, find LRU line and replace it */    
+    int index_to_replace = when_used[ index].back();
+    cache[ index][ index_to_replace].used_bit = 1;
+    cache[ index][ index_to_replace].tag = current_tag;
+    updateLRU( index, index_to_replace);
     return;
 }
 
 uint64 CacheTagArray::getIndex( uint64 addr)
 {
-    return ( addr & mask_for_index) >> offset_size_in_bits;
+    return ( addr & mask_for_index) >> ( offset_size_in_bits);
 }
 
 uint64 CacheTagArray::getTag( uint64 addr)
 {
-    return ( addr & mask_for_tag) >> ( offset_size_in_bits + index_size_in_bits);
+    return  addr >> ( offset_size_in_bits + index_size_in_bits);
 }
 
 void CacheTagArray::checkInput( unsigned int data)
@@ -123,26 +115,30 @@ unsigned short CacheTagArray::getLog( unsigned int data)
 
 void CacheTagArray::updateLRU( uint64 index, unsigned int i)
 {
-    for( unsigned int j = 0; j < number_of_ways; j++)
+    for ( list<int>::iterator iter = when_used[ index].begin(); iter != when_used[ index].end(); iter++)
     {
-        cache[ index][ j].age_bit = 0;
+        if ( *iter == i) 
+        {
+            when_used[ index].erase( iter);
+            break;
+        }
     }
-    cache[ index][ i].age_bit = 1;
+    when_used[ index].push_front( i);
     return;
 }
 
 void CacheTagArray::dump()
 {
-    cout << "Dump info: " << endl;
+    cout << "Dump info: "    << endl;
     cout << "offset_size = " << offset_size_in_bits << endl;
-    cout << "index_size = " << index_size_in_bits << endl;
-    cout << "tag_size = " << tag_size_in_bits << endl;
+    cout << "index_size = "  << index_size_in_bits << endl;
+    cout << "tag_size = "    << tag_size_in_bits << endl;
     for( unsigned int i = 0; i < number_of_set; i++)
     {
         cout << " index = " << i << endl;
         for ( unsigned int j = 0; j < number_of_ways; j++)
         {
-            cout << "    way[" << j << "] = " << cache[ i][ j].age_bit << " " << cache[ i][ j].age_bit 
+            cout << "    way[" << j << "] = " << cache[ i][ j].used_bit << " "  
                  << " " << cache[ i][ j].tag << endl;
         }
     }
