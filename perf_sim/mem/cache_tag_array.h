@@ -24,6 +24,7 @@ class CacheTagArray
     unsigned int index_len; //a number of bits in an index of set
     unsigned int offset_len; //a number of bits in a offset of block
     std::vector< std::set< unsigned int> > tag_array; //set of tags inside an array of sets;
+    std::vector< std::vector< std::set< unsigned int>::iterator> > LRU; //LRU update information;
     
     //You could not create object using this default constructor
     CacheTagArray();

@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <algorithm>
 
 // uArchSim modules
 #include <cache_tag_array.h>
@@ -37,6 +38,7 @@ CacheTagArray::CacheTagArray( unsigned int size_in_bytes,
     this->offset_len = log2( block_size_in_bytes);
     this->tag_len    = addr_size_in_bits - index_len - offset_len;
     this->tag_array.resize( num_of_set); //create sets
+    this->LRU.resize( num_of_set);
 }
 
 unsigned int CacheTagArray::indexOf( uint64 addr) const
@@ -59,7 +61,10 @@ bool CacheTagArray::read( uint64 addr)
     if ( this_set != tag_array[ index].end())
     {
         is_finded = true;
-        tag_array[ index].insert( tag_array[ index].begin(), tag);
+        vector< set< unsigned int>::iterator>::iterator it = find( LRU[ index].begin(), LRU[ index].end(), this_set);
+        assert( it != LRU[ index].end());
+        LRU[ index].erase( it);
+        LRU[ index].push_back( this_set);
     } else 
     {
         write( addr);
@@ -74,8 +79,11 @@ void CacheTagArray::write( uint64 addr)
 
     if ( tag_array[ index].size() == this->num_of_ways)
     {
-        tag_array[ index].erase( --tag_array[ index].end()); 
+        tag_array[ index].erase( *(LRU[ index].begin())); 
+        LRU[ index].erase( LRU[ index].begin());
     } 
-    tag_array[ index].insert( tag_array[ index].begin(), tag);
+    set< unsigned int>::iterator ins_place = tag_array[ index].insert( tag).first;
+    LRU[ index].push_back( ins_place);
+    
 } 
 
