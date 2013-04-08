@@ -1,10 +1,8 @@
 # 
-# Building the cache_tag_array for MIPS ElF binaries
-# @author Alexander Titov <alexander.igorevich.titov@gmail.com>
-# Copyright 2012 uArchSim iLab Project
+# Building the miss rate study
+# author Alexander Kravtcov
 #
 
-# specifying relative path to the TRUNK
 TRUNK= ../../
 
 # paths to look for headers
@@ -14,13 +12,11 @@ vpath %.h $(TRUNK)/common
 # to search for headers
 INCL= -I ./ -I $(TRUNK)/common/ 
 
+CXX_FLAGS := -Wall
 ifeq ($(debug), 1)
-	CXX_FLAGS := -g -O0 -Wall -DDEBUG
+	CXX_FLAGS := $(CXX_FLAGS) -g -O0 -DDEBUG
 endif
 
-#
-# Enter for building miss_rate_sim stand alone program
-#
 miss_rate_sim: miss_rate_sim.o cache_tag_array.o 
 	$(CXX) -o $@ $^ $(CXX_FLAGS) 
 	@echo "---------------------------------"
