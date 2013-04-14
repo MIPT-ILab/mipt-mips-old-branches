@@ -20,19 +20,30 @@ INCL= -I ./ -I $(TRUNK)/common/ -I $(TRUNK)/func_sim/elf_parser/
 INCL_GTEST= -I $(TRUNK)/libs/gtest-1.6.0/include
 GTEST_LIB= $(TRUNK)/libs/gtest-1.6.0/libgtest.a
 
+# Modules on which FuncMemory depends
+MODULES_DIRS= $(TRUNK)/func_sim/elf_parser/
+MODULES_OBJS= $(TRUNK)/func_sim/elf_parser/elf_parser.o
+
 #
 # Enter for building func_memory stand alone program
 #
-func_memory: func_memory.o elf_parser.o main.o
+func_memory: modules func_memory.o main.o
 	@# don't forget to link ELF library using "-l elf"
-	$(CXX) -o $@ $^ -l elf
+	@echo ""
+	$(CXX) -o $@ func_memory.o main.o $(MODULES_OBJS) -l elf
 	@echo "---------------------------------"
-	@echo "$@ is built SUCCESSFULLY"
+	@echo "$@ is built SUCCESSFULLY!"
+
+#
+# Build dependencies
+#
+modules: 
+	@echo "Building modules..."
+	@for obj_dir in $(MODULES_DIRS); do make -C $$obj_dir; done
+	@echo "---------------------------------"
+	@echo "Building modules is done SUCCESSFULLY!"
 
 func_memory.o: func_memory.cpp func_memory.h types.h
-	$(CXX) -c $< $(INCL)
-
-elf_parser.o: elf_parser.cpp elf_parser.h types.h
 	$(CXX) -c $< $(INCL)
 
 main.o: main.cpp func_memory.h types.h
@@ -41,22 +52,22 @@ main.o: main.cpp func_memory.h types.h
 #
 # Enter for building func_memory unit test
 #
-test: unit_test
+test: modules unit_test
 	@echo ""
-	@echo "Running ./$<\n"
-	@./$<
-	@echo "Unit testing for the moduler functional memory passed SUCCESSFULLY!"
+	@echo "Running ./unit_test\n"
+	@./unit_test
+	@echo "Unit testing for FuncMemory has passed SUCCESSFULLY!"
 
-unit_test: unit_test.o func_memory.o elf_parser.o
+unit_test: unit_test.o func_memory.o
 	@# don't forget to link ELF library using "-l elf"
 	@# and use "-lpthread" options for Google Test
-	$(CXX) $^ -lpthread $(GTEST_LIB) -o $@ -l elf  $(GTEST_LIB)
+	$(CXX) -o $@ $^ $(MODULES_OBJS) -lpthread $(GTEST_LIB) -lelf $(INCL_GTEST) $(INCL)
 	@echo "---------------------------------"
 	@echo "$@ is built SUCCESSFULLY"
 
-unit_test.o: unit_test.cpp func_memory.o elf_parser.o
-	$(CXX) -c $< $(INCL_GTEST) $(INCL) 
+unit_test.o: unit_test.cpp  
+	$(CXX) -o $@ -c $^ $(INCL_GTEST) $(INCL) 
 
 clean:
-	@-rm *.o
-	@-rm func_memory unit_test
+	@rm -f *.o
+	@rm -f func_memory unit_test

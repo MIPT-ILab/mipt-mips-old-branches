@@ -8,6 +8,7 @@
 #include <iomanip>
 
 // uArchSim modules
+#include <func_sim.h>
 #include <elf_parser.h>
 #include <func_instr.h>
 #include <reg_file.h>
@@ -16,9 +17,9 @@ using namespace std;
 
 int main ( int argc, char* argv[])
 {
-    if ( argc >= min_num_of_args && strcmp( argv[1], "--help"))
+    if ( argc >= 2 && strcmp( argv[1], "--help"))
     {
-        FuncSim simulator( argv[1]);
+        ;
     } else if ( argc == 2 && !strcmp( argv[ 1], "--help"))
     {
         cout << "MIPS simulator." << endl << endl

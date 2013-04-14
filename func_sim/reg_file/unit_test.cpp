@@ -8,7 +8,16 @@
 // uArchSim modules
 #include <reg_file.h>
 
-TEST( Reg_file, Dummy_test)
+TEST( RegFile, invalid_access)
 {   
-  ASSERT_TRUE( true);
+  ASSERT_DEATH({ RegFile regfile( 128); regfile.read( 128); }, ".*");
+  ASSERT_DEATH({ RegFile regfile( 128); regfile.write( 128, 0); }, ".*");
 } 
+
+TEST( RegFile, read_write)
+{   
+  RegFile regfile(1);
+  regfile.write(0, 0xDEAD);
+  EXPECT_EQ(0xDEAD, regfile.read(0));
+
+}

@@ -3,5 +3,4 @@
          .text
          .global __start
  __start:
-	add $t0, $t1, $t2
-	add $v0, $t3, $t1
+	add $v0, $t1, $t2

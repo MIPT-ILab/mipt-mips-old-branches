@@ -10,12 +10,20 @@
 #ifndef REG_FILE__REG_FILE_H
 #define REG_FILE__REG_FILE_H
 
+#include <types.h>
+
 class RegFile
 {
 public:
-  RegFile();
+    RegFile(size_t size);
+    ~RegFile();
+
+    uint64 read(size_t register_id);
+    void write(size_t register_id, uint64 val);
+
+private:
+    uint64 *regfile;
+    const size_t size;
 };
 
 #endif 
-
-

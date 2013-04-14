@@ -15,6 +15,8 @@
 
 // uArchSim modules
 #include <types.h>
+#include <reg_file.h>
+#include <func_memory.h>
 #include <func_instr.h>
 
 using namespace std;
@@ -27,7 +29,7 @@ struct Register
 
 class FuncInstr
 {
-    // You could not create the object
+    // You can't create the object
     // using this default constructor
     FuncInstr(){}
 
@@ -53,14 +55,20 @@ public:
         BEQ,       // branch equel
         BNE,       // branch not equal
         JMP,       // unconditional jump
-        JRE,       // jump to address in a register
+        JR,        // jump to address in a register,
+        LW,        // load a word from memory
+        SW,        // store a word in memory
+        LUI,       // load upper immediate
     };
     
     explicit FuncInstr( uint32 bits);
 
     virtual ~FuncInstr();
     
-    std::string Dump( std::string indent = " ") const;
+    std::string dump( std::string indent = "") const;
+    std::string dumpWithRegisterValues( RegFile &regfile, std::string indent = "") const;
+    uint64 execute( uint64 pc, FuncMemory &mem, RegFile &regfile) const;
+    bool isTerminalInstruction() const;
 
 private:
 
@@ -75,6 +83,8 @@ private:
 
     Type          type;
     FormatType    format;
+
+    bool is_terminal_instr;
 
     const char*   name;     // Human-readable instruction name
 };

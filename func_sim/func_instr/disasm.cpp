@@ -42,7 +42,7 @@ int main ( int argc, char* argv[])
                 cout << indent_offset_string << setw( 8);
                 cout.fill( '0');
                 cout << right << hex << instr_addr 
-                     << instr.Dump( indent_disasm_string) << endl;
+                     << instr.dump( indent_disasm_string) << endl;
             }
 
             cout << endl;

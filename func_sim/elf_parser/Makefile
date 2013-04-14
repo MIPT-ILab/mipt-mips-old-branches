@@ -40,12 +40,12 @@ test: unit_test
 	@echo ""
 	@echo "Running ./$<\n"
 	@./$<
-	@echo "Unit testing for the moduler ELF parser passed SUCCESSFULLY!"
+	@echo "Unit testing for the module ELF parser has passed SUCCESSFULLY!"
 
 unit_test: unit_test.o elf_parser.o
 	@# don't forget to link ELF library using "-l elf"
 	@# and use "-lpthread" options for Google Test
-	$(CXX) $^ -lpthread $(GTEST_LIB) -o $@ -l elf  $(GTEST_LIB)
+	$(CXX) $^ -lpthread $(GTEST_LIB) -o $@ -l elf 
 	@echo "---------------------------------"
 	@echo "$@ is built SUCCESSFULLY"
 
@@ -53,5 +53,5 @@ unit_test.o: unit_test.cpp elf_parser.o
 	$(CXX) -c $< $(INCL_GTEST) $(INCL) 
 
 clean:
-	@-rm *.o
-	@-rm elf_parser unit_test
+	@rm -f *.o
+	@rm -f elf_parser unit_test
