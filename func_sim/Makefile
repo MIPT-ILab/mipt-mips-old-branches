@@ -87,8 +87,9 @@ simulator_test.o: simulator_test.cpp
 
 clean:
 	@rm -f *.o
+	@rm simulator simulator_test
 	@for obj_dir in $(MODULES_DIRS); do \
 		make -C $$obj_dir clean; \
 	done
-	make -C ./tests/ clean
+	@make -C ./tests/ clean
 
