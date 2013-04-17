@@ -80,11 +80,11 @@ TEST( FuncSim_tests, instructions_add_sub)
     const char *test_program = "./tests/arith.out";
     FuncSim sim( test_program);
     sim.doSimulationStep();
-    string expected_dump = "addi  $t0(0), $t0(0), 0xDEAD";
+    string expected_dump = "addiu $t0(0), $t0(0), 57005";
     string dump = sim.dumpCurrentInstruction();
     EXPECT_EQ( expected_dump, dump);   
     sim.doSimulationStep();
-    expected_dump = "addi  $t1(0), $t1(0), 0x1";
+    expected_dump = "addiu $t1(0), $t1(0), 1";
     dump = sim.dumpCurrentInstruction();
     EXPECT_EQ( expected_dump, dump);   
     sim.doSimulationStep();
@@ -107,7 +107,7 @@ TEST( FuncSim_tests, instructions_shifts)
     const char *test_program = "./tests/shifts.out";
     FuncSim sim( test_program);
     sim.doSimulationStep();
-    string expected_dump = "addi  $t0(0), $t0(0), 0x1000";
+    string expected_dump = "addi  $t0(0), $t0(0), 4096";
     string dump = sim.dumpCurrentInstruction();
     EXPECT_EQ( expected_dump, dump);   
     sim.doSimulationStep();
@@ -176,6 +176,7 @@ TEST( FuncSim_tests, instructions_bne)
     const char *test_program = "./tests/bne.out";
     FuncSim sim( test_program);
     uint64 pc = sim.getPC();
+    sim.doSimulationStep();
     sim.doSimulationStep();
     sim.doSimulationStep();
     sim.doSimulationStep();

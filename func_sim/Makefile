@@ -66,6 +66,18 @@ simulator.o: simulator.cpp
 func_sim.o: func_sim.cpp
 	$(CXX) -c $< $(INCL)
 
+# 
+# Enter for running factorial test
+#
+factorial: asm_tests simulator
+	./simulator ./tests/factorial.out
+
+# 
+# Enter for running fibonacci test
+#
+fibonacci: asm_tests simulator
+	./simulator ./tests/fibonacci.out
+
 #
 # Enter for building functional simulator tests
 #
@@ -87,7 +99,7 @@ simulator_test.o: simulator_test.cpp
 
 clean:
 	@rm -f *.o
-	@rm simulator simulator_test
+	@rm -f simulator simulator_test
 	@for obj_dir in $(MODULES_DIRS); do \
 		make -C $$obj_dir clean; \
 	done

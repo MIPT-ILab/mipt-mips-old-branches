@@ -43,3 +43,8 @@ uint64 FuncSim::getPC() const
 {
     return pc;
 }
+
+uint64 FuncSim::getRegisterValue( size_t register_id) const
+{
+	return regfile.read( register_id);
+}

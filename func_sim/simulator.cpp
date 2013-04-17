@@ -19,7 +19,22 @@ int main ( int argc, char* argv[])
 {
     if ( argc >= 2 && strcmp( argv[1], "--help"))
     {
-        ;
+        FuncSim sim( argv[1]);
+        int instr_counter = 0;
+        cout << "    Running simulation on " << argv[1] << "..." << endl;
+        cout << "----------------------------------------" 
+                "----------------------------------------" << endl;
+        while ( !sim.isTerminalConditionReached()) {
+            sim.doSimulationStep();
+            cout << "    " << hex << sim.getPC() << "    " 
+                 << sim.dumpCurrentInstruction() << endl;
+            instr_counter++;
+        }
+        cout << "----------------------------------------" 
+                "----------------------------------------" << endl;
+        cout << "    $v0 = " << dec << sim.getRegisterValue( 2) << endl;
+        cout << "    " << instr_counter << " instructions were executed" 
+             << endl;
     } else if ( argc == 2 && !strcmp( argv[ 1], "--help"))
     {
         cout << "MIPS simulator." << endl << endl

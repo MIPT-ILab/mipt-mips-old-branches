@@ -88,7 +88,7 @@ FuncInstr::FuncInstr( uint32 bits)
 {
     uint8  opcode = ( bits & 0xfc000000) >> 26;
     uint8    func = ( bits & 0x3f);
-    uint32   addr = ( bits & 0x3fffff) << 2;
+    uint32   addr = ( bits & 0x3ffffff);
     uint16    imm = ( bits & 0xffff);
     uint8   shimm = ( bits & 0x7c0) >> 6;
     uint8 rs_bits = ( bits & 0x3e00000) >> 21;
@@ -179,9 +179,12 @@ string FuncInstr::dump( string indent) const
                 << this->rt.name;
             break;
         case ADDI: 
+            oss << this->rt.name << ", " << this->rs.name << ", "
+                << (sint16)imm;
+            break;
         case ADDIU:
             oss << this->rt.name << ", " << this->rs.name << ", "
-                << "0x" << hex << uppercase << imm;
+                << imm;
             break;
         case SLL:
         case SRL:
@@ -260,12 +263,18 @@ string FuncInstr::dumpWithRegisterValues( RegFile &reg_file, string indent) cons
                 << "(" << reg_file.read( this->rt.num) << ")";
             break;
         case ADDI: 
+            oss << this->rt.name 
+                << "(" << reg_file.read( this->rt.num) << ")"
+                << ", " << this->rs.name 
+                << "(" << reg_file.read( this->rs.num) << ")"
+                << ", " << (sint16)this->imm;
+                break;
         case ADDIU:
             oss << this->rt.name 
                 << "(" << reg_file.read( this->rt.num) << ")"
                 << ", " << this->rs.name 
                 << "(" << reg_file.read( this->rs.num) << ")"
-                << ", " << "0x" << hex << uppercase << this->imm;
+                << ", " << uppercase << this->imm;
             break;
         case SLL:
         case SRL:
@@ -344,15 +353,15 @@ uint64 FuncInstr::execute( uint64 pc, FuncMemory &memory, RegFile &regfile) cons
         }
         case ADDI:
         {
-            uint64 s = regfile.read( this->rs.num);
-            sint64 t = (sint64)s + sint64(this->imm);
+            sint64 s = regfile.read( this->rs.num);
+            sint64 t = (sint64)s + (sint16)this->imm;
             regfile.write( this->rt.num, t);
             break;
         }
         case ADDIU:
         {
             uint64 s = regfile.read( this->rs.num);
-            uint64 t = s + this->imm;
+            uint64 t = s + (uint16)this->imm;
             regfile.write( this->rt.num, t);
             break;
         }
@@ -371,7 +380,7 @@ uint64 FuncInstr::execute( uint64 pc, FuncMemory &memory, RegFile &regfile) cons
             break;
         }
         case JMP:
-            return (pc & 0xf0000000) | (4 * this->imm);
+            return (pc & 0xf0000000) | (4 * this->addr);
         case JR:
         {
             uint64 s = regfile.read( this->rs.num);

@@ -27,6 +27,7 @@ public:
 	bool isTerminalConditionReached() const;
 	std::string dumpCurrentInstruction() const;
 	uint64 getPC() const;
+	uint64 getRegisterValue( size_t register_id) const;
 
 private:
 	FuncMemory memory;

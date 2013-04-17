@@ -15,14 +15,14 @@
 class RegFile
 {
 public:
-    RegFile(size_t size);
+    RegFile( size_t size);
     ~RegFile();
 
-    uint64 read(size_t register_id);
-    void write(size_t register_id, uint64 val);
+    sint64 read( size_t register_id) const;
+    void write( size_t register_id, sint64 val);
 
 private:
-    uint64 *regfile;
+    sint64 *regfile;
     const size_t size;
 };
 

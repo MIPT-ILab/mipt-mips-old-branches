@@ -22,7 +22,7 @@ build_all: $(OUT_FILES)
 	@echo $@ is built
 
 %.o: %.s
-	@mips-as $< -o $@
+	@mips-as -O0 $< -o $@
 
 # it is needed to preven make from 
 # deleting .o files automatically
