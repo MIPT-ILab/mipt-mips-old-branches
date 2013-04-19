@@ -16,7 +16,7 @@
 
 const FuncInstr::InstrInfo FuncInstr::ISA[] =
 {
-    /*     name      opcode  funct    type  s  t  d im order*/
+    /*instr    name  opcode  funct    type  s  t  d im order*/
     {   ADD, "  add",  0x0,   0x20, R_TYPE, 1, 1, 1, 0, DST},
     {  ADDU, " addu",  0x0,   0x21, R_TYPE, 1, 1, 1, 0, DST},
     {   SUB, "  sub",  0x0,   0x22, R_TYPE, 1, 1, 1, 0, DST},
@@ -31,19 +31,28 @@ const FuncInstr::InstrInfo FuncInstr::ISA[] =
     {    JR, "   jr",  0x0,    0x8, R_TYPE, 1, 0, 0, 0,   S},
     {    LW, "   lw", 0x23, UNUSED, I_TYPE, 1, 1, 0, 1, TIS},
     {    SW, "   sw", 0x2B, UNUSED, I_TYPE, 1, 1, 0, 1, TIS},
-    {   LUI, "  lui",  0xF, UNUSED, I_TYPE, 0, 1, 0, 1,  TI}
+    {   LUI, "  lui",  0xF, UNUSED, I_TYPE, 0, 1, 0, 1,  TI},
+    {   NOP, "  nop",  0x0,    0x0, R_TYPE, 0, 0, 0, 0, NOT}
 };
 
 const FuncInstr::RegName FuncInstr::RegNames[] =
 { 
-    { ZERO, "$zero"}, { AT, "$at"}, { V0, "$v0"}, { V1, "$v1"},
-    {   A0,   "$a0"}, { A1, "$a1"}, { A2, "$a2"}, { A3, "$a3"},
-    {   T0,   "$t0"}, { T1, "$t1"}, { T2, "$t2"}, { T3, "$t3"}, 
-    {   T4,   "$t4"}, { T5, "$t5"}, { T6, "$t6"}, { T7, "$t7"},
-    {   S0,   "$s0"}, { S1, "$s1"}, { S2, "$s2"}, { S3, "$s3"}, 
-    {   S4,   "$s4"}, { S5, "$s5"}, { S6, "$s6"}, { S7, "$s7"}, 
-    {   T8,   "$t8"}, { T9, "$t9"}, { K0, "$k0"}, { K1, "$k1"}, 
-    {   GP,   "$gp"}, { SP, "$sp"}, { FP, "$fp"}, { RA, "$ra"}
+    { RegFile::ZERO, "$zero"}, { RegFile::AT, "$at"},
+    {   RegFile::V0,   "$v0"}, { RegFile::V1, "$v1"},
+    {   RegFile::A0,   "$a0"}, { RegFile::A1, "$a1"},
+    {   RegFile::A2,   "$a2"}, { RegFile::A3, "$a3"},
+    {   RegFile::T0,   "$t0"}, { RegFile::T1, "$t1"},
+    {   RegFile::T2,   "$t2"}, { RegFile::T3, "$t3"}, 
+    {   RegFile::T4,   "$t4"}, { RegFile::T5, "$t5"},
+    {   RegFile::T6,   "$t6"}, { RegFile::T7, "$t7"},
+    {   RegFile::S0,   "$s0"}, { RegFile::S1, "$s1"},
+    {   RegFile::S2,   "$s2"}, { RegFile::S3, "$s3"}, 
+    {   RegFile::S4,   "$s4"}, { RegFile::S5, "$s5"},
+    {   RegFile::S6,   "$s6"}, { RegFile::S7, "$s7"}, 
+    {   RegFile::T8,   "$t8"}, { RegFile::T9, "$t9"},
+    {   RegFile::K0,   "$k0"}, { RegFile::K1, "$k1"}, 
+    {   RegFile::GP,   "$gp"}, { RegFile::SP, "$sp"},
+    {   RegFile::FP,   "$fp"}, { RegFile::RA, "$ra"}
 };
 
 
@@ -51,26 +60,27 @@ FuncInstr::FuncInstr( uint32 bytes)
 {
     this->convertible.bytes = bytes;
 
-    this->instr = selection();
+    this->instr_info = selection();
 
     parseInstr();
 
-    this->num_of_arguments = this->instr.is_reg_s + this->instr.is_reg_t +
-                             this->instr.is_reg_d + this->instr.is_imm;
-
-    formDumpStr();
+    this->num_of_arguments = this->instr_info.is_reg_s 
+                             + this->instr_info.is_reg_t 
+                             + this->instr_info.is_reg_d 
+                             + this->instr_info.is_imm;
 }
 
 FuncInstr::InstrInfo FuncInstr::selection() const
 {
 
 #if DEBUG        
-    std::cout << "opcode: " << std::hex << this->convertible.asR.opcode 
+    std::cout << "instr: " << std::hex << this->convertible.bytes << std::dec
+              << ", opcode: " << std::hex << this->convertible.asR.opcode 
               << std::dec << ", funct: " << std::hex
               << this->convertible.asR.funct << std::dec << std::endl;
 #endif
 
-    for ( int i = 0; i < SIZE_OF_ISA; i++)
+    for ( int i = 0; i < SIZE_OF_INSTR; i++)
     {
         if ( ( this->convertible.asR.opcode == ISA[ i].opcode) &&
              ( ( ISA[ i].funct == UNUSED) ||
@@ -80,7 +90,7 @@ FuncInstr::InstrInfo FuncInstr::selection() const
         }
     }
     
-    std::cerr << "ERROR: Instuction 0x" << std::hex << this->convertible.bytes
+    std::cerr << "ERROR. Instuction 0x" << std::hex << this->convertible.bytes
               << std::dec << " is not a MIPS instruction!" << std::endl;
 
     exit( EXIT_FAILURE);
@@ -89,96 +99,144 @@ FuncInstr::InstrInfo FuncInstr::selection() const
 void FuncInstr::parseInstr()
 {
     // for all instructions position of rigesters like R_TYPE
-    if ( this->instr.is_reg_s)
+    this->reg_s = RegNames[ this->convertible.asR.s];
+    this->reg_t = RegNames[ this->convertible.asR.t];
+    this->reg_d = RegNames[ this->convertible.asR.d];
+
+    switch ( this->instr_info.type)
     {
-        this->reg_s = RegNames[ this->convertible.asR.s];
-    }
-    if ( this->instr.is_reg_t)
-    {
-        this->reg_t = RegNames[ this->convertible.asR.t];
-    }
-    if ( this->instr.is_reg_d)
-    {
-        this->reg_d = RegNames[ this->convertible.asR.d];
-    }
-    if ( this->instr.is_imm)
-    {
-        switch ( this->instr.type)
-        {
-            case R_TYPE:
-                this->imm = this->convertible.asR.shamt;
-                break;
-            case J_TYPE:
-                this->imm = this->convertible.asJ.imm;
-                break;
-            case I_TYPE:
-                this->imm = this->convertible.asI.imm;
-                break;
-        }
+        case R_TYPE:
+            this->imm = this->convertible.asR.shamt;
+            break;
+
+        case J_TYPE:
+            this->imm = this->convertible.asJ.addr;
+            break;
+
+        case I_TYPE:
+            switch ( this->instr_info.instr)
+            {
+                case ADDIU:
+                case LUI:
+                    this->imm = ( uint64)this->convertible.asI.imm;
+                    break;
+                default:
+                    this->imm = ( uint64)( ( sint64)
+                                           ( ( short)this->convertible.asI.imm));
+                    break;
+            }
+            break;
     }
 
     // pseudo-instructions
-    if ( ( this->instr.name == ADDIU) && ( this->imm == 0))
+    if ( ( this->instr_info.instr == ADDIU) && ( this->imm == 0))
     {
-        this->instr.name_str = " move";
-        this->instr.is_imm = 0;
-        this->instr.arg_order = TS;
+        this->instr_info.name_str = " move";
+        this->instr_info.is_imm = 0;
+        this->instr_info.arg_order = TS;
     }
-    if ( ( this->instr.name == ADDU) && ( this->reg_t.reg == ZERO))
+    if ( ( this->instr_info.instr == ADDU)
+         && ( this->reg_t.reg == RegFile::ZERO))
     {
-        this->instr.name_str = " move";
-        this->instr.is_reg_t = 0;
-        this->instr.arg_order = TS;
+        this->instr_info.name_str = " move";
+        this->instr_info.is_reg_t = 0;
+        this->instr_info.arg_order = DS;
     }
-    if ( ( this->instr.name == ADDU) && ( this->reg_s.reg == ZERO) &&
-         ( this->reg_d.reg == ZERO))
+    if ( ( this->instr_info.instr == ADDU)
+         && ( this->reg_s.reg == RegFile::ZERO)
+         && ( this->reg_d.reg == RegFile::ZERO))
     {
-        this->instr.name_str = "clear";
-        this->instr.is_reg_s = 0;
-        this->instr.is_reg_d = 0;
-        this->instr.arg_order = T;
+        this->instr_info.name_str = "clear";
+        this->instr_info.is_reg_s = 0;
+        this->instr_info.is_reg_d = 0;
+        this->instr_info.arg_order = T;
     }
-    if ( ( this->instr.name == SLL) && ( this->reg_t.reg == ZERO) &&
-         ( this->reg_d.reg == ZERO) && ( this->imm == 0))
+    if ( ( this->instr_info.instr == SLL)
+         && ( this->reg_t.reg == RegFile::ZERO)
+         && ( this->reg_d.reg == RegFile::ZERO) && ( this->imm == 0))
     {
-        this->instr.name_str = "  nop";
-        this->instr.is_reg_t = 0;
-        this->instr.is_reg_d = 0;
-        this->instr.is_imm = 0;
-        this->instr.arg_order = NOT;
+        this->instr_info = ISA[ NOP];
     }
 }
 
-void FuncInstr::formDumpStr()
+void FuncInstr::setDataOfRegs( uint64 data_src1, uint64 data_src2, uint64 data_dst)
+{
+    this->data_src1 = data_src1;
+    this->data_src2 = data_src2;
+    this->data_dst = data_dst;
+};
+
+uint64 FuncInstr::getImm()
+{
+    return this->imm;
+}
+
+FuncInstr::Instructions FuncInstr::getInstr()
+{
+    return this->instr_info.instr;
+}
+
+RegFile::Registers FuncInstr::getRegS()
+{
+    return this->reg_s.reg;
+}
+
+RegFile::Registers FuncInstr::getRegT()
+{
+    return this->reg_t.reg;
+}
+
+RegFile::Registers FuncInstr::getRegD()
+{
+    return this->reg_d.reg;
+}
+
+
+std::string FuncInstr::formDumpStr() const
 {
     std::ostringstream oss;
 
-    oss << this->instr.name_str << " ";
+    oss << this->instr_info.name_str << " ";
     
-    switch ( this->instr.arg_order)
+    switch ( this->instr_info.arg_order)
     {
         case DST:
-            oss << this->reg_d.name_str << ", " << this->reg_s.name_str << ", "
-                << this->reg_t.name_str;
+            oss << this->reg_d.name_str << "(" << this->data_dst << "), "
+                << this->reg_s.name_str << "(" << this->data_src1 << "), "
+                << this->reg_t.name_str << "(" << this->data_src2 << ")";
             break;
         
         case TSI:
-            oss << this->reg_t.name_str << ", " << this->reg_s.name_str << ", "
+            oss << this->reg_t.name_str << "(" << this->data_dst << "), "
+                << this->reg_s.name_str << "(" << this->data_src1 << "), "
                 << "0x" << std::hex << this->imm << std::dec;
             break;
 
         case DTI:
-            oss << this->reg_d.name_str << ", " << this->reg_t.name_str << ", "
+            oss << this->reg_d.name_str << "(" << this->data_dst << "), "
+                << this->reg_t.name_str << "(" << this->data_src1 << "), "
                 << "0x" << std::hex << this->imm << std::dec;
             break;
 
         case STI:
-            oss << this->reg_s.name_str << ", " << this->reg_t.name_str << ", "
+            oss << this->reg_s.name_str << "(" << this->data_src1 << "), "
+                << this->reg_t.name_str << "(" << this->data_src2 << "), "
                 << "0x" << std::hex << this->imm << std::dec;
             break;
 
         case TS:
-            oss << this->reg_t.name_str << ", " << this->reg_s.name_str;
+            oss << this->reg_t.name_str << "(" << this->data_dst << "), "
+                << this->reg_s.name_str << "(" << this->data_src1 << ")";
+            break;
+
+        case DS:
+            oss << this->reg_d.name_str << "(" << this->data_dst << "), "
+                << this->reg_s.name_str << "(" << this->data_src1 << ")";
+            break;
+
+        case TI:
+            oss << this->reg_t.name_str << "(" << this->data_dst << "), "
+                << "0x" << std::hex << this->imm << std::dec;
             break;
 
         case I:
@@ -186,21 +244,17 @@ void FuncInstr::formDumpStr()
             break;
 
         case S:
-            oss << this->reg_s.name_str;
+            oss << this->reg_s.name_str << "(" << this->data_src1 << ")";
             break;
 
         case T:
-            oss << this->reg_t.name_str;
+            oss << this->reg_t.name_str << "(" << this->data_dst << ")";
             break;
 
         case TIS:
-            oss << this->reg_t.name_str << ", " << this->imm 
-                << "(" << this->reg_s.name_str << ")";
-            break;
-
-        case TI:
-            oss << this->reg_t.name_str << ", "
-                << "0x" << std::hex << this->imm << std::dec;
+            oss << this->reg_t.name_str << "(" << this->data_dst << "), "
+                << ( sint64)this->imm << "(" 
+                << this->reg_s.name_str << "(" << this->data_src1 << "))";
             break;
 
         case NOT:
@@ -208,14 +262,17 @@ void FuncInstr::formDumpStr()
 
     }
 
-    this->dump_str = oss.str();
+    //this->dump_str = oss.str();
+    return oss.str();
 }
 
 std::string FuncInstr::dump( std::string indent) const
 {
+    std::string str = this->formDumpStr();
     std::ostringstream oss;
 
-    oss << indent << this->dump_str << std::endl;
+    //oss << indent << this->dump_str << std::endl;
+    oss << indent << str << std::endl;
 
     return oss.str();
 }

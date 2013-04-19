@@ -12,9 +12,18 @@
 
 // uArchSim modules
 #include <types.h>
+#include <reg_file.h>
 
 class FuncInstr
 {
+  public: 
+    enum Instructions
+    {
+       ADD, ADDU, SUB, SUBU, ADDI, ADDIU, SLL, SRL, BEQ, BNE, J, JR, LW, SW,
+       LUI, NOP, SIZE_OF_INSTR
+    };
+  
+  private:
     // declaration some private types and constants
     enum TypeFormat
     {
@@ -39,7 +48,7 @@ class FuncInstr
     
         struct
         {
-            unsigned imm:16;
+            unsigned short imm:16; // might be used as signed
             unsigned t:5;
             unsigned s:5;
             unsigned opcode:6;
@@ -47,7 +56,7 @@ class FuncInstr
     
         struct
         {
-            unsigned imm:26;
+            unsigned addr:26;
             unsigned opcode:6;
         } asJ;
     };
@@ -59,6 +68,7 @@ class FuncInstr
         DTI,
         STI,
         TS,
+        DS,
         I,
         S,
         T,
@@ -66,16 +76,11 @@ class FuncInstr
         TI,
         NOT // no argement will be printed
     };
-    
-    enum InstrNames
-    {
-       ADD, ADDU, SUB, SUBU, ADDI, ADDIU, SLL, SRL, BEQ, BNE, J, JR, LW, SW, LUI
-    };
-    
+
     struct InstrInfo
     {
-        InstrNames name;
-        std::string name_str; // printed name of instruction (e.g. "add", "sll")
+        Instructions instr;
+        std::string name_str; // contain name of instruction (e.g. "add", "sll")
         unsigned opcode;
         unsigned funct;
         TypeFormat type;
@@ -89,52 +94,41 @@ class FuncInstr
         ArgOrderPrint arg_order;
     };
     
-    // for marking unused filds in list of instructions
-    static const unsigned UNUSED = -1;
-
-    static const int SIZE_OF_ISA = 15;
-    static const int SIZE_OF_REGISTERS = 32;
-    
-    static const InstrInfo ISA[ SIZE_OF_ISA]; // define in .cpp file
-    
-    enum Registers
-    {
-        ZERO, AT,
-        V0, V1,
-        A0, A1, A2, A3,
-        T0, T1, T2, T3, T4, T5, T6, T7,
-        S0, S1, S2, S3, S4, S5, S6, S7,
-        T8, T9,
-        K0, K1,
-        GP, SP, FP, RA
-    };
+    static const InstrInfo ISA[ SIZE_OF_INSTR]; // define in .cpp file
     
     struct RegName
     {
-        enum Registers reg;
+        RegFile::Registers reg;
         std::string name_str;
     };
     
-    static const RegName RegNames[ SIZE_OF_REGISTERS]; // define in .cpp file
+    // define in .cpp file
+    static const RegName RegNames[ RegFile::SIZE_OF_REGISTERS];
+
+    // for marking unused filds in list of instructions
+    static const unsigned UNUSED = -1;
     // end of declaration some private types and constants
 
 
+    InstrInfo instr_info;
 
-    InstrInfo instr;
-
-    unsigned imm;  // contain constant, which can be in instruction
+    uint64 imm;  // contain constant, which can be in instruction
     RegName reg_s; //
     RegName reg_t; // registers
     RegName reg_d; //
 
+    uint64 data_src1; //
+    uint64 data_src2; // data of registers for dump
+    uint64 data_dst;  //
+    
     int num_of_arguments; // which are after name of instruction
 
     // contain command with argements for print ("add $s0, %t0, %t1")
-    std::string dump_str; 
+    //std::string dump_str; 
 
     Convert convertible;
 
-    void formDumpStr();
+    std::string formDumpStr() const;
 
     // define what is the instruction via choice from the list of ISA
     InstrInfo selection() const;
@@ -144,10 +138,21 @@ class FuncInstr
 
     // for unusing default constructor
     FuncInstr(){}
-public:
-        FuncInstr( uint32 bytes);
 
-        std::string dump( std::string indent = " ") const;
+public:
+    FuncInstr( uint32 bytes);
+
+    void setDataOfRegs( uint64 data_src1 = 0, uint64 data_src2 = 0,
+                        uint64 data_dst = 0);
+
+    Instructions getInstr();    
+
+    uint64 getImm();
+    RegFile::Registers getRegS();
+    RegFile::Registers getRegT();
+    RegFile::Registers getRegD();
+
+    std::string dump( std::string indent = " ") const;
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);

@@ -6,8 +6,10 @@
 vpath %.h ../../common
 vpath %.h ../elf_parser
 vpath %.cpp ../elf_parser
+vpath %.h ../reg_file
 
-include=-I ./ -I ../elf_parser/ -I ../../common/
+
+include=-I ./ -I ../elf_parser/ -I ../../common/ -I ../reg_file
 
 ifeq ($(debug), 1)
 	CXX_FLAGS := -g -O0 -Wall -DDEBUG
@@ -18,13 +20,13 @@ disasm: func_instr.o elf_parser.o disasm.o
 	@echo "---------------------------------"
 	@echo "$@ is built successifully"
 
-func_instr.o: func_instr.cpp func_instr.h types.h
+func_instr.o: func_instr.cpp func_instr.h types.h reg_file.h
 	$(CXX) -c $< $(include) $(CXX_FLAGS)
 
 elf_parser.o: elf_parser.cpp elf_parser.h types.h
 	$(CXX) -c $< $(include) $(CXX_FLAGS)
 
-disasm.o: disasm.cpp func_instr.h types.h
+disasm.o: disasm.cpp func_instr.h types.h reg_file.h
 	$(CXX) -c $< $(include) $(CXX_FLAGS)
 
 clean:

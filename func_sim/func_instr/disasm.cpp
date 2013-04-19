@@ -1,6 +1,6 @@
 /**
  * disasm.cpp - MIPS instruction disassembler 
- * @author Alexander Kravtcov
+ * author Alexander Kravtcov
  */
 
 // Generic C
@@ -21,7 +21,7 @@ int main( int argc, char* argv[])
 
     if ( argc - 1 != NUM_OF_ARGS)
     {
-        std::cerr << "ERROR: Wrong data format!" << std::endl;
+        std::cerr << "ERROR. Wrong data format!" << std::endl;
         std::cerr << " Usage: " << argv[ 0] << " <elf filename> <section name>"
                   << std::endl;
 
@@ -45,7 +45,7 @@ int main( int argc, char* argv[])
         uint32 bytes = ( uint32)section.read( start_addr_sect + offset, num_of_bytes);
         
         FuncInstr instr( bytes);
-
+        instr.setDataOfRegs(11, 12, 1);
         std::cout << indent << "0x" << std::hex << start_addr_sect + offset 
                   << std::dec << ":" << indent << instr;
     }
