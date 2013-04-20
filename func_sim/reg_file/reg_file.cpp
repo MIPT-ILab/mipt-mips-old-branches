@@ -19,6 +19,7 @@ RegFile::RegFile()
     {
         this->reg_file[ i] = NO_VAL64;
     }
+    this->reg_file[ ZERO] = 0;
 }
 
 uint64 RegFile::read( RegFile::Registers reg)

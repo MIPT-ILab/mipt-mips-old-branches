@@ -22,6 +22,8 @@ ifeq ($(debug), 1)
 	CXX_FLAGS := $(CXX_FLAGS) -g -O0 -Wall -DDEBUG
 endif
 
+all: simulator tests
+
 simulator: simulator.o func_sim.o func_memory.o elf_parser.o func_instr.o reg_file.o
 	$(CXX) -o $@ $^ $(CXX_FLAGS) -l elf
 	@echo "---------------------------------"
@@ -46,6 +48,24 @@ elf_parser.o: elf_parser.cpp elf_parser.h types.h
 	$(CXX) -c $< $(INCL) $(CXX_FLAGS)
 
 clean:
-	rm -f *.o
+	rm -f *.o *.out
 	rm -f simulator
 
+tests: fibonacci.out factorial.out 
+
+factorial.out: factorial.o
+	@mips-ld $< -o $@  
+	@echo $@ is built
+
+factorial.o: factorial.s
+	@mips-as $< -o $@ -O0
+
+fibonacci.out: fibonacci.o
+	@mips-ld $< -o $@  
+	@echo $@ is built
+
+fibonacci.o: fibonacci.s
+	@mips-as $< -o $@ -O0
+
+# it is needed to preven make from 
+# deleting .o files automatically
