@@ -2,7 +2,7 @@
  * func_instr.h 
  * @author Yury Samarin <yuri.a.samarin@gmail.com>
  * Copyright 2012 uArchSim iLab project
- */
+ **/
 
 // protection from multi-include
 #ifndef FUNC_INSTR__FUNC_INSTR_H
@@ -19,10 +19,7 @@ using namespace std;
 
 class FuncInstr
 {
-    static const uint32 MAX_NUM_OF_INSTR = 20; //max quantity of the instructions that we can parse.
-    static const uint32 MAX_NUM_OF_REG = 32; //max quantity of MIPS registers.
-    static const uint32 NULL_VAL = 0x0; 
-
+public:
     //Opcode/funct of instructions.
     enum NameInstr
     {
@@ -38,6 +35,9 @@ class FuncInstr
         SLL   = 0x0,
         SRL   = 0x2,
         JR    = 0x8,
+      //LW    = 0x23 compared to SUBU, wouldn't be compiled
+        SW    = 0x2B,
+        LUI   = 0xF
     };
 
     //possible types of instructions.
@@ -81,6 +81,7 @@ class FuncInstr
         DT_ORDER,
         ST_ORDER,
         S_ORDER,
+        T_ORDER,
         NO_REG
     };
     //contain information about instruction
@@ -92,36 +93,15 @@ class FuncInstr
         uint32 funct;
         PrintOrder reg_order;
     };
-    
-    struct TurnPseudo
-    {
-        bool nop;
-        bool move;
-        bool clear;
-    };
+    static const short MAX_NUM_OF_INSTR; //max quantity of the instructions that we can parse.
+    static const short MAX_NUM_OF_REG = 32; //max quantity of MIPS registers.
+    static const short NULL_VAL = 0x0; 
 
-    static TurnPseudo pseudo_instr;
     //stores list of all possible instructions in our program
-    static const InstrInfo ISA[ MAX_NUM_OF_INSTR];
+    static const InstrInfo ISA[ ];
     //stores names of all MIPS registers 
     static const string REGNAME[ MAX_NUM_OF_REG];
-    
-    Converter convert; //stores bytes and makes conversion
-    TypeInstr type;
-    string name;
-    uint32 opcode: 6;
-    uint32 funct: 6;
-    string source;
-    string target;
-    string dest;
-    uint32 shamt: 5;
-    uint32 immed: 16;
-    uint32 jump: 26;
-    PrintOrder reg_order;
 
-    //You can't create object with this default constructor
-    FuncInstr();
-public:
     explicit FuncInstr( uint32 bytes);
     string Dump( string indent = " ") const;
     int setType();
@@ -133,9 +113,47 @@ public:
     void setShamt();
     void setImmed();
     void setJump();
+    //following getters are needed in func_sim program
+    inline uint32 getSource() const { return source; }
+    inline uint32 getTarget() const { return target; }
+    inline uint32 getDest()   const { return dest;   }
+    inline uint32 getShamt()  const { return shamt;  }
+    inline TypeInstr getType()const { return type;   }
+    inline uint32 getImmed()  const { return immed;  }
+    inline uint32 getJump()   const { return jump;   }
+    inline uint32 getOpcode() const { return opcode; }
+    inline uint32 getFunct()  const { return funct;  }
     bool is_nop() const;
     bool is_move() const;
     bool is_clear() const;
+
+private:
+    struct TurnPseudo
+    {
+        bool nop;
+        bool move;
+        bool clear;
+    };
+
+    static TurnPseudo pseudo_instr;
+    Converter convert; //stores bytes and makes conversion
+    TypeInstr type;
+    string name;
+    uint32 opcode: 6;
+    uint32 funct: 6;
+    string source_name;
+    string target_name;
+    string dest_name;
+    uint32 source: 5;
+    uint32 target: 5;
+    uint32 dest: 5;
+    uint32 shamt: 5;
+    sint32 immed: 16;
+    uint32 jump: 26;
+    PrintOrder reg_order;
+
+    //You can't create object with this default constructor
+    FuncInstr();
 };
 
 ostream& operator << ( ostream& out, const FuncInstr& instr);

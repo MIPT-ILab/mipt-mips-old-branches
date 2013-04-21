@@ -17,12 +17,15 @@
 // uArchSim modules
 #include <func_instr.h>
 
-const FuncInstr::InstrInfo FuncInstr::ISA[ MAX_NUM_OF_INSTR] = 
+const FuncInstr::InstrInfo FuncInstr::ISA[ ] = 
 {
                 { I_TYPE,  "addi",  ADDI,  0x0,  TS_ORDER },
                 { I_TYPE, "addiu", ADDIU,  0x0,  TS_ORDER },
                 { I_TYPE,   "beq",   BEQ,  0x0,  ST_ORDER },
                 { I_TYPE,   "bne",   BNE,  0x0,  ST_ORDER },
+                { I_TYPE,    "lw",  0x23,  0x0,  TS_ORDER },
+                { I_TYPE,    "sw",    SW,  0x0,  TS_ORDER },
+                { I_TYPE,   "lui",   LUI,  0x0,   T_ORDER },
                 { J_TYPE,     "j",  JUMP,  0x0,    NO_REG },
                 { R_TYPE,   "add",   0x0,  ADD, DST_ORDER },
                 { R_TYPE,  "addu",   0x0, ADDU, DST_ORDER },
@@ -33,6 +36,8 @@ const FuncInstr::InstrInfo FuncInstr::ISA[ MAX_NUM_OF_INSTR] =
                 { R_TYPE,    "jr",   0x0,   JR,   S_ORDER }
 };
 
+const short FuncInstr::MAX_NUM_OF_INSTR = sizeof( ISA) / sizeof( ISA[0]);
+
 const string FuncInstr::REGNAME[ MAX_NUM_OF_REG] = 
 {   "$zero", "$at",
       "$v0", "$v1", "$a0", "$a1", "$a2", "$a3", "$t0", "$t1", 
@@ -41,8 +46,8 @@ const string FuncInstr::REGNAME[ MAX_NUM_OF_REG] =
       "$k0", "$k1", "$gp", "$sp", "$fp", "$ra" 
 };
 
-//to default pseudo-instruction turned on, exept clear
-FuncInstr::TurnPseudo FuncInstr::pseudo_instr = { true, true, false };
+//to default pseudo-instruction is turned on
+FuncInstr::TurnPseudo FuncInstr::pseudo_instr = { true, true, true };
 
 int FuncInstr::setType()
 {
@@ -55,7 +60,7 @@ int FuncInstr::setType()
             return 0;
         }
     }  
-    cerr << "\nUnknown instruction!!\n"; 
+    cerr << "\nUnknown instruction!!\n" << hex << convert.asBytes << endl; 
     exit( EXIT_FAILURE);
 }
 
@@ -91,17 +96,20 @@ registers in order to don't rewrite these functions if we'll have
 another R type instr. without ones*/
 void FuncInstr::setSource()
 {
-    this->source = REGNAME[ this->convert.asR.source];
+    this->source = this->convert.asR.source;
+    this->source_name = REGNAME[ this->source];
 }
 
 void FuncInstr::setTarget()
 {
-    this->target = REGNAME[ this->convert.asR.target];
+    this->target = this->convert.asR.target;
+    this->target_name = REGNAME[ target];
 }
 
 void FuncInstr::setDest()
 {
-    this->dest = REGNAME[ this->convert.asR.dest];
+    this->dest = this->convert.asR.dest;
+    this->dest_name = REGNAME[ dest];
 }
 
 void FuncInstr::setShamt()
@@ -145,19 +153,20 @@ FuncInstr::FuncInstr( uint32 bytes)
 
 bool FuncInstr::is_nop() const
 {
-    return ( this->name == "sll") && ( this->target == "$zero") &&
-           ( this->dest == "$zero") && ( this->shamt == 0x0);
+    return ( this->funct == SLL) && ( this->target_name == "$zero") &&
+           ( this->dest_name == "$zero") && ( this->shamt == 0x0);
 }
 
 bool FuncInstr::is_move() const
 {
-    return ( this->name == "addu") && ( this->target == "$zero");
+    bool true_type = this->funct == ADDU || this->funct == ADD; 
+    return ( true_type) && ( this->target_name == "$zero");
 }
 
 bool FuncInstr::is_clear() const
 {
-    return ( this->name == "add") && ( this->source == "$zero") &&
-           ( this->dest == "$zero");
+    return ( this->funct == ADD) && ( this->source_name == "$zero") &&
+           ( this->dest_name == "$zero");
 }
 
 string FuncInstr::Dump( string indent) const
@@ -173,67 +182,37 @@ string FuncInstr::Dump( string indent) const
            << this->source << endl;
     } else if ( pseudo_instr.clear && is_clear())
     {
-        os << indent << "clear " << this->target << endl;
+        os << indent << "clear " << this->target_name << endl;
     } else
     {
         os << indent << this->name << ' ';
         switch ( this->reg_order)
         {
-            case DST_ORDER: os << this->dest   << ", "
-                               << this->source << ", "
-                               << this->target << endl;
+            case DST_ORDER: os << this->dest_name   << ", "
+                               << this->source_name << ", "
+                               << this->target_name << endl;
                 break;
-            case DT_ORDER: os  << this->dest   << ", "
-                               << this->target << ", "
-                               << this->shamt  << endl;
+            case DT_ORDER: os  << this->dest_name   << ", "
+                               << this->target_name << ", "
+                               << this->shamt       << endl;
                 break;
-            case TS_ORDER: os  << this->target << ", "
-                               << this->source << ", "
-                               << this->immed  << endl;
+            case TS_ORDER: os  << this->target_name << ", "
+                               << this->source_name << ", "
+                               << this->immed       << endl;
                 break;
-            case ST_ORDER: os  << this->source << ", "
-                               << this->target << ", "
-                               << this->immed  << endl;
+            case ST_ORDER: os  << this->source_name << ", "
+                               << this->target_name << ", "
+                               << this->immed       << endl;
                 break;
-            case S_ORDER: os   << this->source << endl;
+            case T_ORDER: os   << this->target_name << ", "
+                               << this->immed       << endl;
                 break;
-            case NO_REG: os    << this->jump   << endl;
+            case S_ORDER: os   << this->source_name << endl;
                 break;
-            default: assert( 0);
-        }
-/*
-        switch ( this->type)
-        {
-            case J_TYPE: os << this->jump << endl;
-                break;
-            case I_TYPE: 
-                if ( this->opcode == BEQ || this->opcode == BNE)
-                {
-                    os << this->source << ", " << this->target 
-                       << ", " << this->immed << endl;
-                } else
-                {
-                    os << this->target << ", " << this->source 
-                       << ", " << this->immed << endl;
-                }
-                break;
-            case R_TYPE: 
-                if ( this->funct == JR)
-                {
-                    os << this->source << endl;
-                } else if ( this->funct == SLL || this->funct == SRL)
-                {
-                    os << this->dest << ", " << this->target << ", "
-                       << this->shamt << endl;
-                } else 
-                {
-                    os << this->dest << ", " << this->source << ", "
-                       << this->target << endl;
-                }
+            case NO_REG: os    << this->jump        << endl;
                 break;
             default: assert( 0);
         }
-*/
     }
     return os.str();
 }
