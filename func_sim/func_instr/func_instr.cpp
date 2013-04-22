@@ -17,28 +17,31 @@
 #include <types.h>
 #include <func_instr.h>
 
-const int FuncInstr::InstrInfosSize = 12;
 const FuncInstr::InstrInfo_t FuncInstr::InstrInfos[] = 
     {
-        {"add",   TYPE_R, INSTR_ADD,   PT_DST,  0x0, 0x20},
-        {"addu",  TYPE_R, INSTR_ADDU,  PT_DST,  0x0, 0x21},
-        {"sub",   TYPE_R, INSTR_SUB,   PT_DST,  0x0, 0x22},
-        {"subu",  TYPE_R, INSTR_SUBU,  PT_DST,  0x0, 0x23},
-        {"addi",  TYPE_I, INSTR_ADDI,  PT_TSI,  0x8, 0x00},
-        {"addiu", TYPE_I, INSTR_ADDIU, PT_TSI,  0x9, 0x00},
-        {"sll",   TYPE_R, INSTR_SLL,   PT_DTSH, 0x0, 0x00},
-        {"srl",   TYPE_R, INSTR_SRL,   PT_DTSH, 0x0, 0x02},
-        {"beq",   TYPE_I, INSTR_BEQ,   PT_STI,  0x4, 0x00},
-        {"bne",   TYPE_I, INSTR_BNE,   PT_STI,  0x5, 0x00},
-        {"j",     TYPE_J, INSTR_J,     PT_ADDR, 0x2, 0x00},
-        {"jr",    TYPE_R, INSTR_JR,    PT_S,    0x0, 0x08},
+        {"add",   TYPE_R, INSTR_ADD,   PT_DST_S,  0x00, 0x20},
+        {"addu",  TYPE_R, INSTR_ADDU,  PT_DST_U,  0x00, 0x21},
+        {"sub",   TYPE_R, INSTR_SUB,   PT_DST_S,  0x00, 0x22},
+        {"subu",  TYPE_R, INSTR_SUBU,  PT_DST_U,  0x00, 0x23},
+        {"addi",  TYPE_I, INSTR_ADDI,  PT_TSI_S,  0x08, 0x00},
+        {"addiu", TYPE_I, INSTR_ADDIU, PT_TSI_U,  0x09, 0x00},
+        {"sll",   TYPE_R, INSTR_SLL,   PT_DTSH_U, 0x00, 0x00},
+        {"srl",   TYPE_R, INSTR_SRL,   PT_DTSH_U, 0x00, 0x02},
+        {"beq",   TYPE_I, INSTR_BEQ,   PT_STI_S,  0x04, 0x00},
+        {"bne",   TYPE_I, INSTR_BNE,   PT_STI_S,  0x05, 0x00},
+        {"j",     TYPE_J, INSTR_J,     PT_ADDR_U, 0x02, 0x00},
+        {"jr",    TYPE_R, INSTR_JR,    PT_S_U,    0x00, 0x08},
+        {"lw",    TYPE_I, INSTR_LW,    PT_TIS_S,  0x23, 0x00},
+        {"sw",    TYPE_I, INSTR_SW,    PT_TIS_S,  0x2B, 0x00},
+        {"lui",   TYPE_I, INSTR_LUI,   PT_TI_U,   0x0F, 0x00},
     };
+const int FuncInstr::InstrInfosSize = sizeof( FuncInstr::InstrInfos) / sizeof( FuncInstr::InstrInfos[0]);
 
-const int FuncInstr::RegNamesSize = 32;
 const std::string FuncInstr::RegNames[] = {"$zero", "$at", "$v0", "$v1", "$a0", "$a1", "$a2", "$a3",
                                            "$t0",   "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
                                            "$s0",   "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7",
                                            "$t8",   "$t9", "$k0", "$k1", "$gp", "$sp", "$fp", "$ra"};
+const int FuncInstr::RegNamesSize = sizeof( FuncInstr::RegNames) / sizeof( FuncInstr::RegNames[0]);
 
 
 void FuncInstr::DefineType()
@@ -119,13 +122,13 @@ void FuncInstr::DefinePseudoInstr()
     } else if( instrBytes & 0xffe0f83f == 0x00000021)
     {
         pseudoInstr = PINSTR_CLEAR;
-        printType   = PT_T;
+        printType   = PT_T_U;
         name        = "clear";
         return;
     } else if( instrBytes & 0xfc00ffff == 0x24000000)
     {
         pseudoInstr = PINSTR_MOVE;
-        printType   = PT_TS;
+        printType   = PT_TS_U;
         name        = "move";
         return;
     }
@@ -146,44 +149,56 @@ std::string FuncInstr::Dump( std::string indent) const
 {
     // Returns assembler representation of instruction
     std::ostringstream oss;
-    oss << indent;
+    oss << indent << name << " ";
     switch( printType)
     {
-        case PT_DST:
-            oss << name << " " << RegNames[d_reg] << ", " << RegNames[s_reg] << ", " << RegNames[t_reg];
+        case PT_DST_S:
+        case PT_DST_U:
+            oss << RegNames[d_reg] << ", " << RegNames[s_reg] << ", " << RegNames[t_reg];
             break;
 
-        case PT_TSI:
-            oss << name << " " << RegNames[t_reg] << ", " << RegNames[s_reg] << ", 0x" << std::hex << immed;
+        case PT_TSI_S:
+        case PT_TSI_U:
+            oss << RegNames[t_reg] << ", " << RegNames[s_reg] << ", 0x" << std::hex << immed;
             break;
 
-        case PT_DTSH:
-            oss << name << " " << RegNames[d_reg] << ", " << RegNames[t_reg] << ", 0x" << std::hex << shamt;
+        case PT_DTSH_U:
+            oss << RegNames[d_reg] << ", " << RegNames[t_reg] << ", 0x" << std::hex << shamt;
             break;
 
-        case PT_STI:
-            oss << name << " " << RegNames[s_reg] << ", " << RegNames[t_reg] << ", 0x" << std::hex << immed;
+        case PT_STI_S:
+            oss << RegNames[s_reg] << ", " << RegNames[t_reg] << ", 0x" << std::hex << immed;
             break;
 
-        case PT_ADDR:
-            oss << name << " 0x" << std::hex << addr;
+        case PT_ADDR_U:
+            oss << "0x" << std::hex << addr;
             break;
 
-        case PT_S:
-            oss << name << " " << RegNames[s_reg];
+        case PT_S_U:
+            oss << RegNames[s_reg];
             break;
 
-        case PT_TS:
-            oss << name << " " << RegNames[t_reg] << ", " << RegNames[s_reg];
+        case PT_TS_U:
+            oss << RegNames[t_reg] << ", " << RegNames[s_reg];
             break;
 
-        case PT_T:
-            oss << name << " " << RegNames[t_reg];
+        case PT_T_U:
+            oss << RegNames[t_reg];
             break;
 
         case PT_NAME:
-            oss << name;
             break;
+
+        case PT_TIS_S:
+            oss << RegNames[t_reg] << ", 0x" << immed << "(" << RegNames[s_reg] << ")";
+            break;
+
+        case PT_TI_U:
+            oss << RegNames[t_reg] << ", 0x" << immed;
+            break;
+        default:
+            std::cerr << "ERROR! Unsupporeted print type occured!" << std::endl;
+            exit( EXIT_FAILURE);
     }
     return oss.str();
 }
@@ -191,4 +206,69 @@ std::string FuncInstr::Dump( std::string indent) const
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr)
 {
     return out << instr.Dump("");
+}
+
+std::string FuncInstr::getName()
+{
+    return name;
+}
+
+std::string FuncInstr::getSRegName()
+{
+    return RegNames[s_reg];
+}
+
+std::string FuncInstr::getTRegName()
+{
+    return RegNames[t_reg];
+}
+
+std::string FuncInstr::getDRegName()
+{
+    return RegNames[d_reg];
+}
+
+FuncInstr::Type FuncInstr::getType()
+{
+    return type;
+}
+
+FuncInstr::PrintType FuncInstr::getPrintType()
+{
+    return printType;
+}
+
+FuncInstr::Instr FuncInstr::getInstr()
+{
+    return instr;
+}
+
+uint8 FuncInstr::getSReg()
+{
+    return s_reg;
+}
+
+uint8 FuncInstr::getTReg()
+{
+    return t_reg;
+}
+
+uint8 FuncInstr::getDReg()
+{
+    return d_reg;
+}
+
+uint16 FuncInstr::getImmed()
+{
+    return immed;
+}
+
+uint8 FuncInstr::getShamt()
+{
+    return shamt;
+}
+
+uint32 FuncInstr::getAddr()
+{
+    return addr;
 }

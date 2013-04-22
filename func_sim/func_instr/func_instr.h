@@ -18,6 +18,7 @@
 
 class FuncInstr
 {
+public:
     // Enumeration for specifying type of instructions
     enum Type
     {
@@ -40,7 +41,10 @@ class FuncInstr
         INSTR_BEQ,  
         INSTR_BNE,   
         INSTR_J,    
-        INSTR_JR
+        INSTR_JR,
+        INSTR_LW,
+        INSTR_SW,
+        INSTR_LUI
     };
 
     // Enumeration for specifying pseudo instructions
@@ -93,17 +97,22 @@ class FuncInstr
     // the asm code of instruction must look like
     enum PrintType
     {
-        PT_DST,
-        PT_TSI, 
-        PT_DTSH, 
-        PT_STI, 
-        PT_ADDR, 
-        PT_S,   
-        PT_TS,  
-        PT_T,    
-        PT_NAME
+        PT_DST_S,
+        PT_DST_U,
+        PT_TSI_S,
+        PT_TSI_U, 
+        PT_DTSH_U, 
+        PT_STI_S, 
+        PT_ADDR_U, 
+        PT_S_U,   
+        PT_TS_U,  
+        PT_T_U,    
+        PT_NAME,
+        PT_TIS_S,
+        PT_TI_U
     };
 
+private:
     // A struct for containing information
     // about supported instructions
     struct InstrInfo_t
@@ -170,6 +179,19 @@ class FuncInstr
 
 public:
     FuncInstr( uint32 bytes);
+    std::string getName();
+    std::string getSRegName();
+    std::string getTRegName();
+    std::string getDRegName();
+    Type        getType();
+    PrintType   getPrintType();
+    Instr       getInstr();
+    uint8       getSReg();
+    uint8       getTReg();
+    uint8       getDReg();
+    uint16      getImmed();
+    uint8       getShamt();
+    uint32      getAddr();
     std::string Dump( std::string indent = " ") const;
 };
 
