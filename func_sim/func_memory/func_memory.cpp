@@ -16,7 +16,7 @@
 #include <sstream>
 
 // uArchSim modules
-#include <func_memory.h>
+#include "func_memory.h"
 
 FuncMemory::FuncMemory( const char* executable_file_name)
            : start_PC( NO_VAL64) 

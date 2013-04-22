@@ -15,7 +15,7 @@
 
 // uArchSim modules
 #include <types.h>
-#include <elf_parser.h>
+#include "elf_parser/elf_parser.h"
 
 using namespace std;
 
