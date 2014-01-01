@@ -37,26 +37,26 @@ class FuncInstr
         {
             struct               // R-format instruction
             {
-                unsigned opcode:6;
-                unsigned rs:5;
-                unsigned rt:5;
-                unsigned rd:5;
-                unsigned shamt:5;
                 unsigned funct:6;
+		unsigned shamt:5;
+		unsigned rd:5;
+		unsigned rt:5;
+		unsigned rs:5;
+		unsigned opcode:6;
             } asR;
 
             struct               // I-format instruction
             {
-                unsigned opcode:6;
-                unsigned rs:5;
-                unsigned rt:5;
                 signed imm:16;
+		unsigned rt:5;
+		unsigned rs:5;
+		unsigned opcode:6;
             } asI;
 
             struct               // J-format instruction
             {
-                unsigned opcode:6;
                 unsigned offset:26;
+		unsigned opcode:6;
             } asJ;
             uint32 raw;            //variable to write bytes of instruction
 
@@ -103,4 +103,3 @@ class FuncInstr
         FuncInstr( uint32 bytes);
         std::string Dump() const;
 };
-
