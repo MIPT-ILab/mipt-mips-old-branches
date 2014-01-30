@@ -33,8 +33,8 @@ class FuncInstr
 
     stringstream ss;
 
-    static const ISAEntry isaTable [15];
-    static const string REG_NAME [32];
+    static const ISAEntry isaTable[ 15];
+    static const string REG_NAME[ 32];
 
 public:
     FuncInstr( uint32 bytes);

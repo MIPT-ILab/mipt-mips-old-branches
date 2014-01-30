@@ -1,5 +1,5 @@
 /**
- * func_instr.h - the module implementing a simple disassembler for MIPS processors.
+ * helper.h - the module implementing a simple disassembler for MIPS processors.
  * @author Anton Mitrokhin <anton.v.mitrokhin@gmail.com>
  * Copyright 2013 uArchSim iLab project
  */

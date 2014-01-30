@@ -38,7 +38,7 @@ FuncInstr::FuncInstr( uint32 bytes)
             this->parseJ( bytes);
             break;
         default:
-        assert( 0);
+        assert( 0); // This line actually never gets reached
     }
 };
 
@@ -69,8 +69,14 @@ void FuncInstr::initFormat( uint32 bytes)
 
 void FuncInstr::initRType()
 {
-    for( this->isa_id = 0; this->isa_id < 15; this->isa_id++)
+    for( this->isa_id = 0; this->isa_id < 16; ++this->isa_id)
     {
+        if( this->isa_id == 15)
+        {
+            cerr << "Unable to find a command in the ISA table. "
+                 << "Please contact your system administrator" << endl;
+        }
+
         if(( this->bytes.asR.opcode == this->isaTable[ this->isa_id].opcode) &&
            ( this->bytes.asR.funct  == this->isaTable[ this->isa_id].funct ))
         {
@@ -78,30 +84,54 @@ void FuncInstr::initRType()
                 break;
         }
     }
-    assert( isa_id < 12);
 
     // Handling ambiguous types
-    // TODO
 
+    // sll -> nop (could-ev jst write "if byte==0", buut this is not cool
+    if( this->isa_id == 6 && bytes.asR.t == 0
+                          && bytes.asR.d == 0
+                          && bytes.asR.S == 0)
+    {
+        this->isa_id = 14;
+        this->type = this->isaTable[ this->isa_id].type;
+    }
 
+    // addu -> clear
+    if( this->isa_id == 1 && bytes.asR.t == 0
+                          && bytes.asR.s == 0)
+    {
+        this->isa_id = 13;
+        this->type = this->isaTable[ this->isa_id].type;
+    }
 };
 
 
 
 void FuncInstr::initIType()
 {
-    for( this->isa_id = 0; this->isa_id < 15; this->isa_id++)
+    for( this->isa_id = 0; this->isa_id < 16; ++this->isa_id)
     {
+        if( this->isa_id == 15)
+        {
+            cerr << "Unable to find a command in the ISA table. "
+                 << "Please contact your system administrator" << endl;
+        }
+
         if( this->bytes.asI.opcode == this->isaTable[ this->isa_id].opcode)
         {
             this->type = this->isaTable[ this->isa_id].type;
             break;
         }
     }
-    assert( isa_id < 12);
-
     // Handling ambiguous types
-    // TODO
+
+    // addiu -> move
+    if( this->isa_id == 5 && bytes.asI.imm == 0)
+    {
+        this->isa_id = 12;
+        this->type = this->isaTable[ this->isa_id].type;
+    }
+
 
 
 };
@@ -110,18 +140,24 @@ void FuncInstr::initIType()
 
 void FuncInstr::initJType()
 {
-    for( this->isa_id = 0; this->isa_id < 15; this->isa_id++)
+    for( this->isa_id = 0; this->isa_id < 16; ++this->isa_id)
     {
+        if( this->isa_id == 15)
+        {
+            cerr << "Unable to find a command in the ISA table. "
+                 << "Please contact your system administrator" << endl;
+        }
+
         if( this->bytes.asJ.opcode == this->isaTable[ this->isa_id].opcode)
         {
             this->type = this->isaTable[ this->isa_id].type;
             break;
         }
     }
-    assert( isa_id < 12);
+
 
     // Handling ambiguous types
-    // TODO
+    // NONE
 
 
 };
@@ -226,8 +262,8 @@ std::string FuncInstr::Dump( std::string indent) const
 
 
 
-const ISAEntry FuncInstr::isaTable[ 15] =
-{
+const ISAEntry FuncInstr::isaTable[ 15] =               // Important! Do NOT change the order of ISA entries
+{                                                       // DO change the MAX_ISA_ENTRIES constant if added a new entry
     //  name      opcode      func    format       type
     {  "add",     0x0,        0x20,   FORMAT_R,    ADD },
     {  "addu",    0x0,        0x21,   FORMAT_R,    ADD },

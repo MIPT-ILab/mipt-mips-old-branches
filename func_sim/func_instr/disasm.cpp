@@ -28,38 +28,52 @@ union Word
 
 int main (int argc, char* argv[])
 {
-    // extract all ELF sections into the section_array variable
-    vector<ElfSection> sections_array;
-    ElfSection::getAllElfSections( argv[1], sections_array); //*********
+    const int num_of_args = 3;
 
-    // print the information about each section
-    int i = 0;
-
-    // print the information about each section
-    for ( i = 0; i < sections_array.size(); ++i)
-        cout << sections_array[ i].dump() << endl;
-
-
-    for( i = 0; i < sections_array.size(); i++)
-        if( strcmp( sections_array[ i].name, ".data") == 0) break;
-
-    Word converter;
-    for ( int j = 0; j < sections_array[ i].size; j += 4)
+    if ( argc == num_of_args)
     {
-        converter.byte[ 3] = sections_array[ i].content[ j + 0];
-        converter.byte[ 2] = sections_array[ i].content[ j + 1];
-        converter.byte[ 1] = sections_array[ i].content[ j + 2];
-        converter.byte[ 0] = sections_array[ i].content[ j + 3];
+        // extract all ELF sections into the section_array variable
+        vector<ElfSection> sections_array;
+        ElfSection::getAllElfSections( argv[1], sections_array);
 
-        cout << "0x" << hex << converter.word << dec << endl;
-        FuncInstr func_instr( converter.word);
-        cout << func_instr.Dump("--> ") << endl;
+        // print the information about each section
+        for ( int i = 0; i < sections_array.size(); ++i)
+	        cout << sections_array[ i].dump() << endl;
+
+
+        int section_id;
+        for( section_id = 0; section_id < sections_array.size(); ++section_id)
+            if( strcmp( sections_array[ section_id].name, argv[ 2]) == 0) break;
+
+        Word converter;
+        for ( int j = 0; j < sections_array[ section_id].size; j += 4)
+        {
+            converter.byte[ 3] = sections_array[ section_id].content[ j + 0];
+            converter.byte[ 2] = sections_array[ section_id].content[ j + 1];
+            converter.byte[ 1] = sections_array[ section_id].content[ j + 2];
+            converter.byte[ 0] = sections_array[ section_id].content[ j + 3];
+
+
+
+            cout << "0x" << hex << converter.word << dec << endl;
+
+            FuncInstr func_instr( converter.word);
+            cout << func_instr.Dump("--> ") << endl;
+        }
     }
-
-
-
-
-
+    else if ( argc == 2 && !strcmp( argv[ 1], "--help"))
+    {
+        cout << "This program prints a disassembly of the ELF binary file section." << endl
+             << endl
+             << "Usage: \"" << argv[ 0] << " <ELF binary file>\""
+             << " <Section name>\"" << endl;
+    }
+    else
+    {
+        cerr << "ERROR: wrong number of arguments!" << endl
+             << "Type \"" << argv[ 0] << " --help\" for usage." << endl;
+        exit( EXIT_FAILURE);
+    }
 
 
     return 0;
