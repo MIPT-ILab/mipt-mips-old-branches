@@ -21,6 +21,9 @@
 
 #include "helper.h"
 
+
+#define MAX_ISA_ENTRIES 15 // Define the number of ISA table entries
+
 using namespace std;
 using namespace helper;
 
@@ -33,12 +36,13 @@ class FuncInstr
 
     stringstream ss;
 
-    static const ISAEntry isaTable[ 15];
+    static const ISAEntry isaTable[ ];
     static const string REG_NAME[ 32];
 
 public:
     FuncInstr( uint32 bytes);
     std::string Dump( std::string indent = " ") const;
+    friend std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr);
 
     //std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
 private:

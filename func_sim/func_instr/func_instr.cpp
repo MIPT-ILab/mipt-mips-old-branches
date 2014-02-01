@@ -69,9 +69,9 @@ void FuncInstr::initFormat( uint32 bytes)
 
 void FuncInstr::initRType()
 {
-    for( this->isa_id = 0; this->isa_id < 16; ++this->isa_id)
+    for( this->isa_id = 0; this->isa_id < MAX_ISA_ENTRIES + 1; ++this->isa_id)
     {
-        if( this->isa_id == 15)
+        if( this->isa_id == MAX_ISA_ENTRIES)
         {
             cerr << "Unable to find a command in the ISA table. "
                  << "Please contact your system administrator" << endl;
@@ -109,9 +109,9 @@ void FuncInstr::initRType()
 
 void FuncInstr::initIType()
 {
-    for( this->isa_id = 0; this->isa_id < 16; ++this->isa_id)
+    for( this->isa_id = 0; this->isa_id < MAX_ISA_ENTRIES + 1; ++this->isa_id)
     {
-        if( this->isa_id == 15)
+        if( this->isa_id == MAX_ISA_ENTRIES)
         {
             cerr << "Unable to find a command in the ISA table. "
                  << "Please contact your system administrator" << endl;
@@ -140,9 +140,9 @@ void FuncInstr::initIType()
 
 void FuncInstr::initJType()
 {
-    for( this->isa_id = 0; this->isa_id < 16; ++this->isa_id)
+    for( this->isa_id = 0; this->isa_id < MAX_ISA_ENTRIES + 1; ++this->isa_id)
     {
-        if( this->isa_id == 15)
+        if( this->isa_id == MAX_ISA_ENTRIES)
         {
             cerr << "Unable to find a command in the ISA table. "
                  << "Please contact your system administrator" << endl;
@@ -262,7 +262,7 @@ std::string FuncInstr::Dump( std::string indent) const
 
 
 
-const ISAEntry FuncInstr::isaTable[ 15] =               // Important! Do NOT change the order of ISA entries
+const ISAEntry FuncInstr::isaTable[] =                  // Important! Do NOT change the order of ISA entries
 {                                                       // DO change the MAX_ISA_ENTRIES constant if added a new entry
     //  name      opcode      func    format       type
     {  "add",     0x0,        0x20,   FORMAT_R,    ADD },
@@ -296,9 +296,11 @@ const string FuncInstr::REG_NAME[ 32] =
     "gp",   "sp", "s8", "ra"
 };
 
-/*
+
+// Good tutorial: http://en.cppreference.com/w/cpp/language/operators
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
-     return instr->Dump("");
+    out << instr.Dump("");
+    return out;
 };
-*/
+

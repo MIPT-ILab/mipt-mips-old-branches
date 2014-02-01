@@ -58,7 +58,7 @@ int main (int argc, char* argv[])
             cout << "0x" << hex << converter.word << dec << endl;
 
             FuncInstr func_instr( converter.word);
-            cout << func_instr.Dump("--> ") << endl;
+            cout << func_instr << endl;
         }
     }
     else if ( argc == 2 && !strcmp( argv[ 1], "--help"))
