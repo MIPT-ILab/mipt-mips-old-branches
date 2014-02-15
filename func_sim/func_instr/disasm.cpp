@@ -45,20 +45,18 @@ int main (int argc, char* argv[])
         for( section_id = 0; section_id < sections_array.size(); ++section_id)
             if( strcmp( sections_array[ section_id].name, argv[ 2]) == 0) break;
 
-        Word converter;
+        Word word;
         for ( int j = 0; j < sections_array[ section_id].size; j += 4)
         {
-            converter.byte[ 3] = sections_array[ section_id].content[ j + 0];
-            converter.byte[ 2] = sections_array[ section_id].content[ j + 1];
-            converter.byte[ 1] = sections_array[ section_id].content[ j + 2];
-            converter.byte[ 0] = sections_array[ section_id].content[ j + 3];
+            word.byte[ 3] = sections_array[ section_id].content[ j + 3];
+            word.byte[ 2] = sections_array[ section_id].content[ j + 2];
+            word.byte[ 1] = sections_array[ section_id].content[ j + 1];
+            word.byte[ 0] = sections_array[ section_id].content[ j + 0];
 
 
-
-            cout << "0x" << hex << converter.word << dec << endl;
-
-            FuncInstr func_instr( converter.word);
-            cout << func_instr << endl;
+            FuncInstr func_instr( word.word);
+            cout << "0x" << hex << word.word << dec << "\t"
+                 << func_instr << endl;
         }
     }
     else if ( argc == 2 && !strcmp( argv[ 1], "--help"))

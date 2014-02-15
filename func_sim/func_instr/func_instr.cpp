@@ -103,6 +103,13 @@ void FuncInstr::initRType()
         this->isa_id = 13;
         this->type = this->isaTable[ this->isa_id].type;
     }
+
+    // addu -> move
+    if( this->isa_id == 1 && bytes.asR.t == 0)
+    {
+        this->isa_id = 12;
+        this->type = this->isaTable[ this->isa_id].type;
+    }
 };
 
 
@@ -191,6 +198,11 @@ void FuncInstr::parseR( uint32 bytes)
             break;
         case NOP:
             this->ss   << this->isaTable[ this->isa_id].name;
+            break;
+        case MOVE:
+            this->ss   << this->isaTable[ this->isa_id].name <<
+                " $"   << this->REG_NAME[ this->bytes.asR.d] <<
+                ", $"  << this->REG_NAME[ this->bytes.asR.s];
             break;
         default:
         cerr << "ERROR: unknown command\n";

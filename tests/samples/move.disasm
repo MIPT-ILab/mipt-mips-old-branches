@@ -1,0 +1,13 @@
+Disassembly of section .reginfo:
+
+00400074 <.reginfo>:
+  400074:	00001800 	sll	v1,zero,0x0
+	...
+  400088:	00418090 	0x418090
+
+Disassembly of section .text:
+
+00400090 <__start>:
+  400090:	01805821 	move	t3,t4
+	...
+
