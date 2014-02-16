@@ -16,6 +16,8 @@
 //my modules
 #include <my_assert.h>
 
+
+
 //Constructor
 
 FuncInstr::FuncInstr( uint32 bytes)
@@ -24,13 +26,13 @@ FuncInstr::FuncInstr( uint32 bytes)
     switch (this->format)
     {
         case FORMAT_R:
-            this->parseR(bytes);
+            this->initR(bytes);
             break;
         case FORMAT_I:
-            this->parseI(bytes);
+            this->initI(bytes);
             break;
         case FORMAT_J:
-            this->parseR(bytes);
+            this->initJ(bytes);
             break;
         default:
             MY_ASSERT(NULL, "Unknown format of instruction");
@@ -41,7 +43,7 @@ FuncInstr::FuncInstr( uint32 bytes)
 
 const FuncInstr::ISAEntry FuncInstr::isaTable[NUM_OF_COMMANDS] =
 {
-    // name   opcode    func      format              type
+    // name   opcode    func      format                    type
 
     //Add and substruct
 
@@ -65,7 +67,7 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[NUM_OF_COMMANDS] =
     //Unconditional jump
 
     { "j",     0x2,     0x00,  FuncInstr::FORMAT_J, FuncInstr::UNCOND_BRANCH },
-    { "jr",    0x0,     0x08,  FuncInstr::FORMAT_R, FuncInstr::UNCOND_BRANCH }
+    { "jr",    0x0,     0x08,  FuncInstr::FORMAT_R, FuncInstr::UNCOND_BRANCH },
 
 };
 
@@ -112,14 +114,78 @@ void FuncInstr::initFormat( uint32 bytes)
     MY_ASSERT(find_flag, "Unknown format of instruction");
 }
 
+//inicialization of R-format instruction
+
+void FuncInstr::initR( uint32 bytes)
+{
+    std::string indent;          // temp string
+    std::ostringstream oss;      //temp stream
+
+    // handling of pseudo instructions
+
+    if ((this->bytes.asR.funct == 0x21) && (this->bytes.asR.rt == 0) && (this->bytes.asR.rs == 0))    // clear instruction
+    {
+        oss << indent << "clear" << " " << this->RegFile[this->bytes.asR.rd] << std::endl;
+        this->OUT = oss.str();
+        return;
+    }
+
+    if (this->bytes.raw == 0)                 // nop
+    {
+        oss << indent << "nop" << std::endl;
+        this->OUT = oss.str();
+        return;
+    }
+
+    // handling of usual instruction
+
+    this->parseR(bytes);
+}
+
+//inicialization of I-format instruction
+
+void FuncInstr::initI( uint32 bytes)
+{
+    std::string indent;          // temp string
+    std::ostringstream oss;      //temp stream
+
+    // handling of pseudo instructions
+
+    if ((this->bytes.asI.opcode == 0x9) && (this->bytes.asI.imm == 0))    // clear instruction
+    {
+        oss << indent << "move" << " " << this->RegFile[this->bytes.asI.rt] << " " << this->RegFile[this->bytes.asI.rs] << " " << std::endl;
+        this->OUT = oss.str();
+        return;
+    }
+
+    // handling of usual instruction
+
+    this->parseI(bytes);
+}
+
+//inicialization of J-format instruction
+
+void FuncInstr::initJ( uint32 bytes)
+{
+    std::string indent;          // temp string
+    std::ostringstream oss;      //temp stream
+
+    // handling of pseudo instructions
+    // NO PSEUDO INSTRUCTION OF J_FORMAT
+
+    // handling of usual instruction
+
+    this->parseJ(bytes);
+}
+
 // Parse R-format instruction
 
 void FuncInstr::parseR( uint32 bytes)
 {
-    this->bytes.raw = bytes;
 
     std::string indent;          // temp string
     std::ostringstream oss;      //temp stream
+
 
     uint32 opcode = this->bytes.asR.opcode;
     uint32 rt = this->bytes.asR.rt;
@@ -145,7 +211,7 @@ void FuncInstr::parseR( uint32 bytes)
 
     MY_ASSERT(find_flag, "Unknown format of instruction");
 
-    //----------------------------------------------------------------------------------------------------------
+   //----------------------------------------------------------------------------------------------------------
 
     switch (this->isaTable[num_of_instr].type)
     {
@@ -176,7 +242,6 @@ void FuncInstr::parseR( uint32 bytes)
 
 void FuncInstr::parseI( uint32 bytes)
 {
-    this->bytes.raw = bytes;
 
     std::string indent;          // temp string
     std::ostringstream oss;      //temp stream
@@ -227,7 +292,6 @@ void FuncInstr::parseI( uint32 bytes)
 
 void FuncInstr::parseJ( uint32 bytes)
 {
-    this->bytes.raw = bytes;
 
     std::string indent;          // temp string
     std::ostringstream oss;      //temp stream

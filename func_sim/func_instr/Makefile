@@ -33,5 +33,7 @@ func_instr.o: func_instr.cpp func_instr.h types.h my_assert.h
 
 elf_parser.o: elf_parser.cpp elf_parser.h types.h
 	$(CXX) -c $< $(INCL)
+clean:
+	@-rm *.o
 
 

@@ -1,12 +1,15 @@
+#ifndef H_FUNC_IN_STR
+#define H_FUNC_IN_STR
+
 //Generic C++
 #include <sstream>
 #include <string>
 
 //Generis C
 
-
 //uArch sim modules
 #include <types.h>
+
 
 class FuncInstr
 {
@@ -29,36 +32,37 @@ class FuncInstr
             SHIFT,
             COND_BRANCH,
             UNCOND_BRANCH
-        };
+        } type;
 
         // bit fields of instruction
 
         union
         {
+            uint32 raw;            //variable to write bytes of instruction
+
             struct               // R-format instruction
             {
                 unsigned funct:6;
-		unsigned shamt:5;
-		unsigned rd:5;
-		unsigned rt:5;
-		unsigned rs:5;
-		unsigned opcode:6;
+		        unsigned shamt:5;
+		        unsigned rd:5;
+		        unsigned rt:5;
+		        unsigned rs:5;
+		        unsigned opcode:6;
             } asR;
 
             struct               // I-format instruction
             {
                 signed imm:16;
-		unsigned rt:5;
-		unsigned rs:5;
-		unsigned opcode:6;
+                unsigned rt:5;
+		        unsigned rs:5;
+		        unsigned opcode:6;
             } asI;
 
             struct               // J-format instruction
             {
                 unsigned offset:26;
-		unsigned opcode:6;
+		        unsigned opcode:6;
             } asJ;
-            uint32 raw;            //variable to write bytes of instruction
 
         } bytes;
 
@@ -89,6 +93,9 @@ class FuncInstr
         //---------------------------------------------------------------------------------------------
 
         void initFormat( uint32 bytes);
+        void initR( uint32 bytes);
+        void initI( uint32 bytes);
+        void initJ( uint32 bytes);
         void parseR( uint32 bytes);
         void parseI( uint32 bytes);
         void parseJ( uint32 bytes);
@@ -103,3 +110,6 @@ class FuncInstr
         FuncInstr( uint32 bytes);
         std::string Dump() const;
 };
+
+#endif
+

@@ -24,7 +24,8 @@ void Parse_section(const vector<ElfSection>& sections_array, int sect_number)
     for (uint64 cont_pointer=0; cont_pointer < size; cont_pointer++)
     {
         FuncInstr func_instr(content[cont_pointer]);
-        std::cout << "0x" << std::hex << addr << "  ";
+        std::cout << "0x" << std::hex << addr << ":  ";
+        std::cout << std::hex << content[cont_pointer] << ": ";
         std::cout << func_instr.Dump();
         addr = addr + sizeof(uint32);
     }
