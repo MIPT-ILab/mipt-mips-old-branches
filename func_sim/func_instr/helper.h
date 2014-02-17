@@ -5,6 +5,7 @@
  */
 
 
+
 // protection from multi-include
 #ifndef FUNC_MEMORY__HELPER_H
 #define FUNC_MEMORY__HELPER_H
