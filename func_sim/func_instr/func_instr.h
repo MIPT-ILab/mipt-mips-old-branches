@@ -2,9 +2,9 @@
 #include <string>
 #include <cstdlib>
 #include <cassert>
+#include <cstring>
 
-#include "types.h"
-//#include <elf_parser.h>
+#include "../../common/types.h"
 
 using namespace std;
 
@@ -83,4 +83,4 @@ class FuncInstr
 		string Dump(string indent = " ");
 };
 
-//static InstrData InstrArray[10];
+//static::InstrData InstrArray[10];

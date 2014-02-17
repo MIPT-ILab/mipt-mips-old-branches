@@ -21,7 +21,7 @@ FuncInstr::FuncInstr(uint32 bytes)
 
 		InstrInfo.imm = NO_IMM;
 
-		InstrInfo.format = "FORMAT_I";
+		InstrInfo.format = "FORMAT_R";
 		
 		if(InstrInfo.funct == 0x00)
 		{
@@ -36,8 +36,8 @@ FuncInstr::FuncInstr(uint32 bytes)
 		else if(InstrInfo.funct == 0x08)
 		{
 			InstrInfo.type = "JR";
-			InstrInfo.rs = registers[32];
 			InstrInfo.rt = registers[32];
+			InstrInfo.rd = registers[32];
 			InstrInfo.shamt = NO_SHAMT;
 		}
 		else if(InstrInfo.funct == 0x20)
@@ -60,16 +60,31 @@ FuncInstr::FuncInstr(uint32 bytes)
 			InstrInfo.type = "SUBU";
 			InstrInfo.shamt = NO_SHAMT;
 		}
+		else if(InstrInfo.funct == 0x0C)
+		{
+			InstrInfo.type = "SYSCALL";
+			InstrInfo.shamt = NO_SHAMT;
+			InstrInfo.rs = registers[32];
+			InstrInfo.rt = registers[32];
+			InstrInfo.rd = registers[32];
+		}
 		// Иначе, инструкция имеет неизвестный формат
 		else
 		{
-			cout << "instruction not defined\n";
-			InstrInfo.opcode = INSTR_NOT_DEF;
+			cout << "instruction not defined   ";
+			InstrInfo.format = "NO_FORMAT";
+                	InstrInfo.type = "NO_TYPE";
+                	InstrInfo.opcode = INSTR_NOT_DEF;
+                	InstrInfo.rs = registers[32];
+                	InstrInfo.rt = registers[32];
+                	InstrInfo.rd = registers[32];
+                	InstrInfo.shamt = NO_SHAMT;
+                	InstrInfo.imm = NO_IMM;
 		}
 	} 
  
 // Случай, когда инструкция имеет I-формат
-	else if((bytes_.asI.opcode == 0x04) || (bytes_.asI.opcode == 0x05) || (bytes_.asI.opcode == 0x08) || (bytes_.asI.opcode == 0x09))
+	else if((bytes_.asI.opcode == 0x04) || (bytes_.asI.opcode == 0x05) || (bytes_.asI.opcode == 0x08) || (bytes_.asI.opcode == 0x09) || (bytes_.asI.opcode == 0x23) || (bytes_.asI.opcode == 0x2B) || (bytes_.asI.opcode == 0x0F))
 	{
 		InstrInfo.opcode = (uint8)bytes_.asI.opcode;
 		InstrInfo.funct = NO_FUNCT;
@@ -99,10 +114,23 @@ FuncInstr::FuncInstr(uint32 bytes)
 		{
 			InstrInfo.type = "ADDIU";
 		}
+		else if(InstrInfo.opcode == 0x23)
+		{
+			InstrInfo.type = "LW";
+		}
+		else if(InstrInfo.opcode == 0x2B)
+		{
+			InstrInfo.type = "SW";
+		}
+		else if(InstrInfo.opcode == 0x0F)
+		{
+			InstrInfo.type = "LUI";
+			InstrInfo.rs = registers[32];
+		}
 	}
 
 // Случай, когда инструкция имеет J-формат
-	else if(bytes_.asJ.opcode == 0x02)
+	else if((bytes_.asJ.opcode == 0x02) || (bytes_.asJ.opcode == 0x03))
 	{
 		InstrInfo.opcode = (uint8)bytes_.asJ.opcode;
 		InstrInfo.funct = NO_FUNCT;
@@ -115,14 +143,28 @@ FuncInstr::FuncInstr(uint32 bytes)
 		InstrInfo.imm = (uint32)bytes_.asJ.imm;
 		
 		InstrInfo.format = "FORMAT_J";
-		InstrInfo.type = "J";
+		if(InstrInfo.opcode == 0x02)
+		{
+			InstrInfo.type = "J";
+		}
+		else if(InstrInfo.opcode == 0x03)
+		{
+			InstrInfo.type = "JAL";
+		}
 	}
 
 // Иначе, инструкция имеет неизвестный формат
 	else
 	{
-		cout << "instruction not defined\n";
+		cout << "instruction not defined   ";
+		InstrInfo.format = "NO_FORMAT";
+		InstrInfo.type = "NO_TYPE";
 		InstrInfo.opcode = INSTR_NOT_DEF;
+		InstrInfo.rs = registers[32];
+		InstrInfo.rt = registers[32];
+		InstrInfo.rd = registers[32];
+		InstrInfo.shamt = NO_SHAMT;
+		InstrInfo.imm = NO_IMM;		
 	}
 }
 
@@ -132,8 +174,10 @@ FuncInstr::FuncInstr(uint32 bytes)
 
 string FuncInstr::Dump(string indent)
 {
-	cout << indent << InstrInfo.type << " ";
-
+	if(InstrInfo.type != "NO_TYPE")
+	{
+		cout << indent << InstrInfo.type << " ";
+	}
 	if(InstrInfo.rs != registers[32])
 	{
 		cout << InstrInfo.rs << " ";
@@ -152,11 +196,18 @@ string FuncInstr::Dump(string indent)
 	}
 	if(InstrInfo.imm != NO_IMM)
 	{
-		cout << InstrInfo.imm;
+		if(InstrInfo.format == "FORMAT_I")
+		{
+			cout << (int16)InstrInfo.imm;
+		}
+		else
+		{
+			cout << InstrInfo.imm;
+		}
 	}
 	
 	cout << "\n";
 	return " ";
 }
 
-// -----------------------------------------------------------------
+// ----------------------------------------------------------------

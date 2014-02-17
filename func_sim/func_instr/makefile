@@ -1,11 +1,20 @@
-output : test1.o func_instr.o
-	g++ -o output test1.o func_instr.o
+output : elf_parser.o disasm.o func_instr.o
+	g++ disasm.o func_instr.o elf_parser.o -o output -l elf
 
-test1.o : test1.cpp func_instr.h
-	g++ -c test1.cpp
+output_test1 : test1.o func_instr.o 
+	g++ -o output_test1 test1.o func_instr.o -l elf
 
-func_instr.o : func_instr.cpp func_instr.h
+disasm.o: disasm.cpp
+	g++ -c disasm.cpp 
+
+elf_parser.o : ../elf_parser/elf_parser.cpp ../elf_parser/elf_parser.h
+	g++ -c ../elf_parser/elf_parser.cpp 
+
+test1.o : test1.cpp 
+	g++ -c test1.cpp 
+
+func_instr.o : func_instr.cpp 
 	g++ -c func_instr.cpp
 
 clear : 
-	rm output test1.o func_instr.o
+	rm output output_test1 test1.o func_instr.o elf_parser.o libelf_parser.a disasm.o 
