@@ -184,19 +184,23 @@ FuncInstr::FuncInstr( uint32 bytes)
 		InstrInfo.shamt = NO_SHAMT;
 		InstrInfo.imm = NO_IMM;		
 	}
+// Added this instruction to ISA array
+        
+    //isaTable[ISA_number] = InstrInfo;
+    //ISA_number++;
 }
 
 // -----------------------------------------------------------------
 
 // Method, which print instruction
 
-string FuncInstr::Dump( string indent)
+string FuncInstr::Dump( string indent) const
 {
 // If instruction have unknown type
     if( InstrInfo.type == "NO_TYPE")
     {
         cout << "---instruction is not defined---\n";
-        return " ";
+        return "";
     }
 // Print type of instruction
 	if( InstrInfo.type != "NO_TYPE")
@@ -239,7 +243,7 @@ string FuncInstr::Dump( string indent)
 	}
 	
 	cout << "\n";
-	return " ";
+	return "";
 }
 
 // ----------------------------------------------------------------

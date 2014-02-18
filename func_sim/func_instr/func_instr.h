@@ -8,6 +8,8 @@
 
 using namespace std;
 
+static int8 ISA_number = 0;
+
 // If field "shamt" don't need, shamt = NO_SHAMT
 static const uint32 NO_SHAMT = 0xFFFFFFFF;
 // If field "funct" don't need, funct = NO_FUNCT
@@ -91,10 +93,17 @@ class FuncInstr
 		bytes_t bytes_;
 // Info about instruction
 		InstrData InstrInfo;
-
+// Static array for store ISA information
+        static const InstrData isaTable[ ];
 	public:
 // Constructor of this class. He is parse binary instruction and enter info about it in InstrInfo
 		FuncInstr( uint32 bytes);
 // Dump method. He is print instruction in assembler format
-		string Dump( string indent = " ");
+		string Dump( string indent = " ") const;
+// This function just call Dump method with empty indent string
+        friend ostream& operator<< ( ostream& out, const FuncInstr& instr)
+        {
+            out << instr.Dump( "");
+            return out;
+        };
 };
