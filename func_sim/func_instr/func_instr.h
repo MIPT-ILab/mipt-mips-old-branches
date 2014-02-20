@@ -8,8 +8,6 @@
 
 using namespace std;
 
-static int8 ISA_number = 0;
-
 // If field "shamt" don't need, shamt = NO_SHAMT
 static const uint32 NO_SHAMT = 0xFFFFFFFF;
 // If field "funct" don't need, funct = NO_FUNCT
@@ -18,6 +16,9 @@ static const uint8 NO_FUNCT = 0xFF;
 static const uint32 NO_IMM = 0xFFFFFFFF;
 // If instruction don't defined, opcode = INSTR_NOT_DEF
 static const uint8 INSTR_NOT_DEF = 0xFF;
+// Size of ISAarray
+static const uint8 SIZE_OF_ARRAY = 12;
+
 
 // This array have all registers name, each register meet his number in registers file
 static string registers[ 33] = 					
@@ -37,18 +38,12 @@ static string registers[ 33] =
 	"NOTHING"						
 };
 
+
 // Main struct, which have all information about instruction
 struct InstrData
 {
     uint8 opcode;
     uint8 funct;
-	uint32 shamt;
-
-	string rs;
-	string rt;
-	string rd;
-	
-	uint32 imm;
 
 	string format;
 	string type;
@@ -57,6 +52,7 @@ struct InstrData
 // This union needs for reading binary instruction in comfortable format
 union bytes_t
 {
+
 // For reading in I-type
 	struct
 	{
@@ -65,6 +61,7 @@ union bytes_t
 		unsigned s:5;
 		unsigned opcode:6;
 	} asI;
+
 // For reading in R-type
 	struct
 	{
@@ -75,15 +72,18 @@ union bytes_t
 		unsigned s:5;
 		unsigned opcode:6;
 	} asR;
+
 // For reading im J-type
 	struct
 	{
 		unsigned imm:26;
 		unsigned opcode:6;
 	} asJ;
+
 // For reading instruction in binary format
 	uint32 raw;
 };
+
 
 // Main class, which have info about instruction and some methods, which use this instruction
 class FuncInstr
@@ -91,15 +91,33 @@ class FuncInstr
 	private:
 // Binary instruction	
 		bytes_t bytes_;
+
 // Info about instruction
 		InstrData InstrInfo;
+
 // Static array for store ISA information
-        static const InstrData isaTable[ ];
+        static const InstrData isaTable[ ]; 
+
+// Operands of instruction
+        string rs;
+        string rt;
+        string rd;
+
+        uint32 shamt;
+        uint32 imm;
+
 	public:
 // Constructor of this class. He is parse binary instruction and enter info about it in InstrInfo
 		FuncInstr( uint32 bytes);
+
+// Metods for parse
+        void parse_R();
+        void parse_I();
+        void parse_J();
+
 // Dump method. He is print instruction in assembler format
 		string Dump( string indent = " ") const;
+
 // This function just call Dump method with empty indent string
         friend ostream& operator<< ( ostream& out, const FuncInstr& instr)
         {
@@ -107,3 +125,4 @@ class FuncInstr
             return out;
         };
 };
+
