@@ -6,7 +6,9 @@
 
 #include "../../common/types.h"
 
+
 using namespace std;
+
 
 // If field "shamt" don't need, shamt = NO_SHAMT
 static const uint32 NO_SHAMT = 0xFFFFFFFF;
@@ -19,26 +21,7 @@ static const uint8 INSTR_NOT_DEF = 0xFF;
 // Size of ISAarray
 static const uint8 SIZE_OF_ARRAY = 12;
 
-
-// This array have all registers name, each register meet his number in registers file
-static string registers[ 33] = 					
-{								
-	"$zero",						
-	"$at",							
-	"$v0", "$v1",						
-	"$a0", "$a1", "$a2", "$a3",				
-	"$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", 
-	"$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", 
-	"$t8", "$t9",						
-	"$k0", "$k1",						
-	"$gp",							
-	"$sp", 							
-	"$fp",							
-	"$ra",							
-	"NOTHING"						
-};
-
-
+ 
 // Main struct, which have all information about instruction
 struct InstrData
 {
@@ -48,6 +31,7 @@ struct InstrData
 	string format;
 	string type;
 };
+
 
 // This union needs for reading binary instruction in comfortable format
 union bytes_t
@@ -98,6 +82,9 @@ class FuncInstr
 // Static array for store ISA information
         static const InstrData isaTable[ ]; 
 
+// This array have all registers name, each register meet his number in registers file
+        static const string registers[ 33];
+
 // Operands of instruction
         string rs;
         string rt;
@@ -110,10 +97,13 @@ class FuncInstr
 // Constructor of this class. He is parse binary instruction and enter info about it in InstrInfo
 		FuncInstr( uint32 bytes);
 
-// Metods for parse
-        void parse_R();
-        void parse_I();
-        void parse_J();
+// Methods for parse
+        void parse_R( );
+        void parse_I( );
+        void parse_J( );
+
+// Method for find pseudo-instructions
+        void pseudo( );
 
 // Dump method. He is print instruction in assembler format
 		string Dump( string indent = " ") const;

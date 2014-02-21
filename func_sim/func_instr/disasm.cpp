@@ -4,6 +4,7 @@
 #include "../elf_parser/elf_parser.h"
 #include "func_instr.h"
 
+
 int main( int argc, char* argv[ ])
 {
 // Check quantity of arguments
@@ -28,7 +29,7 @@ int main( int argc, char* argv[ ])
 // If we find necessary section
 		if( strcmp( sections_array[ sections_counter].name, section_name) == 0)
 		{
-// For each instruction in this section, we build it, parse it, add in array of ISA, and print it
+// For each instruction in this section, we build it, parse it, and print it
 			for( uint8 byte_counter = 0; byte_counter < sections_array[ sections_counter].size; \
 			byte_counter = byte_counter + 4)
 			{
@@ -40,7 +41,7 @@ int main( int argc, char* argv[ ])
 
 				FuncInstr ISA_instr( instruction);
                 
-				ISA_instr.Dump( );
+				ISA_instr.Dump( "    ");
 			}
 			return 0;
 		}
