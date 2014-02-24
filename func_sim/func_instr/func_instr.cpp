@@ -7,11 +7,12 @@
 //C++ headers
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 //********************************************************************
 
-static const FuncInstr :: ISAEntry FuncInstr :: isaTable[ISANum] =
+const FuncInstr :: ISAEntry FuncInstr :: isaTable[ISANum] =
 {
     	// name      opcode     func          format              type
 	{ "add ",	0x0,	0x20, FuncInstr :: FORMAT_R, FuncInstr :: CAL },
@@ -19,18 +20,18 @@ static const FuncInstr :: ISAEntry FuncInstr :: isaTable[ISANum] =
 	{ "sub ",	0x0,	0x22, FuncInstr :: FORMAT_R, FuncInstr :: CAL },
 	{ "subu ",	0x0,	0x23, FuncInstr :: FORMAT_R, FuncInstr :: CAL },
 	{ "addi ",	0x8,	0x00, FuncInstr :: FORMAT_I, FuncInstr :: CAL },
-	{ "addiu ",	0x9,	0x00, FuncInsrt :: FORMAT_I, FuncInstr :: CAL },
+	{ "addiu ",	0x9,	0x00, FuncInstr :: FORMAT_I, FuncInstr :: CAL },
 	{ "sll ",	0x0,	0x00, FuncInstr :: FORMAT_R, FuncInstr :: SHIFT },
 	{ "srl ",	0x0,	0x02, FuncInstr :: FORMAT_R, FuncInstr :: SHIFT },
 	{ "beq ",	0x4,	0x00, FuncInstr :: FORMAT_I, FuncInstr :: BRANCH_C },
 	{ "bne ",	0x5,	0x00, FuncInstr :: FORMAT_I, FuncInstr :: BRANCH_C },
 	{ "j ",		0x2,	0x00, FuncInstr :: FORMAT_J, FuncInstr :: BRANCH_UC },
-	{ "jr ",		0x0,	0x08, FuncInstr :: FORMAT_R, FuncInstr :: BRANCH_UC }
+	{ "jr ",	0x0,	0x08, FuncInstr :: FORMAT_R, FuncInstr :: BRANCH_UC }
 };
 
 //********************************************************************
 
-static const FuncInstr :: PIComand FuncInstr :: PITable[PICNum] =
+const FuncInstr :: PIComand FuncInstr :: PiTable[PINum] =
 {
 	"move ",
 	"clear ",
@@ -39,7 +40,7 @@ static const FuncInstr :: PIComand FuncInstr :: PITable[PICNum] =
 
 //********************************************************************
 
-static const FuncInstr :: REG FuncInstr :: REGFile [REGNum] =
+const FuncInstr :: REG FuncInstr :: REGFile [REGNum] =
 {
 	"$zero",						// const = 0
 	"$at",							// assembler temporary
@@ -53,7 +54,7 @@ static const FuncInstr :: REG FuncInstr :: REGFile [REGNum] =
         "$sp",							//
         "$fp",							//
         "$ra" 							//
-}
+};
 
 //********************************************************************
 
@@ -81,7 +82,7 @@ FuncInstr :: FuncInstr ( uint32 bytes )
 void FuncInstr :: initFormat ( uint32 bytes )
 {
 	this -> bytes.raw = bytes;
-	uint8 opcode = this -> bytes.opcode;
+	uint8 opcode = this -> bytes.asR.opcode;
 
 	switch ( opcode )
 	{
@@ -111,37 +112,38 @@ void FuncInstr :: parseR ( uint32 bytes )
 		if ( this -> bytes.asR.func == this -> isaTable[i].func )
 		{
 			if ( this -> bytes.raw == 0)
-				oss << PITable[2];
+				oss << PiTable[2].name;
 			else
 			if ( ( this -> bytes.asR.func == 0x21 ) && 
 			     ( this -> bytes.asR.t == 0 ) && 
 			     ( this -> bytes.asR.s == 0 ) )
 			{
-				oss << PITable[1]  
-				<< REGFile[this -> bytes.asR.d];
+				oss << PiTable[1].name   
+				<< REGFile[this -> bytes.asR.d].name;
 			}
 			else
 			{
-				oss << this -> ISATable[i].name << " ";
+				oss << this -> isaTable[i].name << " ";
 				
-				switch ( this -> ISATable[i].type )
+				switch ( this -> isaTable[i].type )
 				{
 				case CAL:
-					oss << REGFile[this -> bytes.asR.d] 
+					oss << REGFile[this -> bytes.asR.d].name 
 					    << ", " 
-					    << REGFile[this -> bytes.asR.s] 
+					    << REGFile[this -> bytes.asR.s].name
 					    << ", "
-					    << REGFile[this -> bytes.asR.t];
+					    << REGFile[this -> bytes.asR.t].name;
 					break;	
 				case SHIFT:
-					oss << REGFile[this -> bytes.asR.d]
+					oss << REGFile[this -> bytes.asR.d].name
 					    << ", "
-					    << REGFile[this -> bytes.asR.t]
+					    << REGFile[this -> bytes.asR.t].name
 					    << ", "
-					    << this -> bytes.asR.sh;
+					    << std::hex << this -> bytes.asR.sh 
+                                            << std::dec;
 					break;
 				case BRANCH_UC:
-					oss << REGFile[this -> bytes.asR.s];
+					oss << REGFile[this -> bytes.asR.s].name;
 					break;
 				default:
 					std :: cerr << "ERROR!: Who knows?\n" 
@@ -150,8 +152,7 @@ void FuncInstr :: parseR ( uint32 bytes )
 					break;
 				}
 			}
-			
-			oss << "\n";
+		
 			this -> DumpCom = oss.str();
 			return;	
 		}
@@ -173,26 +174,26 @@ void FuncInstr :: parseI ( uint32 bytes )
 		{
  			if ( !this -> bytes.asI.imm )
 			{
-				oss << this -> PITable[0]
-				    << this -> bytes.asI.t
+				oss << this -> PiTable[0].name
+				    << REGFile[this -> bytes.asI.t].name
 				    << ", "
-				    << this -> bytes.asI.s;
+				    << REGFile[this -> bytes.asI.s].name;
 			}
 			else
 			{
 				oss << this -> isaTable[i].name 
-                		    << this -> REGFile[this -> bytes.asI.s]
+                		    << this -> REGFile[this -> bytes.asI.s].name
 				    << ", "
-                		    << this -> REGFile[this -> bytes.asI.t]
+                		    << this -> REGFile[this -> bytes.asI.t].name
 				    << ", "
-                		    << this -> bytes.asI.imm;
+                		    << std::hex << this -> bytes.asI.imm << std::dec;
 			}
-			oss << "\n";
-			this DumpCom = oss.str();
+		
+			this -> DumpCom = oss.str();
 			return;		
 		}
 	}	
-	std :: cerr << "ERROR!: invalid comand\n"
+	std :: cerr << "ERROR!: invalid comand\n";
 	assert ( "parseI ( uint32 )" == FAIL );	
 }
 
@@ -202,7 +203,7 @@ void FuncInstr :: parseJ ( uint32 bytes )
 {
 	std :: ostringstream oss;
 	oss << this -> isaTable[JUMP].name
-	    << this -> bytes.asJ.addr << "\n";	
+	    << std::hex << this -> bytes.asJ.addr << std::dec;	
 }
 
 //********************************************************************
