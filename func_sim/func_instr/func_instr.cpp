@@ -6,7 +6,7 @@
 
 
 #include "func_instr.h"
-
+#include <sstream>
 
 FuncInstr::FuncInstr( uint32 bytes)
 {
@@ -52,6 +52,7 @@ int FuncInstr::parseR()
     uint8 opcode = this->bytes.asR.opcode;
     uint8 funct = this->bytes.asR.funct;
     uint32 bytes = this->bytes.raw;
+    std::ostringstream oss;
     int i = 0;
     while(
      !( opcode== this->isaTable[i].opcode && funct== this->isaTable[i].func)
@@ -61,37 +62,37 @@ int FuncInstr::parseR()
 
     if ( bytes == 0)                     //------- nop
     {
-        sprintf(textAss,"nop\n");
+        oss<<"nop\n";
+        this->textAss = oss.str();
         return 0;
     }
     else if( !opcode && (funct==0x21) &&  //------- clear
              !this->bytes.asR.s && !this->bytes.asR.t )
     {
-        sprintf(textAss,"clear %s\n",
-            this->registersTable[this->bytes.asR.d]);
+        oss<<"clear ";
+        oss << this->registersTable[this->bytes.asR.d];
+        this->textAss = oss.str();
         return 0;
     }
     this->type = this->isaTable[i].type;
     //-------------- name %1 %2 %3
-    if( this->type == ADD 
-        ||
-        this->type == SUB)
+    if( this->type == ADD || this->type == SUB)
     {
-        sprintf(textAss,"%s %s %s %s\n",
-                this->isaTable[i].name,
-                this->registersTable[this->bytes.asR.d],
-                this->registersTable[this->bytes.asR.s],
-                this->registersTable[this->bytes.asR.t]);
+        oss<<this->isaTable[i].name;
+        oss<<this->registersTable[this->bytes.asR.d];
+        oss<<this->registersTable[this->bytes.asR.s];
+        oss<<this->registersTable[this->bytes.asR.t]<<"\n";
+        this->textAss = oss.str();
         return 0;
     }
     //-------------- name %1 %2 C
-    if( this->type ==SHIFT)
+    if( this->type == SHIFT)
     {
-        sprintf(textAss,"%s %s %s %u\n",
-                this->isaTable[i].name,
-                this->registersTable[this->bytes.asR.d],
-                this->registersTable[this->bytes.asR.t],
-                (uint32) this->bytes.asR.shamt);
+        oss<< this->isaTable[i].name<< " ";
+        oss<<this->registersTable[this->bytes.asR.d];
+        oss<<this->registersTable[this->bytes.asR.t];
+        oss<<(uint32) this->bytes.asR.shamt<<"\n";
+        this->textAss = oss.str();
         return 0;
     }
     return -1;
@@ -101,6 +102,7 @@ int FuncInstr::parseI()
 {
     uint8 opcode = this->bytes.asR.opcode;
     uint32 bytes = this->bytes.raw;
+    std::ostringstream oss;
     int i = 0;
     while(
      !( opcode== this->isaTable[i].opcode)
@@ -109,30 +111,39 @@ int FuncInstr::parseI()
         i++;
     if ( (opcode == 0x9) && !this->bytes.asI.imm)//----move
     {
-        sprintf(textAss,"move %s %s\n",
-                this->registersTable[this->bytes.asI.s],
-                this->registersTable[this->bytes.asI.t]);
+        oss<< "move "<< this->registersTable[this->bytes.asI.s];
+        oss<< this->registersTable[this->bytes.asI.t]<<"\n";
+        this->textAss = oss.str();
         return 0;
     }
     if ( this->type == BRANCH
          || 
          this->type == ADD )
     {
-        sprintf(textAss,"%s %s %s %u\n",
-                this->isaTable[i].name,
-                this->registersTable[this->bytes.asI.s],
-                this->registersTable[this->bytes.asI.t],
-                (uint32) this->bytes.asI.imm);///??????????????????????????
+        oss<<this->isaTable[i].name<<" ";
+        oss<<this->registersTable[this->bytes.asI.s];
+        oss<<this->registersTable[this->bytes.asI.t];
+        oss<<(int16) this->bytes.asI.imm<< "\n";//?????????????????????
+        this->textAss = oss.str();
+        return 0;
+    }
+    if ( this->type == ADDU)
+    {
+        oss<<this->isaTable[i].name<<" ";
+        oss<<this->registersTable[this->bytes.asI.s];
+        oss<<this->registersTable[this->bytes.asI.t];
+        oss<<(uint16) this->bytes.asI.imm<<"\n";///??????????????????????????
+        this->textAss = oss.str();
         return 0;
     }
     return -1;
 }
 
-
 int FuncInstr::parseJ()
 {
     uint8 opcode = this->bytes.asR.opcode;
     uint32 bytes = this->bytes.raw;
+    std::ostringstream oss;
     int i = 0;
     while(
      !( opcode== this->isaTable[i].opcode)
@@ -142,13 +153,25 @@ int FuncInstr::parseJ()
     
     if ( this->type == BRANCH)
     {
-        sprintf(textAss,"%s %u\n",
-                this->isaTable[i].name,
-                (uint32) this->bytes.asJ.address);
+        oss<<this->isaTable[i].name<<"\n";
+        oss<<(uint32) this->bytes.asJ.address;
+        this->textAss = oss.str();
         return 0;
     }
     return -1;
-}
+};
+
+std::string FuncInstr::Dump( std::string indent) const
+{
+    return indent+this->textAss;
+};
+
+std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
+{
+    return out << instr.Dump("");
+};
+
+
 
 const FuncInstr::ISAEntry FuncInstr::isaTable[] = 
 {
@@ -158,7 +181,7 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
     { "sub"  , 0x0,     0x22, FuncInstr::FORMAT_R, FuncInstr::SUB    },
     { "subu" , 0x0,     0x23, FuncInstr::FORMAT_R, FuncInstr::SUB    },
     { "addi" , 0x8,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADD    },
-    { "addiu", 0x9,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADD    },
+    { "addiu", 0x9,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADDU    },
     { "sll"  , 0x0,     0x00, FuncInstr::FORMAT_R, FuncInstr::SHIFT  },
     { "srl"  , 0x0,     0x02, FuncInstr::FORMAT_R, FuncInstr::SHIFT  },
     { "beq"  , 0x4,     0x00, FuncInstr::FORMAT_I, FuncInstr::BRANCH },

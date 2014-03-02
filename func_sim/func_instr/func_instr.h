@@ -24,10 +24,11 @@ class FuncInstr
         int parseR( );
         int parseI( );
         int parseJ( );
-        char textAss[20];
+        std::string textAss;
     public:
         FuncInstr( uint32 bytes);
         std::string Dump( std::string indent = " ") const;
+        
 
         enum Format
         {
@@ -38,6 +39,7 @@ class FuncInstr
         enum Type
         {
             ADD,
+            ADDU,
             SUB,
             SHIFT,
             BRANCH,
@@ -81,6 +83,8 @@ class FuncInstr
         static const ISAEntry isaTable[];
         static const char* registersTable[];
 };
+
+std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr);
 
 #endif // FUNC_INSTR__FUNC_INSTR_H
 
