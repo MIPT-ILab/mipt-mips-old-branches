@@ -10,6 +10,7 @@
 
 FuncInstr::FuncInstr( uint32 bytes)
 {
+printf("Constryctor\n");
     this->initFormat( bytes);
     switch ( this->format)
     {
@@ -23,15 +24,24 @@ FuncInstr::FuncInstr( uint32 bytes)
             this->parseI( );
             break;
         default:
-            assert(0);
+            std::ostringstream oss;
+            oss<<"Undefined command\n";
+            this->textAss = oss.str();
     }
 }
 
 int FuncInstr::initFormat( uint32 bytes)
 {
+printf("initFormat\n");
     this->bytes.raw = bytes;
     uint8 opcode = this->bytes.asR.opcode;
-
+printf("%llx\n",(uint64)bytes);
+printf("%x %x %x %x %x\n",
+    (uint32) this->bytes.asR.opcode, 
+    (uint32) this->bytes.asR.t, 
+    (uint32) this->bytes.asR.s, 
+    (uint32) this->bytes.asR.d,
+    (uint32) this->bytes.asR.funct); 
     for( int i = 0;
       this->isaTable[i].type != END_OF_INSTRUCTIONS_SET;
       i++)
@@ -49,6 +59,7 @@ int FuncInstr::initFormat( uint32 bytes)
 
 int FuncInstr::parseR()
 {
+printf("r\n");
     uint8 opcode = this->bytes.asR.opcode;
     uint8 funct = this->bytes.asR.funct;
     uint32 bytes = this->bytes.raw;
@@ -56,7 +67,7 @@ int FuncInstr::parseR()
     int i = 0;
     while(
      !( opcode== this->isaTable[i].opcode && funct== this->isaTable[i].func)
-     || 
+     && 
      (this->isaTable[i].type!= END_OF_INSTRUCTIONS_SET) )
         i++;
 
@@ -100,15 +111,17 @@ int FuncInstr::parseR()
 
 int FuncInstr::parseI()
 {
+printf("I\n");
     uint8 opcode = this->bytes.asR.opcode;
     uint32 bytes = this->bytes.raw;
     std::ostringstream oss;
     int i = 0;
     while(
      !( opcode== this->isaTable[i].opcode)
-     || 
+     && 
      (this->isaTable[i].type!= END_OF_INSTRUCTIONS_SET) ) 
         i++;
+printf("1\n");
     if ( (opcode == 0x9) && !this->bytes.asI.imm)//----move
     {
         oss<< "move "<< this->registersTable[this->bytes.asI.s];
@@ -116,6 +129,7 @@ int FuncInstr::parseI()
         this->textAss = oss.str();
         return 0;
     }
+printf("2\n");
     if ( this->type == BRANCH
          || 
          this->type == ADD )
@@ -136,18 +150,20 @@ int FuncInstr::parseI()
         this->textAss = oss.str();
         return 0;
     }
+printf("3\n");
     return -1;
 }
 
 int FuncInstr::parseJ()
 {
+printf("J\n");
     uint8 opcode = this->bytes.asR.opcode;
     uint32 bytes = this->bytes.raw;
     std::ostringstream oss;
     int i = 0;
     while(
      !( opcode== this->isaTable[i].opcode)
-     || 
+     && 
      (this->isaTable[i].type!= END_OF_INSTRUCTIONS_SET) )
         i++;
     
@@ -177,17 +193,17 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // name   opcode    func  format               type
     { "add  ", 0x0,     0x20, FuncInstr::FORMAT_R, FuncInstr::ADD    },
-    { "addu" , 0x0,     0x21, FuncInstr::FORMAT_R, FuncInstr::ADD    },
-    { "sub"  , 0x0,     0x22, FuncInstr::FORMAT_R, FuncInstr::SUB    },
-    { "subu" , 0x0,     0x23, FuncInstr::FORMAT_R, FuncInstr::SUB    },
-    { "addi" , 0x8,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADD    },
-    { "addiu", 0x9,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADDU    },
-    { "sll"  , 0x0,     0x00, FuncInstr::FORMAT_R, FuncInstr::SHIFT  },
-    { "srl"  , 0x0,     0x02, FuncInstr::FORMAT_R, FuncInstr::SHIFT  },
-    { "beq"  , 0x4,     0x00, FuncInstr::FORMAT_I, FuncInstr::BRANCH },
-    { "bne"  , 0x5,     0x00, FuncInstr::FORMAT_I, FuncInstr::BRANCH },
-    { "j"    , 0x2,     0x00, FuncInstr::FORMAT_J, FuncInstr::BRANCH },
-    { "jr"   , 0x0,     0x08, FuncInstr::FORMAT_R, FuncInstr::BRANCH },
+    { "addu " , 0x0,     0x21, FuncInstr::FORMAT_R, FuncInstr::ADD    },
+    { "sub "  , 0x0,     0x22, FuncInstr::FORMAT_R, FuncInstr::SUB    },
+    { "subu " , 0x0,     0x23, FuncInstr::FORMAT_R, FuncInstr::SUB    },
+    { "addi " , 0x8,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADD    },
+    { "addiu ", 0x9,     0x00, FuncInstr::FORMAT_I, FuncInstr::ADDU    },
+    { "sll "  , 0x0,     0x00, FuncInstr::FORMAT_R, FuncInstr::SHIFT  },
+    { "srl "  , 0x0,     0x02, FuncInstr::FORMAT_R, FuncInstr::SHIFT  },
+    { "beq "  , 0x4,     0x00, FuncInstr::FORMAT_I, FuncInstr::BRANCH },
+    { "bne "  , 0x5,     0x00, FuncInstr::FORMAT_I, FuncInstr::BRANCH },
+    { "j "    , 0x2,     0x00, FuncInstr::FORMAT_J, FuncInstr::BRANCH },
+    { "jr "   , 0x0,     0x08, FuncInstr::FORMAT_R, FuncInstr::BRANCH },
     // the last one must be of "END_OF..." type
     { "",0x0,0x0,FuncInstr::FORMAT_R ,FuncInstr::END_OF_INSTRUCTIONS_SET}
 
@@ -195,18 +211,18 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 
 const char* FuncInstr::registersTable[] =
 {
-    "$zero",
-    "$at",
-    "$v0", "$v1",
-    "$a0", "$a2", "$a3",
-    "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
-    "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7",
-    "$t8", "$t9",
-    "$k0", "$k1",        
-    "$gp",
-    "$sp",
-    "$fp",
-    "$ra"
+    "$zero ",
+    "$at ",
+    "$v0 ", "$v1 ",
+    "$a0 ", "$a2 ", "$a3 ",
+    "$t0 ", "$t1 ", "$t2 ", "$t3 ", "$t4 ", "$t5 ", "$t6 ", "$t7 ",
+    "$s0 ", "$s1 ", "$s2 ", "$s3 ", "$s4 ", "$s5 ", "$s6 ", "$s7 ",
+    "$t8 ", "$t9 ",
+    "$k0 ", "$k1 ",        
+    "$gp ",
+    "$sp ",
+    "$fp ",
+    "$ra "
 };
 
 
