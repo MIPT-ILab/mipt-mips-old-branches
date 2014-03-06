@@ -1,8 +1,15 @@
-/**
+/** file ~/func_sim/func_instr.h
+ * It is header file with defenition of 
+ * FuncInstr CLASS.
+ * This class useful for:
+ *      - converting opcode to instruction
+ *      - presenting it to ridiable string-format
+ *      - printing disassembling variant
  *
  *
- *
- *
+ *     now implemented instructions:
+ *         add, addu, sub, subu, addi, addiu, sll,
+ *         srl, beq, bne, j, jr, nop, moov(1), clear
  */
 
 #ifndef FUNC_INSTR__FUNC_INSTR_H
@@ -12,37 +19,39 @@
 //Generic C++
 #include <iostream>
 
-
 //Generic C
-#include "stdio.h"
 #include "assert.h"
 
 class FuncInstr
 {
+    public:
+        FuncInstr( uint32 bytes);
+        //public function, used to gat a string with disas op
+        std::string Dump( std::string indent = " ") const;
     private:
+        // service functions for simpler opcodes parsing
         int initFormat( uint32 bytes);
         int parseR( );
         int parseI( );
         int parseJ( );
-        std::string textAss;
-    public:
-        FuncInstr( uint32 bytes);
-        std::string Dump( std::string indent = " ") const;
         
-
+        std::string textAss;
+        // service constants
         enum Format
         {
             FORMAT_R,
             FORMAT_I,
             FORMAT_J,
         } format; 
-        enum Type
+       
+       enum Type
         {
             ADD,
             ADDU,
             SUB,
             SHIFT,
             BRANCH,
+            BRANCH_R,
             END_OF_INSTRUCTIONS_SET
         }type;
 
@@ -80,10 +89,13 @@ class FuncInstr
             FuncInstr::Format format;
             FuncInstr::Type type;
         };
+
         static const ISAEntry isaTable[];
+        
         static const char* registersTable[];
 };
 
+// this operator overload std ostream stream to correctly work.
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr);
 
 #endif // FUNC_INSTR__FUNC_INSTR_H
