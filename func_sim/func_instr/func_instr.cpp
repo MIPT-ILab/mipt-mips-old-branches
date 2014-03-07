@@ -29,7 +29,7 @@ FuncInstr::FuncInstr( uint32 bytes)
 }
 
 // This function thinks about what temtlate use
-// to disasembly this opcode
+// to disasembly given opcode
 int FuncInstr::initFormat( uint32 bytes)
 {
     this->bytes.raw = bytes;
@@ -88,16 +88,16 @@ int FuncInstr::parseR()
         case ADD:
         case SUB:
             oss << this->isaTable[i].name;
-            oss << this->registersTable[this->bytes.asR.d];
-            oss << this->registersTable[this->bytes.asR.s];
+            oss << this->registersTable[this->bytes.asR.d]<<", ";
+            oss << this->registersTable[this->bytes.asR.s]<<", ";
             oss << this->registersTable[this->bytes.asR.t] <<"\n";
             break;
         //-------------- name %1 %2 C
         case SHIFT:
             oss << this->isaTable[i].name;
-            oss << this->registersTable[this->bytes.asR.d];
-            oss << this->registersTable[this->bytes.asR.t];
-            oss << (uint32) this->bytes.asR.shamt <<"\n";
+            oss << this->registersTable[this->bytes.asR.d]<<", ";
+            oss << this->registersTable[this->bytes.asR.t]<<", ";
+            oss << std::hex<<"0x"<< (uint32) this->bytes.asR.shamt <<"\n";
             break;
         //-------------- jr $s
         case BRANCH_R:
@@ -133,7 +133,7 @@ int FuncInstr::parseI()
         }
     if ( (opcode == 0x9) && ( this->bytes.asI.imm == 0))//----move
     {
-        oss << "move " << this->registersTable[ this->bytes.asI.t];
+        oss << "move " << this->registersTable[ this->bytes.asI.t]<<", ";
         oss << this->registersTable[ this->bytes.asI.s] <<"\n";
         this->textAss = oss.str();
         return 0;
@@ -144,21 +144,21 @@ int FuncInstr::parseI()
     {
         case BRANCH:
             oss << this->isaTable[i].name;
-            oss << this->registersTable[ this->bytes.asI.s];
-            oss << this->registersTable[ this->bytes.asI.t];
-            oss << (int16) this->bytes.asI.imm << "\n";
+            oss << this->registersTable[ this->bytes.asI.s]<<", ";
+            oss << this->registersTable[ this->bytes.asI.t]<<", ";
+            oss << std::hex<<"0x"<< (int16) this->bytes.asI.imm << "\n";
             break;
         case ADD:
             oss << this->isaTable[ i].name;
-            oss << this->registersTable[ this->bytes.asI.t];
-            oss << this->registersTable[ this->bytes.asI.s];
-            oss << (int16) this->bytes.asI.imm << "\n";
+            oss << this->registersTable[ this->bytes.asI.t]<<", ";
+            oss << this->registersTable[ this->bytes.asI.s]<<", ";
+            oss << std::hex<<"0x"<< (int16) this->bytes.asI.imm << "\n";
             break;
         case ADDU:
             oss << this->isaTable[ i].name;
-            oss << this->registersTable[ this->bytes.asI.t];
-            oss << this->registersTable[ this->bytes.asI.s];
-            oss << (uint16) this->bytes.asI.imm <<"\n";
+            oss << this->registersTable[ this->bytes.asI.t]<<", ";
+            oss << this->registersTable[ this->bytes.asI.s]<<", ";
+            oss << std::hex<<"0x"<< (uint16) this->bytes.asI.imm <<"\n";
             break;
         default:
             oss << "Undefined command\n";
@@ -191,8 +191,8 @@ int FuncInstr::parseJ()
     switch (this->type)
     {
         case BRANCH:
-            oss << this->isaTable[ i].name <<"\n";
-            oss << (uint32) this->bytes.asJ.address;
+            oss << this->isaTable[ i].name;
+            oss << std::hex<<"0x"<< (uint32) this->bytes.asJ.address<<"\n";
             break;
         default:
             oss << "Undefined command\n";
@@ -235,18 +235,18 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 
 const char* FuncInstr::registersTable[] =
 {
-    "$zero ",
-    "$at ",
-    "$v0 ", "$v1 ",
-    "$a0 ", "$a1 ", "$a2 ", "$a3 ",
-    "$t0 ", "$t1 ", "$t2 ", "$t3 ", "$t4 ", "$t5 ", "$t6 ", "$t7 ",
-    "$s0 ", "$s1 ", "$s2 ", "$s3 ", "$s4 ", "$s5 ", "$s6 ", "$s7 ",
-    "$t8 ", "$t9 ",
-    "$k0 ", "$k1 ",        
-    "$gp ",
-    "$sp ",
-    "$fp ",
-    "$ra "
+    "$zero",
+    "$at",
+    "$v0", "$v1",
+    "$a0", "$a1", "$a2", "$a3",
+    "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
+    "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7",
+    "$t8", "$t9",
+    "$k0", "$k1",        
+    "$gp",
+    "$sp",
+    "$fp",
+    "$ra"
 };
 
 

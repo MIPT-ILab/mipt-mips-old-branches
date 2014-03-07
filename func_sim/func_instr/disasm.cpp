@@ -28,10 +28,9 @@ int main( int argc, char** argv)
     {
         instructions[i] = new FuncInstr( content[i] );
     }
-    std::cout<<"section: "<<argv[2]<<"\n";
     for( i =0 ; i< section->size/4; i++)
     {
-        std::cout<<"\t"<<*(instructions[i]);
+        std::cout<<"    "<<*(instructions[i]);
     }
     return 0;
 }
