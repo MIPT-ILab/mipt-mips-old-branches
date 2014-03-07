@@ -41,7 +41,7 @@ int main( int argc, char* argv[ ])
 
 				FuncInstr ISA_instr( instruction);
                 
-				ISA_instr.Dump( "    ");
+				cout << "    " << ISA_instr;
 			}
 			return 0;
 		}

@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cstring>
-
+#include <sstream>
 #include "../../common/types.h"
 
 
@@ -28,8 +28,8 @@ struct InstrData
     uint8 opcode;
     uint8 funct;
 
-	string format;
-	string type;
+    string format;
+    string type;
 };
 
 
@@ -38,46 +38,46 @@ union bytes_t
 {
 
 // For reading in I-type
-	struct
-	{
-		unsigned imm:16;
-		unsigned t:5;
-		unsigned s:5;
-		unsigned opcode:6;
-	} asI;
+    struct
+    {
+        unsigned imm:16;
+        unsigned t:5;
+	unsigned s:5;
+	unsigned opcode:6;
+    } asI;
 
 // For reading in R-type
-	struct
-	{
-		unsigned funct:6;
-		unsigned shamt:5;
-		unsigned d:5;
-		unsigned t:5;
-		unsigned s:5;
-		unsigned opcode:6;
-	} asR;
+    struct
+    {
+	unsigned funct:6;
+	unsigned shamt:5;
+	unsigned d:5;
+	unsigned t:5;
+	unsigned s:5;
+	unsigned opcode:6;
+    } asR;
 
 // For reading im J-type
-	struct
-	{
-		unsigned imm:26;
-		unsigned opcode:6;
-	} asJ;
+    struct
+    {
+	unsigned imm:26;
+	unsigned opcode:6;
+    } asJ;
 
 // For reading instruction in binary format
-	uint32 raw;
+    uint32 raw;
 };
 
 
 // Main class, which have info about instruction and some methods, which use this instruction
 class FuncInstr
 {
-	private:
+    private:
 // Binary instruction	
-		bytes_t bytes_;
+	bytes_t bytes_;
 
 // Info about instruction
-		InstrData InstrInfo;
+	InstrData InstrInfo;
 
 // Static array for store ISA information
         static const InstrData isaTable[ ]; 
@@ -93,9 +93,9 @@ class FuncInstr
         uint32 shamt;
         uint32 imm;
 
-	public:
+    public:
 // Constructor of this class. He is parse binary instruction and enter info about it in InstrInfo
-		FuncInstr( uint32 bytes);
+	FuncInstr( uint32 bytes);
 
 // Methods for parse
         void parse_R( );
@@ -106,7 +106,7 @@ class FuncInstr
         void pseudo( );
 
 // Dump method. He is print instruction in assembler format
-		string Dump( string indent = " ") const;
+	string Dump( string indent = " ") const;
 
 // This function just call Dump method with empty indent string
         friend ostream& operator<< ( ostream& out, const FuncInstr& instr)
@@ -115,4 +115,5 @@ class FuncInstr
             return out;
         };
 };
+
 

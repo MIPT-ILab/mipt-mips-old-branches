@@ -186,61 +186,65 @@ void FuncInstr::pseudo( )
 
 string FuncInstr::Dump( string indent) const
 {
+    ostringstream str_out;
+    
+    str_out << indent;
+
 // If instruction have unknown type
     if( InstrInfo.type == "NO_TYPE")
     {
-        cout << "---instruction is not defined---\n";
-        return "";
+        str_out << "instruction is not defined\n";
+        return str_out.str();
     }
 // Print type of instruction
-	if( InstrInfo.type != "NO_TYPE")
-	{
-		cout << indent << InstrInfo.type << " ";
-	}
+    if( InstrInfo.type != "NO_TYPE")
+    {
+	str_out << InstrInfo.type << " ";
+    }
 // Printf (if defined) rs
-	if( rd != registers[ 32])
-	{
-		cout << rd << " ";
-	} 
+    if( rd != registers[ 32])
+    {
+	str_out << rd << " ";
+    }	  
 // Printf (if defined) rt
-	if( rt != registers[ 32])
-	{
-		cout << rt << " ";
-	}
+    if( rt != registers[ 32])
+    {
+	str_out << rt << " ";  
+    }
 // Printf (if defined) rd
-	if( rs != registers[ 32])
-	{
-		cout << rs << " ";
-	}
+    if( rs != registers[ 32])
+    {
+	str_out << rs << " ";
+    }
 // Printf (if defined) shamt
-	if( shamt != NO_SHAMT)
-	{
-		cout << shamt << " ";
-	}
+    if( shamt != NO_SHAMT)
+    {
+	str_out << shamt << " ";
+    }
 // Printf (if defined) immidiate
-	if( imm != NO_IMM)
-	{
+    if( imm != NO_IMM)
+    {
 // If size of immidiate == 2 bytes
-		if( InstrInfo.format == "FORMAT_I")
-		{
-			if( InstrInfo.type == "ADDIU")
+	if( InstrInfo.format == "FORMAT_I")
+	{
+	    if( InstrInfo.type == "ADDIU")
             {
-                cout << ( uint16)imm;
+                str_out << ( uint16)imm;
             }
             else
             {
-                cout << ( int16)imm;
+                str_out << ( int16)imm;
             }
-		}
-// If size of immidiate > 2 bytes
-		else
-		{
-			cout << imm;
-		}
 	}
+// If size of immidiate > 2 bytes
+	else
+	{
+	    str_out << imm;
+	}
+    }
 	
-	cout << "\n";
-	return "";
+    str_out << "\n";
+    return str_out.str();
 }
 
 // ----------------------------------------------------------------
