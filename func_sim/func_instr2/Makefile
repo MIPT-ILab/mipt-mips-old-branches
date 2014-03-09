@@ -29,7 +29,7 @@ func_instr: func_instr.o elf_parser.o disasm.o
 	@echo "---------------------------------"
 	@echo "$@ is built SUCCESSFULLY"
 
-func_instr.o: func_instr.cpp func_instr.h types.h commands.cpp
+func_instr.o: func_instr.cpp func_instr.h types.h
 	$(CXX) -c $< $(INCL)
 
 elf_parser.o: elf_parser.cpp elf_parser.h
