@@ -64,7 +64,7 @@ const char* registersTable[] =
     "$fp",
     "$ra"
 };
-
+// used by default, if comand is not implemented
 int undefined_command(std::string& str, Bytes bytes)
 {
     std::ostringstream oss;
@@ -220,7 +220,8 @@ int j_f(std::string& str, Bytes bytes) // 0x2
 {
     std::ostringstream oss;
     oss << "j ";
-    oss << bytes.asJ.address<<"\n";// !!!!!!!!???????!!!!!!
+    oss << std::hex<<"0x"<<bytes.asJ.address<<"\n";
+    //oss << std::hex<<"0x"<<( ((uint32)bytes.asJ.address) << 2)<<"\n"; !!!
     str = oss.str();
     return 0;
 }

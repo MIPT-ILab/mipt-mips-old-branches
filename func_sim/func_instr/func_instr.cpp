@@ -72,7 +72,7 @@ int FuncInstr::parseR()
         this->textAss = oss.str();
         return 0;
     }
-    if( !opcode && (funct==0x21) &&     //------- clear
+    if( (funct==0x21) &&     //------- clear
              !this->bytes.asR.s && !this->bytes.asR.t )
     {
         oss << "clear ";
@@ -192,7 +192,7 @@ int FuncInstr::parseJ()
     {
         case BRANCH:
             oss << this->isaTable[ i].name;
-            oss << std::hex<<"0x"<< (uint32) this->bytes.asJ.address<<"\n";
+            oss << std::hex<<"0x"<< (uint32) this->bytes.asJ.address<<"\n";//!!
             break;
         default:
             oss << "Undefined command\n";
