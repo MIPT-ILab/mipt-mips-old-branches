@@ -18,9 +18,22 @@
 #include "../../common/types.h"
 //Generic C++
 #include <iostream>
+#include <sstream>
 
 //Generic C
 #include "assert.h"
+
+class FuncInstr
+{
+    public:
+        FuncInstr( uint32 bytes);
+        //public function, used to gat a string with disas op
+        std::string Dump( std::string indent = " ") const;
+    private:
+        // service functions for simpler opcodes parsing
+        int initFormat( uint32 bytes);
+        std::string textAss;
+    public:    
         union Bytes
         {
             struct
@@ -46,29 +59,12 @@
             } asJ;
             uint32 raw;
         };
-
-class FuncInstr
-{
-    public:
-        FuncInstr( uint32 bytes);
-        //public function, used to gat a string with disas op
-        std::string Dump( std::string indent = " ") const;
     private:
-        // service functions for simpler opcodes parsing
-        int initFormat( uint32 bytes);
-        int parseR( );
-        int parseI( );
-        int parseJ( );
-        
-        std::string textAss;
         Bytes bytes;
 };
 
-
 // this operator overload std ostream stream to correctly work.
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr);
-
-
 
 #endif // FUNC_INSTR__FUNC_INSTR_H
 

@@ -6,9 +6,9 @@
  */
 
 #include "func_instr.h"
-#include <sstream>
 
-int parse_command(std::string& str, Bytes bytes);   // implemented at
+int parse_command(std::string& str, FuncInstr::Bytes bytes);
+                                                    // implemented at
                                                     // the end of file
 
 FuncInstr::FuncInstr( uint32 bytes)
@@ -33,7 +33,7 @@ std::ostream& operator << ( std::ostream& out, const FuncInstr& instr)
  *       operation.
  *
  * -to add new instruction, you should write it in this format:
- *   int name(std::string& str, Bytes bytes)
+ *   int name(std::string& str, FuncInstr::Bytes bytes)
  * and add it to hash table in her position at the end of this file.
  *
  * - there is two hash tables:
@@ -65,7 +65,7 @@ const char* registersTable[] =
     "$ra"
 };
 // used by default, if comand is not implemented
-int undefined_command(std::string& str, Bytes bytes)
+int undefined_command(std::string& str, FuncInstr::Bytes bytes)
 {
     std::ostringstream oss;
     oss<<"Undefined command\n";
@@ -73,7 +73,7 @@ int undefined_command(std::string& str, Bytes bytes)
     return -1;
 }
 //---------------------------------------------- I TYPES
-int addi_f(std::string& str, Bytes bytes) // 0x8
+int addi_f(std::string& str, FuncInstr::Bytes bytes) // 0x8
 {
     std::ostringstream oss;
     oss << "addi ";
@@ -83,7 +83,7 @@ int addi_f(std::string& str, Bytes bytes) // 0x8
     str = oss.str();
     return 0;
 }
-int addiu_f(std::string& str, Bytes bytes) // 0x9
+int addiu_f(std::string& str, FuncInstr::Bytes bytes) // 0x9
 {
     std::ostringstream oss;
     if ( bytes.asI.imm == 0 ) // move
@@ -108,7 +108,7 @@ int addiu_f(std::string& str, Bytes bytes) // 0x9
     str = oss.str();
     return 0;
 }
-int beq_f(std::string& str, Bytes bytes) // 0x4
+int beq_f(std::string& str, FuncInstr::Bytes bytes) // 0x4
 {
     std::ostringstream oss;
     oss << "beq ";
@@ -118,7 +118,7 @@ int beq_f(std::string& str, Bytes bytes) // 0x4
     str = oss.str();
     return 0;
 }
-int bne_f(std::string& str, Bytes bytes) // 0x5
+int bne_f(std::string& str, FuncInstr::Bytes bytes) // 0x5
 {
     std::ostringstream oss;
     oss << "bne ";
@@ -130,9 +130,9 @@ int bne_f(std::string& str, Bytes bytes) // 0x5
 }
 //---------------------------------------------- R type
 
-int parseR_f(std::string& str, Bytes bytes); // 0x0
+int parseR_f(std::string& str, FuncInstr::Bytes bytes); // 0x0
 
-int add_f(std::string& str, Bytes bytes) // 0x0 0x20
+int add_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x20
 {
     std::ostringstream oss;
     oss << "add ";
@@ -142,7 +142,7 @@ int add_f(std::string& str, Bytes bytes) // 0x0 0x20
     str = oss.str();
     return 0;
 }
-int addu_f(std::string& str, Bytes bytes) // 0x0 0x21
+int addu_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x21
 {
     std::ostringstream oss;
     if ( (bytes.asR.d == 0) && (bytes.asR.s == 0 ) )
@@ -160,7 +160,7 @@ int addu_f(std::string& str, Bytes bytes) // 0x0 0x21
     str = oss.str();
     return 0;
 }
-int sub_f(std::string& str, Bytes bytes) // 0x0 0x22
+int sub_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x22
 {
     std::ostringstream oss;
     oss << "sub ";
@@ -170,7 +170,7 @@ int sub_f(std::string& str, Bytes bytes) // 0x0 0x22
     str = oss.str();
     return 0;
 }
-int subu_f(std::string& str, Bytes bytes) // 0x0 0x23
+int subu_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x23
 {
     std::ostringstream oss;
     oss << "subu ";
@@ -180,7 +180,7 @@ int subu_f(std::string& str, Bytes bytes) // 0x0 0x23
     str = oss.str();
     return 0;
 }
-int sll_f(std::string& str, Bytes bytes) // 0x0 0x0
+int sll_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x0
 {
     std::ostringstream oss;
     if ( bytes.raw == 0)
@@ -197,7 +197,7 @@ int sll_f(std::string& str, Bytes bytes) // 0x0 0x0
     str = oss.str();
     return 0;
 }
-int srl_f(std::string& str, Bytes bytes) // 0x0 0x2
+int srl_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x2
 {
     std::ostringstream oss;
     oss << "srl ";
@@ -207,7 +207,7 @@ int srl_f(std::string& str, Bytes bytes) // 0x0 0x2
     str = oss.str();
     return 0;
 }
-int jr_f(std::string& str, Bytes bytes) // 0x0 0x8
+int jr_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x8
 {
     std::ostringstream oss;
     oss << "jr ";
@@ -216,7 +216,7 @@ int jr_f(std::string& str, Bytes bytes) // 0x0 0x8
     return 0;
 }
 //--------------- J type
-int j_f(std::string& str, Bytes bytes) // 0x2
+int j_f(std::string& str, FuncInstr::Bytes bytes) // 0x2
 {
     std::ostringstream oss;
     oss << "j ";
@@ -226,7 +226,7 @@ int j_f(std::string& str, Bytes bytes) // 0x2
     return 0;
 }
 // ADDITIONAL FUNCTIONS
-int and_f(std::string& str, Bytes bytes) // 0x0 0x24
+int and_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x24
 {
     std::ostringstream oss;
     oss << "and ";
@@ -236,7 +236,7 @@ int and_f(std::string& str, Bytes bytes) // 0x0 0x24
     str = oss.str();
     return 0;
 }
-int or_f(std::string& str, Bytes bytes) // 0x0 0x25
+int or_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x25
 {
     std::ostringstream oss;
     oss << "or ";
@@ -246,7 +246,7 @@ int or_f(std::string& str, Bytes bytes) // 0x0 0x25
     str = oss.str();
     return 0;
 }
-int xor_f(std::string& str, Bytes bytes) // 0x0 0x26
+int xor_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x26
 {
     std::ostringstream oss;
     oss << "xor ";
@@ -256,7 +256,7 @@ int xor_f(std::string& str, Bytes bytes) // 0x0 0x26
     str = oss.str();
     return 0;
 }
-int nor_f(std::string& str, Bytes bytes) // 0x0 0x27
+int nor_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x27
 {
     std::ostringstream oss;
     oss << "nor ";
@@ -266,7 +266,7 @@ int nor_f(std::string& str, Bytes bytes) // 0x0 0x27
     str = oss.str();
     return 0;
 }
-int slt_f(std::string& str, Bytes bytes) // 0x0 0x2a
+int slt_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x2a
 {
     std::ostringstream oss;
     oss << "slt ";
@@ -276,7 +276,7 @@ int slt_f(std::string& str, Bytes bytes) // 0x0 0x2a
     str = oss.str();
     return 0;
 }
-int sllv_f(std::string& str, Bytes bytes) // 0x0 0x4
+int sllv_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x4
 {
     std::ostringstream oss;
     oss << "sllv ";
@@ -286,7 +286,7 @@ int sllv_f(std::string& str, Bytes bytes) // 0x0 0x4
     str = oss.str();
     return 0;
 }
-int srlv_f(std::string& str, Bytes bytes) // 0x0 0x6
+int srlv_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x6
 {
     std::ostringstream oss;
     oss << "srlv ";
@@ -296,7 +296,7 @@ int srlv_f(std::string& str, Bytes bytes) // 0x0 0x6
     str = oss.str();
     return 0;
 }
-int srav_f(std::string& str, Bytes bytes) // 0x0 0x7
+int srav_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x7
 {
     std::ostringstream oss;
     oss << "srav ";
@@ -306,7 +306,7 @@ int srav_f(std::string& str, Bytes bytes) // 0x0 0x7
     str = oss.str();
     return 0;
 }
-int lw_f(std::string& str, Bytes bytes) // 0x21
+int lw_f(std::string& str, FuncInstr::Bytes bytes) // 0x21
 {
     std::ostringstream oss;
     oss << "lw ";
@@ -316,7 +316,7 @@ int lw_f(std::string& str, Bytes bytes) // 0x21
     str = oss.str();
     return 0;
 }
-int sw_f(std::string& str, Bytes bytes) // 0x2b
+int sw_f(std::string& str, FuncInstr::Bytes bytes) // 0x2b
 {
     std::ostringstream oss;
     oss << "sw ";
@@ -326,7 +326,7 @@ int sw_f(std::string& str, Bytes bytes) // 0x2b
     str = oss.str();
     return 0;
 }
-int lui_f(std::string& str, Bytes bytes) // 0xf
+int lui_f(std::string& str, FuncInstr::Bytes bytes) // 0xf
 {
     std::ostringstream oss;
     oss << "lui ";
@@ -335,14 +335,14 @@ int lui_f(std::string& str, Bytes bytes) // 0xf
     str = oss.str();
     return 0;
 }
-int syscall_f(std::string& str, Bytes bytes) // 0x0 0xc
+int syscall_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0xc
 {
     std::ostringstream oss;
     oss << "syscall \n";
     str = oss.str();
     return 0;
 }
-int jal_f(std::string& str, Bytes bytes) // 0x3
+int jal_f(std::string& str, FuncInstr::Bytes bytes) // 0x3
 {
     std::ostringstream oss;
     oss << "jal ";
@@ -350,7 +350,7 @@ int jal_f(std::string& str, Bytes bytes) // 0x3
     str = oss.str();
     return 0;
 }
-int multu_f(std::string& str, Bytes bytes) // 0x0 0x19
+int multu_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x19
 {
     std::ostringstream oss;
     oss << "multu ";
@@ -359,7 +359,7 @@ int multu_f(std::string& str, Bytes bytes) // 0x0 0x19
     str = oss.str();
     return 0;
 }
-int mflo_f(std::string& str, Bytes bytes) // 0x0 0x12
+int mflo_f(std::string& str, FuncInstr::Bytes bytes) // 0x0 0x12
 {
     std::ostringstream oss;
     oss << "mflo ";
@@ -369,7 +369,7 @@ int mflo_f(std::string& str, Bytes bytes) // 0x0 0x12
 }
 
 // hash table of opcodes
-int (*parse_command_hash[])(std::string& str, Bytes bytes) =
+int (*parse_command_hash[])(std::string& str, FuncInstr::Bytes bytes) =
 {
 /* 0x00 */  parseR_f,   // of opcode 0x0, use the next table
                         // with hashing by funct
@@ -443,7 +443,7 @@ int (*parse_command_hash[])(std::string& str, Bytes bytes) =
 };
 
 // hash-table for R-type commands by opcodes
-int (*parseR_hash[])(std::string& str, Bytes bytes) =
+int (*parseR_hash[])(std::string& str, FuncInstr::Bytes bytes) =
 {
 /* 0x00 */  sll_f,
 /* 0x01 */  undefined_command,
@@ -516,12 +516,12 @@ int (*parseR_hash[])(std::string& str, Bytes bytes) =
 };
 
 
-int parse_command(std::string& str, Bytes bytes)
+int parse_command(std::string& str, FuncInstr::Bytes bytes)
 {
     return parse_command_hash[bytes.asR.opcode](str,bytes);
 }
 
-int parseR_f(std::string& str, Bytes bytes) // 0x0
+int parseR_f(std::string& str, FuncInstr::Bytes bytes) // 0x0
 {
     return parseR_hash[bytes.asR.funct](str,bytes);
 }
