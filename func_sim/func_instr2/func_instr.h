@@ -6,10 +6,12 @@
  *      - presenting it to ridiable string-format
  *      - printing disassembling variant
  *
- *
  *     now implemented instructions:
- *         add, addu, sub, subu, addi, addiu, sll,
- *         srl, beq, bne, j, jr, nop, moov(1), clear
+ *          j, jal, beq, bne, addi, addiu, lui, 
+ *          lw, sw, sll, srl, sllv, srlv, arav,
+ *          jr, syscall, mflo, multu, add, addu,
+ *          sub, suby, and, or, xor, nor, slt,
+ *          nop, move, clear (30).
  */
 
 #ifndef FUNC_INSTR__FUNC_INSTR_H
@@ -34,7 +36,7 @@ class FuncInstr
         int initFormat( uint32 bytes);
         std::string textAss;
     public:    
-        union Bytes
+        union Bytes // used to parsing bits from op. code.
         {
             struct
             {
