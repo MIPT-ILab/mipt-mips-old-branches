@@ -47,6 +47,7 @@ const char *FuncInstr::regTable[32] =
 };
 
 
+
 FuncInstr::FuncInstr( uint32 bytes)
 {
     instr.raw = bytes;
@@ -66,7 +67,6 @@ FuncInstr::FuncInstr( uint32 bytes)
             initUnknown();
             break;
     }
-
 }
 
 
@@ -106,18 +106,20 @@ void FuncInstr::initR()
         initUnknown();
         return;
     }
+    if ( checkPseudo())
+        return;
     ostringstream oss;
     oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " ";
+    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " $";
     switch (outputType)
     {
         case OUT_R_ARITHM:
-            oss << regTable[instr.asR.rd] << ", " \
-                << regTable[instr.asR.rs] << ", " \
+            oss << regTable[instr.asR.rd] << ", $" \
+                << regTable[instr.asR.rs] << ", $" \
                 << regTable[instr.asR.rt];
             break;
         case OUT_R_SHAMT:
-            oss << regTable[instr.asR.rd] << ", " \
+            oss << regTable[instr.asR.rd] << ", $" \
                 << regTable[instr.asR.rt] << ", " \
                 << dec << instr.asR.shamt;
             break;
@@ -129,6 +131,7 @@ void FuncInstr::initR()
     disasmStr = oss.str();
 }
 
+
 void FuncInstr::initI()
 {
     for ( int i = 0; i < isaTableSize; i++)
@@ -138,25 +141,28 @@ void FuncInstr::initI()
             isaNum = i;
             break;
         }
+    if ( checkPseudo())
+        return;
     ostringstream oss;
     oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " ";
+    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " $";
     switch (outputType)
     {
         case OUT_I_ARITHM:
-            oss << regTable[instr.asI.rt] << ", " \
+            oss << regTable[instr.asI.rt] << ", $" \
                 << regTable[instr.asI.rs] << ", " \
-                << dec << (int) instr.asI.imm;
+                << dec << (signed short) instr.asI.imm;
             break;
         case OUT_I_BRANCH:
-            oss << regTable[instr.asI.rs] << ", " \
+            oss << regTable[instr.asI.rs] << ", $" \
                 << regTable[instr.asI.rt] << ", " \
-                << dec << (int) instr.asI.imm;
+                << dec << (signed short) instr.asI.imm;
             break;
     }
     oss << endl;
     disasmStr = oss.str();
 }
+
 
 void FuncInstr::initJ()
 {
@@ -167,6 +173,8 @@ void FuncInstr::initJ()
             isaNum = i;
             break;
         }
+    if ( checkPseudo())
+        return;
     ostringstream oss;
     oss << hex << setfill('0');
     oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " ";
@@ -175,12 +183,54 @@ void FuncInstr::initJ()
     disasmStr = oss.str();
 }
 
+
 void FuncInstr::initUnknown()
 {
     ostringstream oss;
     oss << hex << setfill('0');
     oss << "0x" << setw(8) << instr.raw << '\t' << "Unknown" << endl;
     disasmStr = oss.str();
+}
+
+
+int FuncInstr::checkPseudo()
+{
+    ostringstream oss;
+    oss << hex << setfill('0');
+    oss << "0x" << setw(8) << instr.raw << '\t';
+    // nop
+    if ( instr.raw == 0)
+    {
+        oss << "nop" << endl;
+        disasmStr = oss.str();
+        return 1;
+    }
+    // move
+    if (( instr.asI.opcode == 0x9) && ( instr.asI.imm == 0))
+    {
+        oss << "move" << " $" << regTable[instr.asI.rt] \
+            << ", $" << regTable[instr.asI.rs] << endl;
+        disasmStr = oss.str();
+        return 1;
+    }
+    // move
+    if (( instr.asR.opcode == 0x0) && ( instr.asR.funct == 0x21) 
+            && (instr.asR.rt == 0))
+    {
+        oss << "move" << " $" << regTable[instr.asR.rd] \
+            << ", $" << regTable[instr.asI.rs] << endl;
+        disasmStr = oss.str();
+        return 1;
+    }
+    // clear
+    if (( instr.asR.opcode == 0x0) && ( instr.asR.funct == 0x21) 
+            && (instr.asR.rs == 0) && ( instr.asR.rt == 0))
+    {
+        oss << "clear" << " $" << regTable[instr.asR.rd] << endl;
+        disasmStr = oss.str();
+        return 1;
+    }
+    return 0;
 }
 
 

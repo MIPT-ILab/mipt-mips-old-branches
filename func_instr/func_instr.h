@@ -92,6 +92,7 @@ class FuncInstr
         void initI();
         void initJ();
         void initUnknown();
+        int checkPseudo();
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
