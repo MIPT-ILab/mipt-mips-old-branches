@@ -83,15 +83,17 @@ class FuncInstr
         };
         static const ISAEntry isaTable[];
         static const uint32 isaTableSize;
-        uint32 isaNum;
-        static const char *regTable[32];
-        std::string disasmStr;
+        uint32 isaNum;              // Number of matched ISAEntry
+        static const char *regTable[32];    // registers number -> char*
+        std::string disasmStr;      //string for disassembler
                                                                
         void initFormat();
+        // Find instruction and generate output
         void initR();
         void initI();
         void initJ();
         void initUnknown();
+        // check for pseudo-instr and generate specific output
         int checkPseudo();
 };
 

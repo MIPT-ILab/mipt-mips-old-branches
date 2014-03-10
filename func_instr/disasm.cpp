@@ -14,7 +14,7 @@
 
 using namespace std;
 
-int main(int argc, char* argv[])
+int main( int argc, char* argv[])
 {
 
     if ( argc != 3)
@@ -38,10 +38,11 @@ int main(int argc, char* argv[])
     do
     {
         FuncInstr instr((( uint32*) section[i].content)[j >> 2]);
-        cout << hex << setfill('0');
-        cout << "0x" << setw(8) << (section[i].start_addr + j);
+        cout << hex << setfill( '0');
+        cout << "0x" << setw( 8) << ( section[i].start_addr + j);    //instr addr
         cout << '\t' << instr.Dump();
-    } while ( (j += 4) < section[i].size);
+    } while (( j += 4) < section[i].size);
 
     return 0;
 }
+

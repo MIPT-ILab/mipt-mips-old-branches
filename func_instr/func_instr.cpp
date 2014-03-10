@@ -12,6 +12,10 @@
 #include <iomanip>
 
 
+/*
+ * There is only real instructions visible by hardware. Pseudo-instructions 
+ * are handled only in output creating.
+ */
 const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // name  opcode  func   format    outputType
@@ -76,6 +80,7 @@ std::string FuncInstr::Dump( std::string indent) const
 }
 
 
+// Check only for opcode.
 void FuncInstr::initFormat()
 {
     int i;
@@ -83,16 +88,19 @@ void FuncInstr::initFormat()
         if ( instr.asR.opcode == isaTable[i].opcode)
         {
             format = isaTable[i].format;
+            outputType = isaTable[i].outputType;    //for I and J format, but
+            isaNum = i;                             //for R we will check funct
             break;
         }
-    if ( i == isaTableSize)
-        format = FORMAT_UNKNOWN;   // unknown format
+    if ( i == isaTableSize)         // if this opcode didn't found
+        format = FORMAT_UNKNOWN;    // unknown format
 }
 
 
 void FuncInstr::initR()
 {
     int i;
+    // find instr by funct
     for ( i = 0; i < isaTableSize; i++)
         if (( instr.asR.opcode == isaTable[i].opcode) &&
             ( instr.asR.funct == isaTable[i].funct))
@@ -101,7 +109,7 @@ void FuncInstr::initR()
             isaNum = i;
             break;
         }
-    if ( i == isaTableSize)
+    if ( i == isaTableSize)     // if didn't found funct
     {
         initUnknown();
         return;
@@ -109,9 +117,9 @@ void FuncInstr::initR()
     if ( checkPseudo())
         return;
     ostringstream oss;
-    oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " $";
-    switch (outputType)
+    oss << hex << setfill( '0');
+    oss << "0x" << setw( 8) << instr.raw << '\t' << isaTable[isaNum].name << " $";
+    switch ( outputType)
     {
         case OUT_R_ARITHM:
             oss << regTable[instr.asR.rd] << ", $" \
@@ -134,29 +142,22 @@ void FuncInstr::initR()
 
 void FuncInstr::initI()
 {
-    for ( int i = 0; i < isaTableSize; i++)
-        if ( instr.asI.opcode == isaTable[i].opcode) 
-        {
-            outputType = isaTable[i].outputType;
-            isaNum = i;
-            break;
-        }
     if ( checkPseudo())
         return;
     ostringstream oss;
-    oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " $";
-    switch (outputType)
+    oss << hex << setfill( '0');
+    oss << "0x" << setw( 8) << instr.raw << '\t' << isaTable[isaNum].name << " $";
+    switch ( outputType)
     {
         case OUT_I_ARITHM:
             oss << regTable[instr.asI.rt] << ", $" \
                 << regTable[instr.asI.rs] << ", " \
-                << dec << (signed short) instr.asI.imm;
+                << dec << ( signed short) instr.asI.imm;
             break;
         case OUT_I_BRANCH:
             oss << regTable[instr.asI.rs] << ", $" \
                 << regTable[instr.asI.rt] << ", " \
-                << dec << (signed short) instr.asI.imm;
+                << dec << ( signed short) instr.asI.imm;
             break;
     }
     oss << endl;
@@ -166,18 +167,11 @@ void FuncInstr::initI()
 
 void FuncInstr::initJ()
 {
-    for ( int i = 0; i < isaTableSize; i++)
-        if ( instr.asJ.opcode == isaTable[i].opcode) 
-        {
-            outputType = isaTable[i].outputType;
-            isaNum = i;
-            break;
-        }
     if ( checkPseudo())
         return;
     ostringstream oss;
-    oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t' << isaTable[isaNum].name << " ";
+    oss << hex << setfill( '0');
+    oss << "0x" << setw( 8) << instr.raw << '\t' << isaTable[isaNum].name << " ";
     oss << instr.asJ.imm;
     oss << endl;
     disasmStr = oss.str();
@@ -187,17 +181,22 @@ void FuncInstr::initJ()
 void FuncInstr::initUnknown()
 {
     ostringstream oss;
-    oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t' << "Unknown" << endl;
+    oss << hex << setfill( '0');
+    oss << "0x" << setw( 8) << instr.raw << '\t' << "Unknown" << endl;
     disasmStr = oss.str();
 }
 
 
+/*
+ * Check for pseudo-instructions manually. This way because 
+ * a few pseudos exist.
+ * Manual output creating because of it specific form.
+ */
 int FuncInstr::checkPseudo()
 {
     ostringstream oss;
-    oss << hex << setfill('0');
-    oss << "0x" << setw(8) << instr.raw << '\t';
+    oss << hex << setfill( '0');
+    oss << "0x" << setw( 8) << instr.raw << '\t';
     // nop
     if ( instr.raw == 0)
     {
@@ -215,7 +214,7 @@ int FuncInstr::checkPseudo()
     }
     // move
     if (( instr.asR.opcode == 0x0) && ( instr.asR.funct == 0x21) 
-            && (instr.asR.rt == 0))
+            && ( instr.asR.rt == 0))
     {
         oss << "move" << " $" << regTable[instr.asR.rd] \
             << ", $" << regTable[instr.asI.rs] << endl;
@@ -224,7 +223,7 @@ int FuncInstr::checkPseudo()
     }
     // clear
     if (( instr.asR.opcode == 0x0) && ( instr.asR.funct == 0x21) 
-            && (instr.asR.rs == 0) && ( instr.asR.rt == 0))
+            && ( instr.asR.rs == 0) && ( instr.asR.rt == 0))
     {
         oss << "clear" << " $" << regTable[instr.asR.rd] << endl;
         disasmStr = oss.str();
@@ -236,7 +235,7 @@ int FuncInstr::checkPseudo()
 
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
-         return out << instr.Dump("");
+         return out << instr.Dump( "");
 }
 
 
