@@ -92,7 +92,10 @@ void FuncInstr :: initFormat ( uint32 bytes )
 	case 0x2:
 		this -> format = FORMAT_J;
 		break;
-	case 0x4: case 0x5: case 0x8: case 0x9:
+	case 0x4: 
+	case 0x5: 
+	case 0x8: 
+	case 0x9:
 		this -> format = FORMAT_I;
 		break;
 	default:
@@ -204,6 +207,8 @@ void FuncInstr :: parseJ ( uint32 bytes )
 	std :: ostringstream oss;
 	oss << this -> isaTable[JUMP].name
 	    << std::hex << this -> bytes.asJ.addr << std::dec;	
+
+	this -> DumpCom = oss.str();
 }
 
 //********************************************************************
