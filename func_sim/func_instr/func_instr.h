@@ -24,7 +24,9 @@
 
 #define MAX_ISA_ENTRIES 15 // Define the number of ISA table entries
 
-using namespace std;
+using std::cout;
+using std::cerr;
+using std::endl;
 using namespace helper;
 
 class FuncInstr
@@ -37,14 +39,13 @@ class FuncInstr
     stringstream ss;
 
     static const ISAEntry isaTable[ ];
-    static const string REG_NAME[ 32];
+    static const string REG_NAME[ 32]; // 32 Is for the maximum register count in this architecture (2^5)
 
 public:
     FuncInstr( uint32 bytes);
     std::string Dump( std::string indent = " ") const;
     friend std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr);
 
-    //std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
 private:
     void initFormat( uint32 bytes);
     void initRType();

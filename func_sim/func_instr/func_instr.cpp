@@ -23,6 +23,7 @@
 #include "func_instr.h"
 
 
+
 FuncInstr::FuncInstr( uint32 bytes)
 {
     this->initFormat( bytes);
@@ -312,7 +313,6 @@ const string FuncInstr::REG_NAME[ 32] =
 // Good tutorial: http://en.cppreference.com/w/cpp/language/operators
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
-    out << instr.Dump("");
-    return out;
+    return out << instr.Dump("");
 };
 

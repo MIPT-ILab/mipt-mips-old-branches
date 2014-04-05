@@ -16,17 +16,13 @@
 // uArchSim modules
 #include <func_instr.h>
 
-using namespace std;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 
-union Word
-{
-    uint8 byte[4];
-    uint32 word;
-};
 
-
-int main (int argc, char* argv[])
+int main (int argc, char* argv[])   
 {
     const int num_of_args = 3;
 
@@ -38,24 +34,20 @@ int main (int argc, char* argv[])
 
         // print the information about each section
         for ( int i = 0; i < sections_array.size(); ++i)
-	        cout << sections_array[ i].dump() << endl;
+            cout << sections_array[ i].dump() << endl;
 
 
-        int section_id;
+        uint32 section_id;
         for( section_id = 0; section_id < sections_array.size(); ++section_id)
-            if( strcmp( sections_array[ section_id].name, argv[ 2]) == 0) break;
+            if( strcmp( sections_array[ section_id].name, argv[ 2]) == 0)
+                break;
 
-        Word word;
-        for ( int j = 0; j < sections_array[ section_id].size; j += 4)
+
+        for ( uint32 j = 0; j < sections_array[ section_id].size/4; j ++)
         {
-            word.byte[ 3] = sections_array[ section_id].content[ j + 3];
-            word.byte[ 2] = sections_array[ section_id].content[ j + 2];
-            word.byte[ 1] = sections_array[ section_id].content[ j + 1];
-            word.byte[ 0] = sections_array[ section_id].content[ j + 0];
-
-
-            FuncInstr func_instr( word.word);
-            cout << "0x" << hex << word.word << dec << "\t"
+            uint32 instruction = ((uint32 *)sections_array[ section_id].content)[j];
+            FuncInstr func_instr( instruction);
+            cout << "0x" << hex << instruction << dec << "\t"
                  << func_instr << endl;
         }
     }
