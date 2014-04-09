@@ -41,6 +41,7 @@ int main ( int argc, char *argv[] )
 	{
 		for ( uint32 iKB = 0; iKB < 11; ++iKB ) 
 		{
+			std::cout << "iWais " << iWays << " iKB  " << iKB << "\n";
 			fin.open( argv[1] );
 			if ( !fin.is_open() ) {
 				std::cout << "ERROR: I can't open " << argv[1] << '\n';

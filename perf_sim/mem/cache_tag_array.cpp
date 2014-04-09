@@ -39,10 +39,6 @@ CacheTagArray::CacheTagArray ( 	uint32 size,
 			  << " blockSize*ways\n";
 		exit (EXIT_FAILURE); 
 	}
-	if ( addrSize > blockSize * BIT_IN_BYTE ) {
-		std::cout << "ERROR: addrSize > blockSize\n";
-		exit (EXIT_FAILURE);
-	}
 	
 	//set things that independ of associative
 	size_in_bytes = size;
@@ -63,7 +59,7 @@ CacheTagArray::CacheTagArray ( 	uint32 size,
 	* maskIndex
 	* ways
 	*/
-	if ( ways == MAX_VAL32 ) {
+	if ( ways == FUL_AS ) {
 		maskTag = (MAX_VAL32 >> offsetInBlock) << offsetInBlock; 
 		maskIndex = 0;
 		this->ways = size / block_size_in_bytes;
@@ -79,7 +75,6 @@ CacheTagArray::CacheTagArray ( 	uint32 size,
 	} 
 
 	//Allocate memory for cahce array
-	// length = sezi/(blockSize * ways)
 	cache = new blockCache*[maxIndex];
 	if ( !cache ) {
 		std::cerr << "ERROR: Memory for cache isn't allocate\n";
@@ -110,12 +105,13 @@ bool CacheTagArray::read ( uint32 addr, uint64 PC )
 	uint32 Index = (addr & maskIndex) >> offsetInBlock;	
 	uint32 Tag = (addr & maskTag) >> (offsetInBlock + bitForIndex);	
 
-//	std::cout << "addrRead " << std::hex << addr << " Index " << Index << " Tag " << Tag << "\n" << std::dec;	
 	for ( uint32 i = 0; i < ways; ++i ) {
 		if ( cache[Index] != NULL ) {
-			if ( cache[Index][i].tag  == Tag ) {
-				cache[Index][i].ltu = PC;
-				return true;
+			if ( cache[Index][i].valid ) {
+				if ( cache[Index][i].tag  == Tag ) {
+					cache[Index][i].ltu = PC;
+					return true;
+				}
 			}
 		}
 		else
@@ -131,8 +127,6 @@ int CacheTagArray::write ( uint32 addr, uint64 PC )
 {
 	uint32 Index = (addr & maskIndex) >> offsetInBlock;
 	uint32 Tag = (addr & maskTag) >> (offsetInBlock + bitForIndex);
-
-//	std::cout << "addrWrite " << std::hex << addr << " Index " << Index << " Tag " << Tag << "\n" << std::dec;	
 	
 	if ( cache[Index] == NULL )
 	{
@@ -146,7 +140,6 @@ int CacheTagArray::write ( uint32 addr, uint64 PC )
 			cache[Index][i].valid = false;
 			cache[Index][i].ltu   = 0;
 			cache[Index][i].tag   = 0;
-			errno = 0;
 		}
 	}
 
@@ -169,8 +162,6 @@ int CacheTagArray::write ( uint32 addr, uint64 PC )
 				cache[Index][numMinLtu].valid = true;
 				cache[Index][numMinLtu].ltu   = PC;
 				cache[Index][numMinLtu].tag   = Tag;
-
-			//	std::cout << "ltu " << minLtu+1 << "\n";
 			}
 		} 
 	}
