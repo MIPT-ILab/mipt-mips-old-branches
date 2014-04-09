@@ -1,12 +1,12 @@
 
 
-INCL=-I ../common/ -I ../func_sim/elf_parser -I ./
+INCL=-I ../../common/ -I ../elf_parser -I ./
 
 .PHONY: all
 all: disasm
 
-vpath %.h ../func_sim/elf_parser/
-vpath %.cpp ../func_sim/elf_parser/
+vpath %.h ../elf_parser/
+vpath %.cpp ../elf_parser/
 
 
 disasm: disasm.o func_instr.o elf_parser.o
