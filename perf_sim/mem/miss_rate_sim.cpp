@@ -12,6 +12,7 @@
 #include <cache_tag_array.h>
 #include <errno.h>
 #include <cstdlib>
+#include <unistd.h>
 
 
 using namespace std;
@@ -31,18 +32,20 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	CacheTagArray cache(4096, 4, 32, 32);
+	CacheTagArray cache(4096, 4, 4, 32);
 	uint64 address;
-	uint32 i = 0;
+	uint32 access_count = 0;
+	uint32 misses_count = 0;
 	while ( addr_file >> hex >> address)
 	{
-	   	cout << cache.read(address) << ' ';
-		i++;
-		if (addr_file.get() != ',')
-			break;
+		if ( !cache.read( address))
+			misses_count++;
+		access_count++;
 	}
-
-	cout << i << endl;
+	
+	float miss_rate = (float) misses_count / access_count;
+	cout << miss_rate << endl;
+	cout << access_count << endl;
 	addr_file.close();
 
 	return 0;

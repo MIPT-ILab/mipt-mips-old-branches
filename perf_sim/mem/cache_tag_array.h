@@ -69,7 +69,7 @@ private:
 	uint64 getIndex( uint64 addr);
 	uint64 getOffset( uint64 addr);
 
-	void updateStat( uint32 ways_num);
+	void updateStat(uint32 index, uint32 way);
 };
 
 

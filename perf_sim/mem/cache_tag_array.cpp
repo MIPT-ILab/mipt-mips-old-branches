@@ -56,7 +56,9 @@ CacheTagArray::CacheTagArray( uint32 size_in_bytes,
 	for ( uint32 i = 0; i < index_num; i++)
 	{
 		cache_lines[i].tags = new uint32 [ways_num];
-		cache_lines[i].stat = NULL;
+		cache_lines[i].stat = new uint32 [ways_num];
+		for ( uint32 j = 0; j < ways_num; j++)
+			cache_lines[i].stat[j] = ways_num - j - 1;
 	}
 	//NEED DESTRUCTOR!
 }
@@ -70,7 +72,7 @@ bool CacheTagArray::read( uint64 addr)
 			break;
 	if ( i != ways_num)
 	{
-		updateStat( i);
+		updateStat( getIndex( addr), i);
 		return true;
 	}
 	else
@@ -83,8 +85,12 @@ bool CacheTagArray::read( uint64 addr)
 
 void CacheTagArray::write( uint64 addr)
 {
-	cache_lines[getIndex( addr)].tags[0] = getTag( addr);
-	updateStat( 0);
+	uint32 i;
+	for ( i = 0; i < ways_num; i++)
+		if ( cache_lines[getIndex( addr)].stat[i] == ways_num - 1)
+			break;
+	cache_lines[getIndex( addr)].tags[i] = getTag( addr);
+	updateStat( getIndex( addr), i);
 }
 
 
@@ -106,9 +112,12 @@ uint64 CacheTagArray::getOffset( uint64 addr)
 }
 
 
-void CacheTagArray::updateStat( uint32 ways_num)
+void CacheTagArray::updateStat(uint32 index, uint32 way)
 {
-
+	for ( uint32 i = 0; i < ways_num; i++)
+		if ( cache_lines[index].stat[i] < cache_lines[index].stat[way])
+			cache_lines[index].stat[i]++;
+	cache_lines[index].stat[way] = 0;
 }
 
 
