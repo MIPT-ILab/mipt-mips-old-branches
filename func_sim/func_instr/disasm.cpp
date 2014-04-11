@@ -3,6 +3,7 @@
 #include <cstring>
 #include <stdio.h>
 #include <cerrno>
+#include <stdlib.h>
 
 //uArch sim modules
 #include <types.h>
