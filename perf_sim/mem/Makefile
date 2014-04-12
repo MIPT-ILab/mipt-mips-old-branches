@@ -1,5 +1,5 @@
 
-INCL=-I ../../common/ -I ./ -g
+INCL=-I ../../common/ -I ./
 
 .PHONY: all
 all: miss_rate_sim
