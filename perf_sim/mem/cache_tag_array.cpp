@@ -20,17 +20,17 @@ CacheTagArray::CacheTagArray( unsigned int size_in_bytes,
     {
         //check paprametres for correct!!!
 
-	if ((size_in_bytes % (ways*block_size_in_bytes)) != 0)
-	{
-		std::cerr << "Wrong parametres of cache: number of segments must be integer\n";
-		exit(EXIT_FAILURE);
-	}
+    if ((size_in_bytes % (ways*block_size_in_bytes)) != 0)
+    {
+        std::cerr << "Wrong parametres of cache: number of segments must be integer\n";
+        exit(EXIT_FAILURE);
+    }
 
-	if ((IsTwoPower(size_in_bytes) == false) || (IsTwoPower(ways) == false) || (IsTwoPower(addr_size_in_bits) == false))
-	{
-		std::cerr << "Wrong parametres of cache: size_in_bytes, ways, addr_size_in_bits must be power of 2\n";
-		exit(EXIT_FAILURE);
-	}
+    if ((IsTwoPower(size_in_bytes) == false) || (IsTwoPower(ways) == false) || (IsTwoPower(addr_size_in_bits) == false))
+    {
+        std::cerr << "Wrong parametres of cache: size_in_bytes, ways, addr_size_in_bits must be power of 2\n";
+        exit(EXIT_FAILURE);
+    }
 
         this->number_of_ways = ways;
         this->offset_addr_size = (unsigned int)ceil(log2(block_size_in_bytes));
@@ -41,12 +41,12 @@ CacheTagArray::CacheTagArray( unsigned int size_in_bytes,
         this->Create_cach(size_in_bytes, ways, block_size_in_bytes, addr_size_in_bits);
 
         //masks for counting tag and index
-		unsigned int tag_shift = pow(2, this->tag_addr_size) - 1;
+        unsigned int tag_shift = pow(2, this->tag_addr_size) - 1;
         this->tag_mask = tag_shift  << (this->index_addr_size+this->offset_addr_size);
-		unsigned int index_shift = pow(2, this->index_addr_size) - 1;
+        unsigned int index_shift = pow(2, this->index_addr_size) - 1;
         this->index_mask = index_shift << (this->offset_addr_size);
 
-		this->PC = 0;
+        this->PC = 0;
         this->MAX_ADDR = pow(2, addr_size_in_bits)-1;
 
     }
@@ -74,11 +74,11 @@ void CacheTagArray::Create_cach(unsigned int size_in_bytes,
     bool CacheTagArray::read( uint64 addr)
     {
         //chaeck adddress for correct
-		if (addr > this->MAX_ADDR)
-		{
-			std::cerr << "Wrong address in memory\n";
-			exit(EXIT_FAILURE);
-		}
+        if (addr > this->MAX_ADDR)
+        {
+            std::cerr << "Wrong address in memory\n";
+            exit(EXIT_FAILURE);
+        }
 
         //calculate cache index and tag
         uint64 tag = ((addr & this->tag_mask) >> (this->offset_addr_size + this->index_addr_size));
@@ -89,13 +89,13 @@ void CacheTagArray::Create_cach(unsigned int size_in_bytes,
         {
             if ((cache_tag_array.v[index+i] == true) && (cache_tag_array.tag[index+i] == tag))
             {
-				cache_tag_array.was_used[index + i] = PC;
+                cache_tag_array.was_used[index + i] = PC;
                 return true;
             }
         }
 
-		//increase PC
-		this->PC = this->PC + 1;
+        //increase PC
+        this->PC = this->PC + 1;
         return false;
     }
 
@@ -104,11 +104,11 @@ void CacheTagArray::Create_cach(unsigned int size_in_bytes,
     void CacheTagArray::write( uint64 addr)
     {
         //chaeck address for correct
-		if (addr > this->MAX_ADDR)
-		{
-			std::cerr << "Wrong address in memory\n";
-			exit(EXIT_FAILURE);
-		}
+        if (addr > this->MAX_ADDR)
+        {
+            std::cerr << "Wrong address in memory\n";
+            exit(EXIT_FAILURE);
+        }
 
         //calculate cache index and tag
         uint64 tag = (addr & this->tag_mask) >> this->offset_addr_size + this->index_addr_size;
@@ -143,8 +143,8 @@ void CacheTagArray::Create_cach(unsigned int size_in_bytes,
         cache_tag_array.v[lru_index] = true;
         cache_tag_array.was_used[lru_index] = PC;
 
-		//increase PC
-		this->PC = this->PC + 1;
+        //increase PC
+        this->PC = this->PC + 1;
     }
 
 

@@ -6,20 +6,19 @@
 
 #include "types.h"
 
-//#define CHECK(expression) {if (expression == false) {std::cerr << "Wrong data in\n"; assert(0);}}
-
-inline bool IsTwoPower(const unsigned int A)              //inline function for checking 
+//return true if the number is a power of two, otherwise return false
+inline bool IsTwoPower(const unsigned int A)
 {
-	return (A>0) && ((A&(A - 1)) == 0);
+    return (A>0) && ((A&(A - 1)) == 0);
 }
 
 
 struct Cache
 {
-	bool *v;
-	uint64 *tag;
-	uint8 *data;
-	unsigned int *was_used;
+    bool *v;
+    uint64 *tag;
+    uint8 *data;
+    unsigned int *was_used;
 };
 
 
@@ -74,7 +73,7 @@ private:
     uint64 index_mask;
 
     uint64 MAX_ADDR;
-	uint64 PC;
+    uint64 PC;
 
     //function for creating of cache
     void Create_cach(unsigned int size_in_bytes,
