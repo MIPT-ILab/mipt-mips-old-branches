@@ -92,7 +92,8 @@ bool CacheTagArray:: read( uint64 addr)
     // this way to identify tranzaction number will be broken by
     // overfloating after 60 years after laynching this aplication
     // without reboots
-    operation_number++;
+    operation_number++; // I thint this is better then 
+                        // way in our assignment
     uint64 index = get_index_from_addr( addr);
     uint64 tag = get_tag_from_addr( addr );
     for(uint64 i = 0; i < ways ; i++)
