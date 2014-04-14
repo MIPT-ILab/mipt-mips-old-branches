@@ -1,5 +1,5 @@
 TRUNC= ../..
-CFLAGS= -Wall -I $(TRUNC)/common/
+CFLAGS= -Wall -I $(TRUNC)/common/ -O2 -g
 CC= g++
 
 all: miss_rate_sim
