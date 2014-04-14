@@ -6,6 +6,9 @@
 
 using namespace std;
 
+#define BLOCK_SIZE 4
+
+
 // This function takes cache parameters and data trace and 
 // returns miss rate.
 double CacheTest(  uint64 size_in_bytes,
@@ -61,13 +64,13 @@ int main( int argc, char** argv)
     for( int j = 0; j< 5; j++)
     {
         for( int i = 1024 ; i <= 1024*1024; i*=2)
-            fileOut<<CacheTest(i, ways[j] , 4, 32, adresses )<<", ";
+            fileOut<<CacheTest(i, ways[j] , BLOCK_SIZE, 32, adresses )<<", ";
         fileOut<<"\n";
     }
 
     // Ger table for full associative cache
     for( int i = 1024 ; i <= 1024*1024; i*=2)
-        fileOut<<CacheTest(i, i/4 , 4, 32, adresses )<<", ";
+        fileOut<<CacheTest(i, i/BLOCK_SIZE , BLOCK_SIZE, 32, adresses )<<", ";
     fileOut<<"\n";
 
     return 0;

@@ -35,6 +35,11 @@ CacheTagArray::CacheTagArray( uint64 size_in_bytes,
                    unsigned short block_size_in_bytes, 
                    unsigned short addr_size_in_bits)
 {
+    // need checking for baad arguments
+    if ( (addr_size_in_bits > 64 || addr_size_in_bits < 1) ||
+        ( block_size_in_bytes > ( (uint64) 1 << addr_size_in_bits) )  )
+        throw (std::string) "Invalid parameters in CacheTagArray constructor\n";
+     
     hits = 0;
     misses = 0;
     operation_number = 1;
