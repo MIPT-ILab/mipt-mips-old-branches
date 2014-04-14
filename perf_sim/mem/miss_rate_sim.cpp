@@ -55,6 +55,7 @@ int main( int argc, char* argv[])
         {
             CacheTagArray cache( j, way_set[i], 4, 32);
             uint32 misses_count = 0;
+            uint32 access_count = 0;
             for ( uint32 k = 0; k < trace_size; k++)
                 if ( !cache.read( trace_addr[k]))
                     misses_count++;

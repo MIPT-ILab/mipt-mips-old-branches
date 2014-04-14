@@ -50,11 +50,12 @@ private:
 
     uint32 index_num;
 
-    struct CacheLine {
+    struct CacheSet {
         uint32 *tags;
         uint32 *stat;
+        uint8 *valid;
     };
-    CacheLine *cache_lines;
+    CacheSet *cache_sets;
 
     uint64 getTag( uint64 addr);
     uint64 getIndex( uint64 addr);

@@ -54,11 +54,12 @@ CacheTagArray::CacheTagArray( uint32 size_in_bytes,
     tag_bits = addr_size - offset_bits - index_bits;
     assert( tag_bits >= 0);
 
-    cache_lines = new CacheLine [index_num];
+    cache_sets = new CacheSet [index_num];
     for ( uint32 i = 0; i < index_num; i++)
     {
-        cache_lines[i].tags = new uint32 [ways_num]();
-        cache_lines[i].stat = new uint32 [ways_num]();
+        cache_sets[i].tags = new uint32 [ways_num];
+        cache_sets[i].stat = new uint32 [ways_num]();
+        cache_sets[i].valid = new uint8 [ways_num]();
     }
     access_count = 0;
 }
@@ -68,10 +69,11 @@ CacheTagArray::~CacheTagArray()
 {
     for ( uint32 i = 0; i < index_num; i++)
     {
-        delete cache_lines[i].tags;
-        delete cache_lines[i].stat;
+        delete cache_sets[i].tags;
+        delete cache_sets[i].stat;
+        delete cache_sets[i].valid;
     }
-    delete cache_lines;
+    delete cache_sets;
 }
 
 
@@ -84,7 +86,8 @@ bool CacheTagArray::read( uint64 addr)
     uint64 tag = getTag( addr);
     // search tag hit
     for ( uint32 i = 0; i < ways_num; i++)
-        if ( cache_lines[index].tags[i] == tag)
+        if (( cache_sets[index].tags[i] == tag) 
+                && ( cache_sets[index].valid[i] == 1))
         {
             updateStat( index, i);
             return true;
@@ -103,12 +106,13 @@ void CacheTagArray::write( uint64 addr)
     uint64 oldest_access_time = -1;         // uint64_max
     uint32 oldest_way_num = 0;
     for ( uint32 i = 0; i < ways_num; i++)
-        if ( cache_lines[index].stat[i] < oldest_access_time)
+        if ( cache_sets[index].stat[i] < oldest_access_time)
         {
-            oldest_access_time = cache_lines[index].stat[i];
+            oldest_access_time = cache_sets[index].stat[i];
             oldest_way_num = i;
         }
-    cache_lines[index].tags[oldest_way_num] = tag;
+    cache_sets[index].tags[oldest_way_num] = tag;
+    cache_sets[index].valid[oldest_way_num] = 1;
     updateStat( index, oldest_way_num);
 }
 
@@ -135,7 +139,7 @@ uint64 CacheTagArray::getOffset( uint64 addr)
  */
 void CacheTagArray::updateStat( uint32 index, uint32 way)
 {
-    cache_lines[index].stat[way] = ++access_count;
+    cache_sets[index].stat[way] = ++access_count;
 }
 
 
