@@ -40,10 +40,11 @@ FuncMemory::FuncMemory(const char* executable_file_name,
 _addr_bits   (addr_size), 
 _page_bits   (page_num_size), 
 _offset_bits (offset_size),
-_file_name   (executable_file_name) {
+_file_name   (executable_file_name)
+{
     assert(executable_file_name != NULL);
 
-    getAllElfSections(exectutable_file_name, vector<ElfSection> sections);
+    ElfParser::getAllElfSections(exectutable_file_name, vector<ElfSection> sections);
     
     _set_templ = SetBytes(_addr_bits - _page_bits - _offset_bits, _page_bits + _offset_bits);
     _page_templ = SetBytes(_page_bits, _offset_bits);
@@ -65,7 +66,8 @@ _file_name   (executable_file_name) {
     _end_addr = sections[sections.size() - 1].start_addr + 
                 sections[sections.size() - 1].size - 1;
 
-    memory = new uint8**[_sets_num];
+    _memory = new uint8**[_sets_num];
+
     for (int i = 0; i < sections.size(); i++) {
         if (sections[i].name = ".text") 
             _text_addr = sections[i].start_addr;
