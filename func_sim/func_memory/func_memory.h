@@ -34,7 +34,7 @@ class FuncMemory
     //DATA **************************************************************
     char *_file_name;
 
-    unit64 _text_start; //< All class data's names start with "_"
+    uint64 _text_start; //< All class data's names start with "_"
     
     uint64 _begin_addr;
     uint64 _end_addr;
@@ -63,23 +63,23 @@ public:
                 uint64 offset_size = 12);
     
     virtual ~FuncMemory();
-    DestroySet(const uint8 **set_addr); //< Deletes all memory in the current set
+    void DestroySet(uint8 **set_addr); //< Deletes all memory in the current set
     
     //Searchs by "addr" address and returns a value. Modes for reading ("r") and writing ("w").
     //Default: read mode ("r");
-    uint64& Search(const uint64 addr, const char mode = 'r');
+    uint8& Search(const uint64 addr, const char mode = 'r') const;
     uint64 read(uint64 addr, unsigned short num_of_bytes = 4) const;
     void   write(uint64 value, uint64 addr, unsigned short num_of_bytes = 4);
     
     inline uint64 startPC() const { return _text_start; }
      
     string dump(string indent = "") const;
-    string PrintSet(const uint8 **set_addr, string indent = "") const;
-    string PrintPage(const uint8 *page_addr, string indent = "") const;
+    string SetDump(uint8 **set_addr, string indent = "") const;
+    string PageDump(uint8 *page_addr, string indent = "") const;
     //********************************************************************
 };
 
 //Sets "num" bytes on the "length" bytes from the first one
-uint64 SetBytes(uint64 num, uint length = 0);
+uint64 SetBytes(uint64 num, uint64 length = 0);
 
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
