@@ -8,6 +8,7 @@
 // Generic C
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 
 // Generic C++
 #include <iostream>
@@ -28,14 +29,19 @@ FuncMemory::FuncMemory( const char* executable_file_name,
         ArraySet(1 << (addr_size - page_bits - offset_bits)),
         _addr_size(addr_size), _page_bits(page_bits), _offset_bits(offset_bits)
 {
-    cout << executable_file_name << endl;
+    assert(ArraySet.size() > 0);
+    assert(executable_file_name != NULL);
+    assert(strlen(executable_file_name));
+    //assert(addr_size > page_bits + offset_bits);
+    //assert(0 < addr_size && addr_size <= MAX_ADDRES_LEN);
+    //cout << executable_file_name << endl;
     //vector<uint64> numSet = getAddr(0x405b150, addr_size, page_bits, offset_bits);
     //cout << hex << numSet[0] << ' ' << numSet[1] << ' ' << numSet[2] << dec << endl;
     vector<ElfSection> sections_array;
     ElfSection::getAllElfSections(executable_file_name, sections_array);
-    cout << ArraySet.size() << endl;
+    //cout << ArraySet.size() << endl;
     for(int i = 0; i < sections_array.size(); i++) {
-        cout << sections_array[i].dump();
+        //cout << sections_array[i].dump();
         for(uint64 j = 0; j <= sections_array[i].size; j ++) {
             vector<uint64> numSet = getAddr(sections_array[ i].start_addr + j,
                     addr_size,
@@ -80,7 +86,7 @@ uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
     // put your code here
     uint64 value = 0;
     for(unsigned short i = 0; i < num_of_bytes; i++) {
-        cout << value << endl;
+        //cout << value << endl;
         vector<uint64> myAddr = getAddr(addr + num_of_bytes - i - 1, _addr_size, _page_bits, _offset_bits);
         if(checkAddr(myAddr)) {
             value = (value << (BITS_IN_BYTE * sizeof(uint8))) + ArraySet.at(myAddr[0])->at(myAddr[1])->at(myAddr[2]);
@@ -95,10 +101,10 @@ uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
 void FuncMemory::write( uint64 value, uint64 addr, unsigned short num_of_bytes) {
     // put your code here
     for (unsigned short i = 0; i < num_of_bytes; i++) {
-        cout << value << endl;
-        cout << "k=" << (1 << (sizeof(uint8) * BITS_IN_BYTE)) << endl;
+        //cout << value << endl;
+        //cout << "k=" << (1 << (sizeof(uint8) * BITS_IN_BYTE)) << endl;
         uint8 byte = value % (1 << (sizeof(uint8) * BITS_IN_BYTE));
-        cout << "byte:" << hex << byte << dec << endl;
+        //cout << "byte:" << hex << byte << dec << endl;
         value = value >> (sizeof(uint8) * BITS_IN_BYTE);
         vector <uint64> myAddr = getAddr(addr + i);
         checkAddrAndAdd(myAddr);
@@ -184,7 +190,7 @@ vector<uint64> FuncMemory::getAddr( uint64 full_addr) const {
 }
 
 bool FuncMemory::checkAddrAndAdd(const vector<uint64> &addr) {
-    //assert(addr.size() != 3);
+    assert(addr.size() == 3);
     if(ArraySet.at(addr[0]) == NULL) {
         //cout << "Init SET" << numSet[0] << endl;
         ArraySet.at(addr[0]) = new Page(1 << _page_bits);

@@ -10,6 +10,7 @@
 #define FUNC_MEMORY__FUNC_MEMORY_H
 
 #define BITS_IN_BYTE 8
+#define MAX_ADDRES_LEN 48
 
 // Generic C++
 #include <string>
