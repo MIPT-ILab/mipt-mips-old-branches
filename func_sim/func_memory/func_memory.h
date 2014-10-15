@@ -19,12 +19,25 @@
 
 using namespace std;
 
+typedef vector<uint64> Cell;
+typedef vector<Cell*> Page;
+typedef vector<Page*> SetPage;
+
 class FuncMemory
 {
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
 
+    vector<uint64> getAddr( uint64 full_addr,
+            uint64 addr_size,
+            uint64 page_bits,
+            uint64 offset_bits);
+    uint64 getMask(uint64 num_digit);
+    SetPage ArraySet;
+    uint64 _addr_size;
+    uint64 _page_bits;
+    uint64 _offset_bits;
 public:
 
     FuncMemory ( const char* executable_file_name,

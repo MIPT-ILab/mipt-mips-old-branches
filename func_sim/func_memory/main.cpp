@@ -22,9 +22,9 @@ int main (int argc, char* argv[])
         
         // create the functiona memory
         FuncMemory func_mem( file_name, 32, 10, 12);
-        
+        cout << "DUMP" << endl << func_mem.dump() << "DUMP END" << endl;
         // print content of the memory
-        cout << func_mem.dump() << endl;
+        //cout << func_mem.dump() << endl;
  
     } else if ( argc - 1 > num_of_args)
     {
