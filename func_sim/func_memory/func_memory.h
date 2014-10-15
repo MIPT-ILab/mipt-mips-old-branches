@@ -1,8 +1,8 @@
 /**
  * func_memory.h - Header of module implementing the concept of 
  * programer-visible memory space accesing via memory address.
- * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
- * Copyright 2012 uArchSim iLab project
+ * @author Lyubogoshchev Mikhail <lyubogoshchev@phystech.edu>
+ * Copyright 2014 MIPT-MIPS iLab project
  */
 
 // protection from multi-include
@@ -23,14 +23,34 @@ class FuncMemory
 {
     // You could not create the object
     // using this default constructor
-    FuncMemory(){}
+    FuncMemory(){};
+    class SectionInfo
+    {
+        SectionInfo(){};
+    public:
+        char* name;
+        uint64 size;
+        uint64 start_addr;
+        SectionInfo( char* sec_name, uint64 sec_size, uint64 sec_start_addr)
+        : size( sec_size), start_addr( sec_start_addr) { strcpy( name, sec_name);}
+        ~SectionInfo(){ delete name;};
+    };
+    vector<SectionInfo> sections;
+    uint8***  pages_set;
+    uint64 addr_size;
+    uint64 page_bits;
+    uint64 offset_bits;
 
+    int addrCalc( uint64 addr, uint64& set, uint64& page, uint64& offset) const;
+    //A function to reverse bits in uint8
+    uint8 reverse ( uint8 in ) const { in = (( in & 0x55) << 1) | ( ( in >> 1) & 0x55);
+                                in = ( ( in & 0x33) << 2) | ( ( in >> 2) & 0x33);
+                     in = (( in & 0x0F) << 4) | (( in >> 4) & 0x0F); return in; };   
 public:
-
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
-                 uint64 page_num_size = 10,
-                 uint64 offset_size = 12);
+                 uint64 page_bits = 10,
+                 uint64 offset_bits = 12);
     
     virtual ~FuncMemory();
     
