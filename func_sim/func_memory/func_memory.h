@@ -9,6 +9,8 @@
 #ifndef FUNC_MEMORY__FUNC_MEMORY_H
 #define FUNC_MEMORY__FUNC_MEMORY_H
 
+#define BITS_IN_BYTE 8
+
 // Generic C++
 #include <string>
 #include <cassert>
@@ -28,16 +30,18 @@ class FuncMemory
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
-
-    vector<uint64> getAddr( uint64 full_addr,
-            uint64 addr_size,
-            uint64 page_bits,
-            uint64 offset_bits);
-    uint64 getMask(uint64 num_digit);
     SetPage ArraySet;
     uint64 _addr_size;
     uint64 _page_bits;
     uint64 _offset_bits;
+    vector<uint64> getAddr( uint64 full_addr,
+                            uint64 addr_size,
+                            uint64 page_bits,
+                            uint64 offset_bits) const;
+    vector<uint64> getAddr( uint64 full_addr) const;
+    uint64         getMask(uint64 num_digit) const;
+    bool           checkAddrAndAdd(const vector<uint64> &addr);
+    bool           checkAddr(const vector<uint64> &addr) const;
 public:
 
     FuncMemory ( const char* executable_file_name,

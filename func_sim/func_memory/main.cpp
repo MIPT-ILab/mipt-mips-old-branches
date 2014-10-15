@@ -5,7 +5,7 @@
 #include <iostream>
 
 // uArchSim modules
-#include <func_memory.h>
+#include "func_memory.h"
 
 using namespace std;
 
@@ -18,10 +18,12 @@ int main (int argc, char* argv[])
     if ( argc - 1 == num_of_args)
     {
         // set the name of the executable file
-        const char * file_name = argv[1];        
-        
+        const char * file_name = argv[1];
+
         // create the functiona memory
         FuncMemory func_mem( file_name, 32, 10, 12);
+        func_mem.write(1516, 0x4100c3, 10);
+        cout << "READ:" << func_mem.read(0x4100c3, 10) << endl;
         cout << "DUMP" << endl << func_mem.dump() << "DUMP END" << endl;
         // print content of the memory
         //cout << func_mem.dump() << endl;
