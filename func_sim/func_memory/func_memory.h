@@ -5,15 +5,15 @@
  * Copyright 2012 uArchSim iLab project
  */
 
-/*******************************************************
+/***************************************************************
 
-    Reducted by:
+        Reducted by:
 
-    @date: October 13, 2014
-    @author: Kirill Korolev <kirill.korolef@gmail.com>
-    @version: 1.0 (October 13, 2014) 
+        @date: October 13, 2014
+        @author: Kirill Korolev <kirill.korolef@gmail.com>
+        @version: 1.0 (October 13, 2014) 
 
-*******************************************************/
+***************************************************************/
 
 // protection from multi-include
 #ifndef FUNC_MEMORY__FUNC_MEMORY_H
@@ -29,57 +29,57 @@
 
 using namespace std;
 
+typedef struct Pair {
+        uint8 value;
+        uint64 addr;
+} Pair_t;
+
 class FuncMemory
 {
-    //DATA **************************************************************
-    char *_file_name;
+        //DATA **************************************************************
+        char *_file_name;
 
-    uint64 _text_start; //< All class data's names start with "_"
-    
-    uint64 _begin_addr;
-    uint64 _end_addr;
-    
-    uint8 ***_memory;
+        uint64 _text_start; //< All class data's names start with "_"
 
-    uint64 _sets_num; // Maximum number of sets
-    uint64 _pages_num; // Number of pages in each set
-    uint64 _offsets_num; // Number of offsets in each page
-    
-    uint64 _addr_bits;
-    uint64 _page_bits;
-    uint64 _offset_bits;
+        uint64 _begin_addr;
+        uint64 _end_addr;
 
-    uint64 _set_templ;
-    uint64 _page_templ;
-    uint64 _offset_templ;
-    // ******************************************************************
+        vector< vector< vector<Pair_t> > > _memory;
 
-    //INTERFACE *********************************************************
-    FuncMemory(){} //< Can't use default constructor
+        uint64 _addr_bits;
+        uint64 _set_bits;
+        uint64 _page_bits;
+        uint64 _offset_bits;
+
+        uint64 _set_mask;
+        uint64 _page_mask;
+        uint64 _offset_mask;
+        // ******************************************************************
+
+        //INTERFACE *********************************************************
+        FuncMemory(){} //< Can't use default constructor
 public:
-    FuncMemory (const char* executable_file_name,
-                uint64 addr_size = 32,
-                uint64 page_num_size = 10,
-                uint64 offset_size = 12);
+        FuncMemory (const char* executable_file_name,
+                    uint64 addr_size = 32,
+                    uint64 page_num_size = 10,
+                    uint64 offset_size = 12);
+
+        virtual ~FuncMemory(){} //< All allocated memory dectroys in vector class destructor
     
-    virtual ~FuncMemory();
-    void DestroySet(uint8 **set_addr); //< Deletes all memory in the current set
+        const uint8* RSearch(const uint64 addr) const; //< Returns pointer by address for reading
+        uint8* WSearch(const uint64 addr); //< Returns pointer by address for writing
+        uint64 read(uint64 addr, unsigned short num_of_bytes = 4) const;
+        void   write(uint64 value, uint64 addr, unsigned short num_of_bytes = 4);
     
-    //Searchs by "addr" address and returns a value. Modes for reading ("r") and writing ("w").
-    //Default: read mode ("r");
-    uint8& Search(const uint64 addr, const char mode = 'r') const;
-    uint64 read(uint64 addr, unsigned short num_of_bytes = 4) const;
-    void   write(uint64 value, uint64 addr, unsigned short num_of_bytes = 4);
-    
-    inline uint64 startPC() const { return _text_start; }
+        inline uint64 startPC() const { return _text_start; }
      
-    string dump(string indent = "") const;
-    string SetDump(uint8 **set_addr, string indent = "") const;
-    string PageDump(uint8 *page_addr, string indent = "") const;
-    //********************************************************************
+        string dump(string indent = "") const;
+        string SetDump(const vector< vector<Pair_t> > set_addr, const string indent = "") const;
+        string PageDump(const vector<Pair_t> page_addr, const string indent = "") const;
+        //********************************************************************
 };
 
 //Sets "num" bytes on the "length" bytes from the first one
-uint64 SetBytes(uint64 num, uint64 length = 0);
+uint64 SetBytes(const uint8 num, const uint8 length = 0);
 
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
