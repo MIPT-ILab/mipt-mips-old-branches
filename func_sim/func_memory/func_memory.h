@@ -7,8 +7,12 @@
 
  /**
  * updated by Alexander Pronin <alexander.pronin.mipt@gmail.com>
+ *
  * v. 1.0: created 16.10.2014 21:05
  *         added implementation of main functions
+ *
+ * v. 1.1: created 17.10.2014 00:10
+ *         added dump function
  */
 
 // protection from multi-include
@@ -42,6 +46,10 @@ class MemSet
 public:
     MemPage** page;
 };
+
+string valtohex( uint64 val);
+
+string addrtohex( uint64 addr);
 
 class FuncMemory
 {
