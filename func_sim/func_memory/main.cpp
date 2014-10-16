@@ -21,9 +21,10 @@ int main (int argc, char* argv[])
         // set the name of the executable file
         const char * file_name = argv[1];        
         // create the functiona memory
-        FuncMemory func_mem( file_name, 64, 15, 27);
+        FuncMemory func_mem( file_name, 32, 10, 12);
         // print content of the memory
-        cout << func_mem.dump() << endl;
+        cout << func_mem.read( 0x300000)<< endl;
+       // cout << func_mem.dump() << endl;
  
     } else if ( argc - 1 > num_of_args)
     {

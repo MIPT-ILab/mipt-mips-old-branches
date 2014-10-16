@@ -35,6 +35,7 @@ TEST( Func_memory, StartPC_Method_Test)
     ASSERT_EQ( func_mem.startPC(), 0x4000b0 /*address of the ".text" section*/);
 }
 
+
 TEST( Func_memory, Read_Method_Test)
 {
     FuncMemory func_mem( valid_elf_file);
@@ -104,6 +105,7 @@ TEST( Func_memory, Write_Read_Not_Initialized_Mem_Test)
     // write 0x03020100 into the four bytes pointed by write_addr
     func_mem.write( 0x03020100, write_addr, sizeof( uint64));
     uint64 right_ret = 0x0100;
+    cout << "Here am I" << endl;
     ASSERT_EQ( func_mem.read( write_addr, sizeof( uint16)), right_ret);
  
     right_ret = 0x0201;
