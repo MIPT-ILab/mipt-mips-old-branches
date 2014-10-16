@@ -35,6 +35,7 @@ class FuncMemory
     uint64 _addr_size;
     uint64 _page_bits;
     uint64 _offset_bits;
+    uint64 _segm_text;
     vector<uint64> getAddr( uint64 full_addr,
                             uint64 addr_size,
                             uint64 page_bits,
