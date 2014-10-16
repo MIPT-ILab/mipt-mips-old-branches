@@ -28,19 +28,22 @@ class FuncMemory
     {
         SectionInfo(){};
     public:
-        char* name;
+        string name;
         uint64 size;
         uint64 start_addr;
-        SectionInfo( char* sec_name, uint64 sec_size, uint64 sec_start_addr)
-        : size( sec_size), start_addr( sec_start_addr) { strcpy( name, sec_name);}
-        ~SectionInfo(){ delete name;};
+
+        SectionInfo( string sec_name, uint64 sec_size, uint64 sec_start_addr)
+        : size( sec_size), start_addr( sec_start_addr), name( sec_name) {};
+
+        SectionInfo( const SectionInfo &that): size( that.size), 
+        start_addr( that.start_addr), name( that.name){};
+        ~SectionInfo(){};
     };
     vector<SectionInfo> sections;
     uint8***  pages_set;
     uint64 addr_size;
     uint64 page_bits;
     uint64 offset_bits;
-
     int addrCalc( uint64 addr, uint64& set, uint64& page, uint64& offset) const;
     //A function to reverse bits in uint8
     uint8 reverse ( uint8 in ) const { in = (( in & 0x55) << 1) | ( ( in >> 1) & 0x55);
@@ -49,8 +52,8 @@ class FuncMemory
 public:
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
-                 uint64 page_bits = 10,
-                 uint64 offset_bits = 12);
+                 uint64 page_num_size = 10,
+                 uint64 offset_size = 12);
     
     virtual ~FuncMemory();
     

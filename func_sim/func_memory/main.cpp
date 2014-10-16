@@ -1,5 +1,6 @@
 // Generci C
 #include <stdlib.h>
+#include <cstring>
 
 // Generic C++
 #include <iostream>
@@ -19,10 +20,8 @@ int main (int argc, char* argv[])
     {
         // set the name of the executable file
         const char * file_name = argv[1];        
-        
         // create the functiona memory
-        FuncMemory func_mem( file_name, 32, 10, 12);
-        
+        FuncMemory func_mem( file_name, 64, 15, 27);
         // print content of the memory
         cout << func_mem.dump() << endl;
  
