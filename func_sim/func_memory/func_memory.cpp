@@ -1,4 +1,4 @@
-/**
+ake/**
 * func_memory.cpp - the module implementing the concept of
 * programer-visible memory space accesing via memory address.
 * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
@@ -91,55 +91,6 @@ _file_name   ((char*) executable_file_name)
         }
 }
 
-const uint8* FuncMemory::RSearch(const uint64 addr) const
-{
-        assert(addr != 0);
-
-        // getting addresses:
-        uint64 set_addr = (addr & _set_mask) >> (_page_bits + _offset_bits);
-        uint64 page_addr = (addr & _page_mask) >> _offset_bits;
-        uint64 offset_addr = addr & _offset_mask;
-
-        // in case there is no allocated memory there:
-        assert(_memory.size() > set_addr);
-        assert(_memory[set_addr].size() > page_addr);
-
-        // searching through a current page:
-        for (int i = 0; i < _memory[set_addr][page_addr].size(); i++) {
-                if (_memory[set_addr][page_addr][i].addr == offset_addr)
-                        return &_memory[set_addr][page_addr][i].value;
-        }
-
-        // if there is no needed byte in the page:
-        return NULL;
-}
-
-uint8* FuncMemory::WSearch(const uint64 addr)
-{
-        assert(addr != 0);
-
-        uint64 set_addr = (addr & _set_mask) >> (_page_bits + _offset_bits);
-        uint64 page_addr = (addr & _page_mask) >> _offset_bits;
-        uint64 offset_addr = addr & _offset_mask;
-
-        if (_memory.size() <= set_addr)              
-                _memory.resize(set_addr + 1);
-        if (_memory[set_addr].size() <= page_addr)
-                _memory[set_addr].resize(page_addr + 1);
-
-        for (int i = 0; i < _memory[set_addr][page_addr].size(); i++) {
-                if (_memory[set_addr][page_addr][i].addr == offset_addr)
-                        return &_memory[set_addr][page_addr][i].value;
-        }
-
-        // the same function, but now we allocates a missing byte: 
-        Pair_t new_p;
-        new_p.addr = offset_addr;
-        new_p.value = 0;
-        _memory[set_addr][page_addr].push_back(new_p);
-        return &_memory[set_addr][page_addr].back().value;
-}
-
 uint64 FuncMemory::read(uint64 addr, unsigned short num_of_bytes) const
 {
         // assertions:
@@ -152,12 +103,21 @@ uint64 FuncMemory::read(uint64 addr, unsigned short num_of_bytes) const
         const uint8 *byte = NULL;
         for (int i = 0; i < num_of_bytes; i++) {
                 res <<= 8;
-                byte = RSearch(addr + i);
-                if (byte) //< in case of NULL pointer:
-                        res |= *byte;
+                
+                // getting addresses:
+                uint64 set_addr = ((addr + i) & _set_mask) >> (_page_bits + _offset_bits);
+                uint64 page_addr = ((addr + i) & _page_mask) >> _offset_bits;
+                uint64 offset_addr = (addr + i) & _offset_mask;
+
+                // in case there is no allocated memory there:
+                assert(_memory.size() > set_addr);
+                assert(_memory[set_addr].size() > page_addr);
+                assert(_memory[set_addr][page_addr].size() > offset_addr);
+
+                res |= _memory[set_addr][page_addr][offset_addr];
         }
 
-        return Reverse(res, num_of_bytes * 8); //< Big Endian => Little Endian
+        return Reverse(res, num_of_bytes * 8);
 }
 
 void FuncMemory::write(uint64 value, uint64 addr, unsigned short num_of_bytes)
@@ -167,12 +127,27 @@ void FuncMemory::write(uint64 value, uint64 addr, unsigned short num_of_bytes)
         assert(num_of_bytes > 0);
         assert(addr != 0);
         
-        uint64 rev_vl = Reverse(value, 8 * num_of_bytes); //< Little => Big Endian
+        uint64 rev_vl = Reverse(value, 8 * num_of_bytes);
         uint64 mask = SetBytes(8);
         
         // writing by byte:
         for (int i = num_of_bytes; i > 0; i--) {
-                *WSearch(addr + i - 1) = (rev_vl & mask) >> ((num_of_bytes - i) * 8);
+                // getting addresses:
+                uint64 set_addr = (addr & _set_mask) >> (_page_bits + _offset_bits);
+                uint64 page_addr = (addr & _page_mask) >> _offset_bits;
+                uint64 offset_addr = addr & _offset_mask;
+
+                // allocating needed memory:
+                if (_memory.size() <= set_addr)              
+                        _memory.resize(set_addr + 1);
+                if (_memory[set_addr].size() <= page_addr)
+                        _memory[set_addr].resize(page_addr + 1);
+                if (_memory[set_addr][page_addr].size() <= offset_addr)
+                        _memory[set_addr].resize(offset_addr + 1);
+
+                _memory[set_addr][page_addr][offset_addr] = 
+                (rev_vl & mask) >> ((num_of_bytes - i) * 8);
+                
                 mask <<= 8;
         }
 }
@@ -203,7 +178,7 @@ string FuncMemory::dump(string indent) const
     return oss.str();
 }
 
-string FuncMemory::SetDump(const vector< vector<Pair_t> > set_addr, const string indent) const
+string FuncMemory::SetDump(const vector< vector<uint8> > set_addr, const string indent) const
 {
         ostringstream oss;
 
@@ -234,16 +209,25 @@ string FuncMemory::SetDump(const vector< vector<Pair_t> > set_addr, const string
         return oss.str();
 }
 
-string FuncMemory::PageDump(const vector<Pair_t> page_addr, const string indent) const
+string FuncMemory::PageDump(const vector<uint8> page_addr, const string indent) const
 {
         ostringstream oss;
 
-        char sym = '|';
-        // printing every byte in the page:
-        for (int i = 0; i < page_addr.size(); i++) {
-                if (i == page_addr.size() - 1)
-                sym = ' ';
-                
+        uint64 i = 0;
+        while (!page_addr[i] && i < page_addr.size()) i++;
+
+        char sym = '\0';
+        // printing each not zero offset:
+        while (i < page_addr.size()) {
+                uint64 curr_offset = i;
+                i++;
+                while (!page_addr[i] && i < page_addr.size()) i++;
+
+                if (i == page_addr.size())
+                        sym = ' ';
+                else
+                        sym = '|';
+                        
                 oss << indent << sym << "`--------0x" << hex << page_addr[i].addr << ":  "
                     << bitset<8>(page_addr[i].value) << endl;
         }

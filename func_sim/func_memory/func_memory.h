@@ -29,13 +29,6 @@
 
 using namespace std;
 
-// A pair of a byte and its offset
-// for writing in pages:
-typedef struct Pair {
-        uint8 value;
-        uint64 addr;
-} Pair_t;
-
 class FuncMemory
 {
         //DATA ******************************************************************
@@ -47,7 +40,7 @@ class FuncMemory
         uint64 _end_addr;   //<= a whole memory space.                         //
                                                                                //
         //< Hierarchical organised memory:                                     //
-        vector< vector< vector<Pair_t> > > _memory;                            //
+        vector< vector< vector<uint8> > > _memory;                             //
                                                                                //
         // Number of bits:                                                     //
         uint64 _page_bits;   // in a "page part;                               //
@@ -77,8 +70,8 @@ public:                                                                         
                                                                                                       //
         // Recursive hierarchical memory dump by tree functions:                                      //
         string dump(string indent = "") const;                                                        //
-        string SetDump(const vector< vector<Pair_t> > set_addr, const string indent = "") const;      //
-        string PageDump(const vector<Pair_t> page_addr, const string indent = "") const;              //
+        string SetDump(const vector< vector<uint8> > set_addr, const string indent = "") const;       //
+        string PageDump(const vector<uint8> page_addr, const string indent = "") const;               //
         //**********************************************************************************************
 };
 // 2 BINARY FUNCTIONS:
