@@ -19,6 +19,12 @@
 
 using namespace std; 
 
+typedef struct{
+    uint8* addr_offset;
+    uint8** addr_page;
+    uint8*** addr_set;
+} F_Memory;
+
 class FuncMemory
 {
     // You could not create the object
@@ -29,9 +35,14 @@ class FuncMemory
     uint64 addr_set_size;
     uint64 addr_page_size;
     uint64 addr_offset_size;
+    uint64 addr_set;
+    uint64 addr_page;
+    uint64 addr_offset;
+    F_Memory F_Mem;
 
 public:
-
+    
+    void FuncMemory_addr ( const uint64);
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
                  uint64 page_num_size = 10,
