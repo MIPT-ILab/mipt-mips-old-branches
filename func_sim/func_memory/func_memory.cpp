@@ -41,6 +41,17 @@ uint64 SetBytes(const uint8 num, const uint8 length)
         return res;
 }
 
+uint64 Reverse(const uint64 val, const uint8 num)
+{
+    uint64 res = 0, loc_v = val;
+    for (int i = 0; i < num; i++) {
+        res |= (loc_v & 1) << (num - i - 1);
+        loc_v >>= 1;
+    }
+
+    return res;
+}
+
 FuncMemory::FuncMemory(const char* executable_file_name,
                        uint64 addr_size,
                        uint64 page_num_size,
@@ -124,28 +135,32 @@ uint8* FuncMemory::WSearch(const uint64 addr)
 uint64 FuncMemory::read(uint64 addr, unsigned short num_of_bytes) const
 {
         assert(num_of_bytes <= 8);
+        assert(num_of_bytes > 0);
         assert(addr != 0);
-
+        
         uint64 res = 0;
+        const uint8 *byte = NULL;
         for (int i = 0; i < num_of_bytes; i++) {
                 res <<= 8;
-                res += *RSearch(addr + i);
+                byte = RSearch(addr + i);
+                if (byte)
+                        res |= *byte;
         }
 
-        return res;
+        return Reverse(res, num_of_bytes * 8); //< Big Endian --> Little Endian
 }
 
 void FuncMemory::write(uint64 value, uint64 addr, unsigned short num_of_bytes)
 {
         assert(num_of_bytes <= 8);
+        assert(num_of_bytes > 0);
         assert(addr != 0);
-
+        
+        uint64 rev_vl = Reverse(value, 8 * num_of_bytes); //< Little --> Big Endian
         uint64 mask = SetBytes(8);
         
-        if (value == 0)
-                return;
         for (int i = num_of_bytes; i > 0; i--) {
-                *WSearch(addr + i - 1) = (value & mask) >> ((num_of_bytes - i) * 8);
+                *WSearch(addr + i - 1) = (rev_vl & mask) >> ((num_of_bytes - i) * 8);
                 mask <<= 8;
         }
 }

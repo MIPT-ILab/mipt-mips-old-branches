@@ -1,3 +1,13 @@
+/*******************************************************
+
+    Reducted by:
+
+    @date: October 14, 2014
+    @author: Kirill Korolev <kirill.korolef@gmail.com>
+    @vertion: 1.0 (October 14, 2014) 
+
+*******************************************************/
+
 // Generci C
 #include <stdlib.h>
 
@@ -20,11 +30,28 @@ int main (int argc, char* argv[])
         // set the name of the executable file
         const char * file_name = argv[1];        
         
+        cout << "\nCONSTRUCTOR TESTING... \n" << endl;
         // create the functiona memory
-        FuncMemory func_mem( file_name, 32, 10, 12);
+        FuncMemory func_mem( file_name);
         
+        cout << "\nDUMP TESTING... \n" << endl
         // print content of the memory
-        cout << func_mem.dump() << endl;
+             << func_mem.dump() << endl;
+
+        cout << "\nREAD TESTING... \n\n"
+             << "First 4 bytes: " << hex << func_mem.read(0x4100c0, 4) << endl;
+
+        cout << "\nSTARTPC TESTING...\n" << endl
+             << "address: 0x" << hex << func_mem.startPC() << endl;
+
+        cout << "\nWRITE TESTING...\n" << endl
+             << "b1 = 0x" << hex << func_mem.read(0x400095, 1) << endl
+             << "b2 = 0xff" << endl
+             << "b1 = b2..." << endl;
+        func_mem.write(0xff, 0x400095, 1);
+        cout << "Now b1 = 0x" << hex << func_mem.read(0x400095, 1) << endl;
+
+        cout << "\nDESTRUCTOR TESTING... " << endl;
  
     } else if ( argc - 1 > num_of_args)
     {

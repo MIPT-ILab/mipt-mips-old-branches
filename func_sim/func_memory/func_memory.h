@@ -82,4 +82,6 @@ public:
 //Sets "num" bytes on the "length" bytes from the first one
 uint64 SetBytes(const uint8 num, const uint8 length = 0);
 
+uint64 Reverse(const uint64 val, const uint8 num);
+
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
