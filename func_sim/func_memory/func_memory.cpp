@@ -56,33 +56,36 @@ FuncMemory::FuncMemory(const char* executable_file_name,
                        uint64 addr_size,
                        uint64 page_num_size,
                        uint64 offset_size):
-_addr_bits   (addr_size),
-_set_bits    (addr_size - page_num_size - offset_size),
 _page_bits   (page_num_size),
 _offset_bits (offset_size),
 _file_name   ((char*) executable_file_name)
 {
+        // assertions:
         assert(executable_file_name != NULL);
         assert(addr_size <= 64);
         assert(page_num_size < 64);
         assert(offset_size < 64);
 
+        // getting sections:
         vector<ElfSection> sections;
         ElfSection::getAllElfSections(executable_file_name, sections);
         assert(sections.size() != 0);
 
-        _set_mask = SetBytes(_set_bits, _page_bits + _offset_bits);
+        // calculating masks:
+        _set_mask = SetBytes(addr_size - _page_bits - _offset_bits, _page_bits + _offset_bits);
         _page_mask = SetBytes(_page_bits, _offset_bits);
         _offset_mask = SetBytes(_offset_bits);
 
+        // getting boundary addresses:
         _begin_addr = sections[0].start_addr;
         _end_addr = sections[sections.size() - 1].start_addr +
                     sections[sections.size() - 1].size - 1;
 
         for (int i = 0; i < sections.size(); i++) {
+                // for startPC();
                 if (!strcmp(sections[i].name,".text"))
                         _text_start = sections[i].start_addr;
-
+                // writing in the memory:
                 for (int j = 0; j < sections[i].size; j++)
                         write(sections[i].content[j], sections[i].start_addr + j, 1);
         }
@@ -92,18 +95,22 @@ const uint8* FuncMemory::RSearch(const uint64 addr) const
 {
         assert(addr != 0);
 
+        // getting addresses:
         uint64 set_addr = (addr & _set_mask) >> (_page_bits + _offset_bits);
         uint64 page_addr = (addr & _page_mask) >> _offset_bits;
         uint64 offset_addr = addr & _offset_mask;
 
+        // in case there is no allocated memory there:
         assert(_memory.size() > set_addr);
         assert(_memory[set_addr].size() > page_addr);
 
+        // searching through a current page:
         for (int i = 0; i < _memory[set_addr][page_addr].size(); i++) {
                 if (_memory[set_addr][page_addr][i].addr == offset_addr)
                         return &_memory[set_addr][page_addr][i].value;
         }
 
+        // if there is no needed byte in the page:
         return NULL;
 }
 
@@ -125,6 +132,7 @@ uint8* FuncMemory::WSearch(const uint64 addr)
                         return &_memory[set_addr][page_addr][i].value;
         }
 
+        // the same function, but now we allocates a missing byte: 
         Pair_t new_p;
         new_p.addr = offset_addr;
         new_p.value = 0;
@@ -134,31 +142,35 @@ uint8* FuncMemory::WSearch(const uint64 addr)
 
 uint64 FuncMemory::read(uint64 addr, unsigned short num_of_bytes) const
 {
+        // assertions:
         assert(num_of_bytes <= 8);
         assert(num_of_bytes > 0);
         assert(addr != 0);
         
+        // creating a value by byte:
         uint64 res = 0;
         const uint8 *byte = NULL;
         for (int i = 0; i < num_of_bytes; i++) {
                 res <<= 8;
                 byte = RSearch(addr + i);
-                if (byte)
+                if (byte) //< in case of NULL pointer:
                         res |= *byte;
         }
 
-        return Reverse(res, num_of_bytes * 8); //< Big Endian --> Little Endian
+        return Reverse(res, num_of_bytes * 8); //< Big Endian => Little Endian
 }
 
 void FuncMemory::write(uint64 value, uint64 addr, unsigned short num_of_bytes)
 {
+        // assertions:
         assert(num_of_bytes <= 8);
         assert(num_of_bytes > 0);
         assert(addr != 0);
         
-        uint64 rev_vl = Reverse(value, 8 * num_of_bytes); //< Little --> Big Endian
+        uint64 rev_vl = Reverse(value, 8 * num_of_bytes); //< Little => Big Endian
         uint64 mask = SetBytes(8);
         
+        // writing by byte:
         for (int i = num_of_bytes; i > 0; i--) {
                 *WSearch(addr + i - 1) = (rev_vl & mask) >> ((num_of_bytes - i) * 8);
                 mask <<= 8;
@@ -169,6 +181,7 @@ string FuncMemory::dump(string indent) const
 {
         ostringstream oss;
 
+        // a dump head:
         oss << indent << "Functional Memory Dump" << endl
             << indent << "Executable file name: " << _file_name << endl
             << indent << "First address: 0x" << hex << _begin_addr << dec << endl
@@ -176,6 +189,7 @@ string FuncMemory::dump(string indent) const
             << indent << "Content:" << endl
             << indent << "|SET       |PAGE      |OFFSET:  VALUE     |" << endl;
 
+        // printing each not emplty set:
         indent.push_back(' ');
         for (int i = 0; i < _memory.size(); i++) {
                 if (_memory[i].size()) {
@@ -197,6 +211,7 @@ string FuncMemory::SetDump(const vector< vector<Pair_t> > set_addr, const string
         while (!set_addr[i].size() && i < set_addr.size()) i++;
 
         char sym = '\0';
+        // printing each not empty page:
         while (i < set_addr.size()) {
                 uint64 curr_page = i;
                 i++;
@@ -224,6 +239,7 @@ string FuncMemory::PageDump(const vector<Pair_t> page_addr, const string indent)
         ostringstream oss;
 
         char sym = '|';
+        // printing every byte in the page:
         for (int i = 0; i < page_addr.size(); i++) {
                 if (i == page_addr.size() - 1)
                 sym = ' ';
