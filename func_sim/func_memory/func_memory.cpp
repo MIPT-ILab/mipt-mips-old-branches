@@ -13,6 +13,10 @@
  *
  * v. 1.1: created 17.10.2014 00:10
  *         added dump function
+ *
+ * v. 1.2: created 17.10.2014 11:25
+ *         fixed bug in destruction
+ *         optimized write function
  */
 
 // Generic C
@@ -76,13 +80,35 @@ void FuncMemory::MemWrite( uint8* value, uint64 addr, uint64 size)
         {
             if ( this->memory[ cur_set_addr]->page[ cur_page_addr])
             {
-                this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+                bool writed = false;
+                while ( ( cur_set_addr || !writed) && size)
+                {
+                    this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+                    addr++;
+                    pos++;
+                    size--;
+                    writed = true;
+                    cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
+                }
+                cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
+                cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
             }
             else
             {
                 this->memory[ cur_set_addr]->page[ cur_page_addr] = new MemPage;
                 this->memory[ cur_set_addr]->page[ cur_page_addr]->offset = new MemOffset[ this->OffsetSize];
-                this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+                bool writed = false;
+                while ( ( cur_set_addr || !writed) && size)
+                {
+                    this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+                    addr++;
+                    pos++;
+                    size--;
+                    writed = true;
+                    cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
+                }
+                cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
+                cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
             }
         }
         else
@@ -95,14 +121,19 @@ void FuncMemory::MemWrite( uint8* value, uint64 addr, uint64 size)
             }
             this->memory[ cur_set_addr]->page[ cur_page_addr] = new MemPage;
             this->memory[ cur_set_addr]->page[ cur_page_addr]->offset = new MemOffset[ this->OffsetSize];
-            this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+            bool writed = false;
+            while ( ( cur_set_addr || !writed) && size)
+            {
+                this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+                addr++;
+                pos++;
+                size--;
+                writed = true;
+                cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
+            }
+            cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
+            cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
         }
-        addr++;
-        pos++;
-        size--;
-        cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-        cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
-        cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
     }
 }
 
@@ -117,6 +148,7 @@ FuncMemory::~FuncMemory()
             {
                 if ( this->memory[ i]->page[ j])
                 {
+                    delete [] this->memory[ i]->page[ j]->offset;
                     delete [] this->memory[ i]->page[ j];
                 }
             }
