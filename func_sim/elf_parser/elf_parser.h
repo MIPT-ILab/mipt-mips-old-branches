@@ -14,7 +14,7 @@
 class Elf;
 
 // uArchSim modules
-#include <types.h>
+#include "types.h"
 
 using namespace std;
 
@@ -22,7 +22,7 @@ class ElfSection
 {
     // You cannot use this constructor to create an object.
     // Use the static function getAllElfSections.
-    ElfSection(); 
+    ElfSection();
     ElfSection( const char* name, uint64 start_addr,
                 uint64 size, const uint8* content);
 
@@ -34,14 +34,14 @@ public:
 
     ElfSection( const  ElfSection& old);
     ElfSection& operator=( const ElfSection& that);
-    
+
     // Use this function to extract all sections from the ELF binary file.
     // Note that the 2nd parameter is used as output.
     static void getAllElfSections( const char* elf_file_name,
                                    vector<ElfSection>& sections_array /*used as output*/);
-    
+
     virtual ~ElfSection();
-    
+
     string dump( string indent = "") const;
     string strByBytes() const;
     string strByWords() const;
