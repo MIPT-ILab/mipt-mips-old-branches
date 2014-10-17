@@ -17,6 +17,11 @@
  * v. 1.2: created 17.10.2014 11:25
  *         fixed bug in destruction
  *         optimized write function
+ *
+ * v. 1.3: created 17.10.2014 18:35
+ *         fixed bug in destruction
+ *         some changes in dump
+ *         
  */
 
 // protection from multi-include

@@ -75,6 +75,7 @@ void ElfSection::getAllElfSections( const char* elf_file_name,
     // open the binary file, we have to use C-style open,
     // because it is required by elf_begin function
     int file_descr = open( elf_file_name, O_RDONLY); 
+    
     if ( file_descr < 0)
     {
         cerr << "ERROR: Could not open file " << elf_file_name << ": "
@@ -103,6 +104,8 @@ void ElfSection::getAllElfSections( const char* elf_file_name,
     size_t shstrndx;
     elf_getshdrstrndx( elf, &shstrndx);
     
+    vector<FILE*> files;
+
     Elf_Scn *section = NULL;
     while ( (section = elf_nextscn( elf, section)) != NULL)
     {        
@@ -117,10 +120,10 @@ void ElfSection::getAllElfSections( const char* elf_file_name,
 
         uint64 size = ( uint64)shdr.sh_size;
         uint64 offset = ( uint64)shdr.sh_offset;
-	    uint8* content = new uint8[ size];
-        
+        uint8* content = new uint8[ size];
+        FILE* file = fdopen( file_descr, "r");
+        files.push_back( file);
         lseek( file_descr, offset, SEEK_SET);
-        FILE *file = fdopen( file_descr, "r");
         if ( !file )
         {
             cerr << "ERROR: Could not open file " << elf_file_name << ": "
@@ -131,12 +134,16 @@ void ElfSection::getAllElfSections( const char* elf_file_name,
         // fill the content by the section data
         fread( content, sizeof( uint8), size, file);
         ElfSection section( name, start_addr, size, content);
-	    sections_array.push_back( ElfSection( name, start_addr, size, content));
+        sections_array.push_back( ElfSection( name, start_addr, size, content));
+        delete [] content;
     }
     
     // close all used files
     elf_end( elf);
     close( file_descr);
+
+    for ( int i = 0; i < files.size(); i++)
+        fclose( files[ i]);
 }
 
 ElfSection::~ElfSection()
