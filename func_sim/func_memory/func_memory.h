@@ -21,7 +21,12 @@
  * v. 1.3: created 17.10.2014 18:35
  *         fixed bug in destruction
  *         some changes in dump
- *         
+ *
+ * v. 1.4: created 17.10.2014 20:25
+ *         added start address to dump
+ *         added comments
+ *         added some checks
+ *
  */
 
 // protection from multi-include
