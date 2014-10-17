@@ -39,7 +39,7 @@ int main (int argc, char* argv[])
              << func_mem.dump() << endl;
 
         cout << "\nREAD TESTING... \n\n"
-             << "First 4 bytes: " << hex << func_mem.read(0x4100c0, 4) << endl;
+             << "First 4 bytes: " << hex << func_mem.read(0x400094, 4) << endl;
 
         cout << "\nSTARTPC TESTING...\n" << endl
              << "address: 0x" << hex << func_mem.startPC() << endl;

@@ -31,48 +31,46 @@ using namespace std;
 
 class FuncMemory
 {
-        //DATA ******************************************************************
-        char *_file_name; //< All class data's names start with "_".           //
-                                                                               //
-        uint64 _text_start; //< First address of .text section.                //
-                                                                               //
-        uint64 _begin_addr; //<= Two boundary addresses of                     //
-        uint64 _end_addr;   //<= a whole memory space.                         //
-                                                                               //
-        //< Hierarchical organised memory:                                     //
-        vector< vector< vector<uint8> > > _memory;                             //
-                                                                               //
-        // Number of bits:                                                     //
-        uint64 _page_bits;   // in a "page part;                               //
-        uint64 _offset_bits; // in a "offset" part.                            //
-                                                                               //
-        uint64 _set_mask;    //<= Tree masks for getting set, page and offset  //
-        uint64 _page_mask;   //<= addresses from a big one.                    //
-        uint64 _offset_mask; //<=                                              //
-        // **********************************************************************
+    //DATA ******************************************************************
+    char *_file_name; //< All class data's names start with "_".           //
+                                                                           //
+    uint64 _text_start; //< First address of .text section.                //
+                                                                           //
+    uint64 _begin_addr; //<= Two boundary addresses of                     //
+    uint64 _end_addr;   //<= a whole memory space.                         //
+                                                                           //
+    //< Hierarchical organised memory:                                     //
+    vector< vector< vector<uint8> > > _memory;                             //
+                                                                           //
+    // Number of bits:                                                     //
+    uint64 _page_bits;   // in a "page part;                               //
+    uint64 _offset_bits; // in a "offset" part.                            //
+                                                                           //
+    uint64 _set_mask;    //<= Tree masks for getting set, page and offset  //
+    uint64 _page_mask;   //<= addresses from a big one.                    //
+    uint64 _offset_mask; //<=                                              //
+    // **********************************************************************
 
-        //INTERFACE ************************************************************************************
-        FuncMemory(){} //< Can't use default constructor                                              //
-public:                                                                                               //
-        FuncMemory (const char* executable_file_name, //< Basic class constructor:                    //
-                    uint64 addr_size     = 32,                                                        //
-                    uint64 page_num_size = 10,                                                        //
-                    uint64 offset_size   = 12);                                                       //
-                                                                                                      //
-        virtual ~FuncMemory(){} //< All allocated memory dectroys in vector class destructor          //
-                                                                                                      //
-        const uint8* RSearch(const uint64 addr) const; //< Returns pointer by address for reading     //
-              uint8* WSearch(const uint64 addr);       //< Returns pointer by address for writing     //
-              uint64 read(uint64 addr, unsigned short num_of_bytes = 4) const;                        //
-              void   write(uint64 value, uint64 addr, unsigned short num_of_bytes = 4);               // 
-                                                                                                      //
-        inline uint64 startPC() const { return _text_start; }                                         //
-                                                                                                      //
-        // Recursive hierarchical memory dump by tree functions:                                      //
-        string dump(string indent = "") const;                                                        //
-        string SetDump(const vector< vector<uint8> > set_addr, const string indent = "") const;       //
-        string PageDump(const vector<uint8> page_addr, const string indent = "") const;               //
-        //**********************************************************************************************
+    //INTERFACE ************************************************************************************
+    FuncMemory(){} //< Can't use default constructor                                              //
+public:                                                                                           //
+    FuncMemory (const char* executable_file_name, //< Basic class constructor:                    //
+                uint64 addr_size     = 32,                                                        //
+                uint64 page_num_size = 10,                                                        //
+                uint64 offset_size   = 12);                                                       //
+                                                                                                  //
+    virtual ~FuncMemory(){} //< All allocated memory dectroys in vector class destructor          //
+                                                                                                  //
+    uint64 read(uint64 addr, unsigned short num_of_bytes = 4) const;                              //
+    void   write(uint64 value, uint64 addr, unsigned short num_of_bytes = 4);                     // 
+                                                                                                  //
+    inline uint64 startPC() const { return _text_start; }                                         //
+                                                                                                  //
+    // Recursive hierarchical memory dump by tree functions:                                      //
+    string dump(string indent = "") const;                                                        //
+    string SetDump(const vector< vector<uint8> > set_addr, const string indent = "") const;       //
+    string PageDump(const vector<uint8> page_addr, const string indent = "") const;               //
+    //**********************************************************************************************
 };
 // 2 BINARY FUNCTIONS:
 
