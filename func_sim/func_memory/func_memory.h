@@ -36,12 +36,12 @@ class FuncMemory
     uint64 _page_bits;
     uint64 _offset_bits;
     uint64 _segm_text;
-    vector<uint64> getAddr( uint64 full_addr,
-                            uint64 addr_size,
-                            uint64 page_bits,
-                            uint64 offset_bits) const;
-    vector<uint64> getAddr( uint64 full_addr) const;
-    uint64         getMask(uint64 num_digit) const;
+    vector<uint64> getAddr( const uint64 full_addr,
+                            const uint64 addr_size,
+                            const uint64 page_bits,
+                            const uint64 offset_bits) const;
+    vector<uint64> getAddr( const uint64 full_addr) const;
+    uint64         getMask( const uint64 num_digit) const;
     bool           checkAddrAndAdd(const vector<uint64> &addr);
     bool           checkAddr(const vector<uint64> &addr) const;
 public:

@@ -21,7 +21,7 @@ int main (int argc, char* argv[])
         const char * file_name = argv[1];
 
         // create the functiona memory
-        FuncMemory func_mem( file_name, 64, 10, 32);
+        FuncMemory func_mem( file_name, 32, 10, 12);
         func_mem.write(1512, 0x4100c3, 2);
         cout << "READ:" << func_mem.read(0x4100c3, 2) << endl;
         cout << "DUMP" << endl << func_mem.dump() << "DUMP END" << endl;
