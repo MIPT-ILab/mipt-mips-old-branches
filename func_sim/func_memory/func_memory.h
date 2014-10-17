@@ -17,13 +17,18 @@
 #include <types.h>
 #include <elf_parser.h>
 
-using namespace std;
+using namespace std; 
 
 class FuncMemory
 {
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
+    vector < ElfSection> sec_array;
+    uint64 address_size;
+    uint64 addr_set_size;
+    uint64 addr_page_size;
+    uint64 addr_offset_size;
 
 public:
 

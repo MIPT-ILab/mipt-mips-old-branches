@@ -8,7 +8,7 @@
 // Generic C
 
 // Generic C++
-
+#include <iostream>
 // uArchSim modules
 #include <func_memory.h>
 
@@ -17,6 +17,12 @@ FuncMemory::FuncMemory( const char* executable_file_name,
                         uint64 page_bits,
                         uint64 offset_bits)
 {
+    ElfSection::getAllElfSections ( executable_file_name, sec_array);
+    address_size = addr_size;
+    addr_page_size = page_bits;
+    addr_offset_size = offset_bits;
+    addr_set_size = address_size - ( addr_page_size + addr_offset_size);
+    std::cout << addr_set_size << "\n" << addr_page_size << "\n" << addr_offset_size << "\n";
     // put your code here
 }
 
