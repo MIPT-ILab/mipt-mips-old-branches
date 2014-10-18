@@ -5,6 +5,8 @@
  * Copyright 2012 uArchSim iLab project
  */
 
+/** Edited by Ladin Oleg. */
+
 // protection from multi-include
 #ifndef FUNC_MEMORY__FUNC_MEMORY_H
 #define FUNC_MEMORY__FUNC_MEMORY_H
@@ -27,6 +29,14 @@ class FuncMemory
 
 public:
 
+    /*
+     * sections_array - vector of sections, sa_num - amount of sections,
+     * sa_all - amount of additional allocated sections.
+     */
+    vector<ElfSection> sections_array;
+    int sa_num;
+    int sa_all;
+    
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
                  uint64 page_num_size = 10,
