@@ -10,8 +10,10 @@
 #define FUNC_MEMORY__FUNC_MEMORY_H
 
 // Generic C++
+#include <cstring>
 #include <string>
 #include <cassert>
+#include <vector>
 
 // uArchSim modules
 #include <types.h>
@@ -23,14 +25,33 @@ class FuncMemory
 {
     // You could not create the object
     // using this default constructor
-    FuncMemory(){}
+    FuncMemory() {}
+    
+    uint64 takeLeastBits( uint64 address, uint64 bits_number) const;
+    void decodeAddress( uint64 address, 
+                        uint64* set_index, 
+                        uint64* page_index, 
+                        uint64* offset) const;
+    
+    uint64 addr_bits;
+    uint64 set_num_bits;
+    uint64 page_num_bits;
+    uint64 offset_bits;
+    
+    uint64 addr_size;
+    uint64 sets_array_size;
+    uint64 set_size;
+    uint64 page_size;
+    
+    uint64 start_pc;
+    
+    uint8*** sets_array;
 
 public:
-
     FuncMemory ( const char* executable_file_name,
-                 uint64 addr_size = 32,
-                 uint64 page_num_size = 10,
-                 uint64 offset_size = 12);
+                 uint64 addr_bits = 32,
+                 uint64 page_num_bits = 10,
+                 uint64 offset_bits = 12);
     
     virtual ~FuncMemory();
     
