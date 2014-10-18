@@ -27,17 +27,10 @@
 
 // uArchSim modules
 #include "func_memory.h"
+#include "extra_functions.h"
 
 using namespace std;
 
-
-    vector<int> toBin( uint64 val);
-    vector<int> toBin( uint8 val);
-    uint64 fromBin( vector<int> data);
-    void myWrite( uint8* content,
-                   uint64 value,
-                   uint64 from,
-                   uint64 count);
 
 /* toBin represents number of type uint8 in binary */
 vector<int> toBin( uint64 val)
@@ -200,6 +193,14 @@ void FuncMemory::write( uint64 value, uint64 addr, unsigned short num_of_bytes)
         }
     }
 
+    for ( int i = 0; i < sections_array.size(); ++i)
+    {
+        if ( strcmp( sections_array[i].name, ".text") != 0)
+        {
+            sections_array.push_back( sections_array[ i]);
+            break;
+        }
+    }
     sections_array.push_back( sections_array[ 0]);
     sections_array[ pver_size].start_addr = addr;
     delete[] sections_array[ pver_size].content;
