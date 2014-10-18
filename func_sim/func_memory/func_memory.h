@@ -20,7 +20,7 @@
 using namespace std; 
 
 typedef struct{
-    uint8*** addr_set;
+    uint8*** addr_mem;
     char** name;
     uint64* start_address;
     uint64* size;
@@ -36,9 +36,6 @@ class FuncMemory
     uint64 addr_set_size;
     uint64 addr_page_size;
     uint64 addr_offset_size;
-    uint64 addr_set;
-    uint64 addr_page;
-    uint64 addr_offset;
     uint64 size_of_set;
     uint64 size_of_page;
     uint64 size_of_offset;
@@ -46,7 +43,7 @@ class FuncMemory
 
 public:
     
-    void FuncMemory_addr ( const uint64);
+    void FuncMemory_find_addr ( uint64*, uint64*, uint64*, const uint64) const;
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
                  uint64 page_num_size = 10,

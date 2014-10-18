@@ -31,10 +31,11 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     size_of_set = 0x1l << addr_set_size;
     size_of_page = 0x1l << addr_page_size;
     size_of_offset = 0x1l << addr_offset_size;
-
+    
+    uint64 addr_set, addr_page, addr_offset;
     //cout << "Size_vector and so on: " <<  hex <<sec_array.size() << " " /*<< hex*/ << size_of_set << " " << size_of_page << " " << size_of_offset << dec << "\n" ;
 
-    F_Mem.addr_set = new uint8 ** [ ( size_of_set) * sizeof ( uint8**)];
+    F_Mem.addr_mem = new uint8 ** [ ( size_of_set) * sizeof ( uint8**)];
     /*for ( int z = 0; z < size_of_set; z++)
         F_Mem.addr_set [ z] = NULL;*/
     F_Mem.name = new char* [ sec_array.size() * sizeof ( char*)];
@@ -45,19 +46,19 @@ FuncMemory::FuncMemory( const char* executable_file_name,
         F_Mem.name [ i] = sec_array [ i].name;
         F_Mem.start_address [ i]= sec_array [ i].start_addr;
         F_Mem.size [ i]= sec_array [ i].size;
-        FuncMemory_addr ( sec_array [ i]. start_addr); 
+        FuncMemory_find_addr ( &addr_set, &addr_page, &addr_offset, sec_array [ i].start_addr); 
         for ( int y = 0; y <= ( ( ( uint64) addr_offset + sec_array [ i].size) / (size_of_page * size_of_offset)); y++)
         {
             //if ( F_Mem.addr_set [ addr_set + y] == NULL)
             {
-                F_Mem.addr_set [ addr_set + y] = new uint8* [ ( size_of_page) * sizeof ( uint8*)];
+                F_Mem.addr_mem [ addr_set + y] = new uint8* [ ( size_of_page) * sizeof ( uint8*)];
                 
                 for ( int z = 0; z < size_of_page; z++)
-                    F_Mem.addr_set [ addr_set + y] [ z] = NULL;
+                    F_Mem.addr_mem [ addr_set + y] [ z] = NULL;
                 for ( int j = 0; j <= ( ( ( uint64) addr_offset + sec_array [ i].size) / size_of_offset); j++)
                     //if ( F_Mem.addr_set [ addr_set + y] [ addr_page + j] == NULL)
                     {
-                        F_Mem.addr_set [ addr_set + y] [ addr_page + j] = new uint8 [ ( size_of_offset) * sizeof ( uint8)]; 
+                        F_Mem.addr_mem [ addr_set + y] [ addr_page + j] = new uint8 [ ( size_of_offset) * sizeof ( uint8)]; 
                    }
             }
         }
@@ -65,8 +66,9 @@ FuncMemory::FuncMemory( const char* executable_file_name,
         for ( int j = 0; j < sec_array [ i].size; j++)
         {
             uint64 flag_page = ( addr_offset + j) / size_of_offset;
-            uint64 flag_set = (addr_page + flag_page) / size_of_page;
-            F_Mem.addr_set [ addr_set + flag_set] [ addr_page + flag_page - ( flag_set * size_of_page)] [ addr_offset + j - ( flag_page * size_of_offset)] = sec_array [ i].content [ j];
+            uint64 flag_set = ( addr_page + flag_page) / size_of_page;
+            F_Mem.addr_mem [ addr_set + flag_set] [ addr_page + flag_page - ( flag_set * size_of_page)] [ addr_offset + j - ( flag_page * size_of_offset)] = sec_array [ i].content [ j];
+            //cout << F_Mem.addr_mem [ addr_set + flag_set] [ addr_page + flag_page - ( flag_set * size_of_page)] [ addr_offset + j - ( flag_page * size_of_offset)] << " ";
         } 
     }
 }
@@ -86,25 +88,31 @@ uint64 FuncMemory::startPC() const
     // put your code here
 }
 
-void FuncMemory::FuncMemory_addr ( const uint64 addr)
+void FuncMemory::FuncMemory_find_addr ( uint64 *addr_set, uint64 *addr_page, uint64 *addr_offset, const uint64 address) const  
 {
-    addr_set = addr >> ( addr_offset_size + addr_page_size);    
-    addr_page = ( addr >> addr_offset_size) & ( size_of_page - 1);
-    addr_offset = addr & (size_of_offset -1);
+    *addr_set = address >> ( addr_offset_size + addr_page_size);    
+    *addr_page = ( address >> addr_offset_size) & ( size_of_page - 1);
+    *addr_offset = address & (size_of_offset -1);
     
     //cout << "FuncMemory_addr "<< hex << addr << " " << addr_set << " " << addr_page << " " << addr_offset << dec << "\n";
 }
 
 uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
 {
-    /*
-                buf = ( ( buf & 0xF0 ) >> 4 ) | ( ( buf & 0x0f ) << 4 );
-                buf = ( ( buf & 0xCC ) >> 2 ) | ( ( buf & 0x33 ) << 2 );
-                buf = ( ( buf & 0xAA ) >> 1 ) | ( ( buf & 0x55 ) << 1 );
-                cout << ( int) buf << "\n\n";
-    */
-    //cout << "Before return answ\n" << answ << "\n";
-    return 0;
+    uint64 buf, answ = 0;
+    uint64 addr_set, addr_page, addr_offset;
+    FuncMemory_find_addr ( &addr_set, &addr_page, &addr_offset, addr);
+    for ( int i = 0; i < num_of_bytes; i++);
+    {
+        buf = F_Mem.addr_mem [ addr_set] [ addr_page] [ addr_offset];
+        cout << hex << addr_set_size << " " << addr_page_size << " " << addr_offset_size << "\n";
+        cout << addr << " " << addr_set << " " << addr_page << " " << addr_offset << " " << buf << "\n" << dec;
+        buf = ( ( buf & 0xF0 ) >> 4 ) | ( ( buf & 0x0f ) << 4 );
+        buf = ( ( buf & 0xCC ) >> 2 ) | ( ( buf & 0x33 ) << 2 );
+        buf = ( ( buf & 0xAA ) >> 1 ) | ( ( buf & 0x55 ) << 1 );
+        answ = answ + ( buf << 0x8);
+    }
+    return answ;
     // put your code here
 }
 
