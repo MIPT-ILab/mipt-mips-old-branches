@@ -30,6 +30,10 @@
  * v. 1.5: created 18.10.2014 18:20
  *         fixed bug in dump function
  *
+ * v. 1.6: created 18.10.2014 22:10
+ *         some changes in coding style
+ *         added new function PageWrite
+ *         corrected some grammar mistakes
  */
 
 // Generic C
@@ -64,31 +68,31 @@ FuncMemory::FuncMemory( const char* executable_file_name,
     assert( executable_file_name);
 
     // give start value to number of address elements
-    this->OffsetSize = 1;
-    this->PageSize = 1;
-    this->SetSize = 1;
+    this->Offset_Size = 1;
+    this->Page_Size = 1;
+    this->Set_Size = 1;
 
     // save sizes of address parts
-    this->OffsetBits = offset_bits;
-    this->PageBits = page_bits;
-    this->SetBits = addr_size - page_bits - offset_bits;
+    this->Offset_Bits = offset_bits;
+    this->Page_Bits = page_bits;
+    this->Set_Bits = addr_size - page_bits - offset_bits;
 
     // initializate correct start address
     this->PCstart_addr = 0;
 
     // count number of address elements
     for ( int i = 0; i < offset_bits; i++)
-        this->OffsetSize *= 2;
+        this->Offset_Size *= 2;
     for ( int i = 0; i < page_bits; i++)
-        this->PageSize *= 2;
+        this->Page_Size *= 2;
     for ( int i = 0; i < ( addr_size - page_bits - offset_bits); i++)
-        this->SetSize *= 2;
+        this->Set_Size *= 2;
 
     // create memory
-    this->memory = new MemSet* [ SetSize];
+    this->memory = new MemSet* [ Set_Size];
 
     // save addresses of sets as NULL
-    for ( int i = 0; i < SetSize; i++)
+    for ( int i = 0; i < Set_Size; i++)
         this->memory[ i] = NULL;
 
     // get information from input file
@@ -103,6 +107,35 @@ FuncMemory::FuncMemory( const char* executable_file_name,
             PCstart_addr = sections_array[ i].start_addr;
         }
         this->MemWrite( sections_array[ i].content, sections_array[ i].start_addr, sections_array[ i].size);
+    }
+}
+/**
+ * FuncMemory::PageWrite - write information on one page
+ * 
+ * param    value                       array of input data
+ * param    addr                        address to write to
+ * param    size                        number of bytes to write
+ *
+ */
+void FuncMemory::PageWrite( uint8* value, uint64* addr, uint64* size)
+{
+    // find current numbers of address parts
+    uint64 cur_set_addr = ( ( this->Set_Size - 1) & ( ( *addr) >> ( this->Offset_Bits + this->Page_Bits)));
+    uint64 cur_page_addr = ( ( this->Page_Size - 1) & ( ( *addr) >> this->Offset_Bits));
+    uint64 cur_offset_addr = ( ( this->Offset_Size - 1) & ( *addr));
+    
+    int pos = 0;
+    bool written = false;
+
+    // write data to current page until its end or until end of data
+    while ( ( cur_set_addr || !written) && ( *size))
+    {
+        this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
+        ( *addr)++;
+        pos++;
+        ( *size)--;
+        written = true;
+        cur_offset_addr = ( ( this->Offset_Size - 1) & ( *addr));
     }
 }
 
@@ -121,12 +154,12 @@ void FuncMemory::MemWrite( uint8* value, uint64 addr, uint64 size)
     assert( size);
 
     // find current numbers of address parts
-    uint64 cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-    uint64 cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
-    uint64 cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
+    uint64 cur_set_addr = ( ( this->Set_Size - 1) & ( addr >> ( this->Offset_Bits + this->Page_Bits)));
+    uint64 cur_page_addr = ( ( this->Page_Size - 1) & ( addr >> this->Offset_Bits));
+    uint64 cur_offset_addr = ( ( this->Offset_Size - 1) & addr);
     
     // initializate counter of wroten data
-    uint64 pos = 0;
+    uint64 start_size = size;
 
     // write data
     while ( size > 0)
@@ -135,52 +168,30 @@ void FuncMemory::MemWrite( uint8* value, uint64 addr, uint64 size)
         {
             if ( this->memory[ cur_set_addr]->page[ cur_page_addr])
             {
-                bool writed = false;
+                this->PageWrite( value + start_size - size, &addr, &size);
 
-                // write data to current page
-                while ( ( cur_set_addr || !writed) && size)
-                {
-                    this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
-                    addr++;
-                    pos++;
-                    size--;
-                    writed = true;
-                    cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
-                }
-                cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-                cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
-            }
-            else
+                cur_set_addr = ( ( this->Set_Size - 1) & ( addr >> ( this->Offset_Bits + this->Page_Bits)));
+                cur_page_addr = ( ( this->Page_Size - 1) & ( addr >> this->Offset_Bits));
+            } else
             {
                 // creating new page
                 this->memory[ cur_set_addr]->page[ cur_page_addr] = new MemPage;
                 
                 // creating array of values
-                this->memory[ cur_set_addr]->page[ cur_page_addr]->offset = new MemOffset[ this->OffsetSize];
-                bool writed = false;
-                
-                // write data to current page
-                while ( ( cur_set_addr || !writed) && size)
-                {
-                    this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
-                    addr++;
-                    pos++;
-                    size--;
-                    writed = true;
-                    cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
-                }
-                cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-                cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
+                this->memory[ cur_set_addr]->page[ cur_page_addr]->offset = new MemOffset[ this->Offset_Size];
+                this->PageWrite( value + start_size - size, &addr, &size);
+
+                cur_set_addr = ( ( this->Set_Size - 1) & ( addr >> ( this->Offset_Bits + this->Page_Bits)));
+                cur_page_addr = ( ( this->Page_Size - 1) & ( addr >> this->Offset_Bits));
             }
-        }
-        else
+        } else
         {
             // create new set
             this->memory[ cur_set_addr] = new MemSet;
-            this->memory[ cur_set_addr]->page = new MemPage*[ this->PageSize];
+            this->memory[ cur_set_addr]->page = new MemPage*[ this->Page_Size];
             
             // save addresses of pages as NULL
-            for ( int i = 0; i < PageSize; i++)
+            for ( int i = 0; i < Page_Size; i++)
             {
                 this->memory[ cur_set_addr]->page[ i] = NULL;
             }
@@ -189,21 +200,11 @@ void FuncMemory::MemWrite( uint8* value, uint64 addr, uint64 size)
             this->memory[ cur_set_addr]->page[ cur_page_addr] = new MemPage;
             
             // creating array of values
-            this->memory[ cur_set_addr]->page[ cur_page_addr]->offset = new MemOffset[ this->OffsetSize];
-            bool writed = false;
-            
-            // write data to current page
-            while ( ( cur_set_addr || !writed) && size)
-            {
-                this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value = value[ pos];
-                addr++;
-                pos++;
-                size--;
-                writed = true;
-                cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
-            }
-            cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-            cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
+            this->memory[ cur_set_addr]->page[ cur_page_addr]->offset = new MemOffset[ this->Offset_Size];
+            this->PageWrite( value + start_size - size, &addr, &size);
+
+            cur_set_addr = ( ( this->Set_Size - 1) & ( addr >> ( this->Offset_Bits + this->Page_Bits)));
+            cur_page_addr = ( ( this->Page_Size - 1) & ( addr >> this->Offset_Bits));
         }
     }
 }
@@ -214,11 +215,11 @@ void FuncMemory::MemWrite( uint8* value, uint64 addr, uint64 size)
  */
 FuncMemory::~FuncMemory()
 {
-    for ( int i = 0; i < this->SetSize; i++)
+    for ( int i = 0; i < this->Set_Size; i++)
     {
         if ( this->memory[ i])
         {
-            for ( int j = 0; j < this->PageSize; j++)
+            for ( int j = 0; j < this->Page_Size; j++)
             {
                 if ( this->memory[ i]->page[ j])
                 {
@@ -256,9 +257,9 @@ uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
     assert( num_of_bytes <= 8);
     
     // find current numbers of address parts
-    uint64 cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-    uint64 cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
-    uint64 cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
+    uint64 cur_set_addr = ( ( this->Set_Size - 1) & ( addr >> ( this->Offset_Bits + this->Page_Bits)));
+    uint64 cur_page_addr = ( ( this->Page_Size - 1) & ( addr >> this->Offset_Bits));
+    uint64 cur_offset_addr = ( ( this->Offset_Size - 1) & addr);
     
     // initializate items for output
     uint8 res[ 8];
@@ -274,9 +275,9 @@ uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
         // read one byte from memory
         res[ i] = this->memory[ cur_set_addr]->page[ cur_page_addr]->offset[ cur_offset_addr].value;
         addr++;
-        cur_set_addr = ( ( this->SetSize - 1) & ( addr >> ( this->OffsetBits + this->PageBits)));
-        cur_page_addr = ( ( this->PageSize - 1) & ( addr >> this->OffsetBits));
-        cur_offset_addr = ( ( this->OffsetSize - 1) & addr);
+        cur_set_addr = ( ( this->Set_Size - 1) & ( addr >> ( this->Offset_Bits + this->Page_Bits)));
+        cur_page_addr = ( ( this->Page_Size - 1) & ( addr >> this->Offset_Bits));
+        cur_offset_addr = ( ( this->Offset_Size - 1) & addr);
     }
 
     // link found bytes together
@@ -327,26 +328,25 @@ string FuncMemory::dump( string indent) const
     oss << indent << endl << " Address start from:    " << addrtohex( this->startPC()) << endl << indent << endl;
     oss << indent << endl << " Memory:" << endl << indent << endl;
 
-    for ( int i = 0; i < this->SetSize; i++)
+    for ( int i = 0; i < this->Set_Size; i++)
     {
         if ( this->memory[ i])
         {
-            for ( int j = 0; j < this->PageSize; j++)
+            for ( int j = 0; j < this->Page_Size; j++)
             {
                 if ( this->memory[ i]->page[ j])
                 {
                     int offset_last = 0;
-                    for ( int k = 0; k < ( this->OffsetSize / 4); k++)
+                    for ( int k = 0; k < ( this->Offset_Size / 4); k++)
                     {
-                        uint64 addr = this->OffsetSize * this->PageSize * i + this->OffsetSize * j + 4 * k;
+                        uint64 addr = this->Offset_Size * this->Page_Size * i + this->Offset_Size * j + 4 * k;
                         uint64 val = this->read( addr, 4);
                         if ( val == 0)
                         {
                             if ( !skipping)
                                 oss << indent << endl << indent << "          ....  " << endl << indent << endl;
                             skipping = true;
-                        }
-                        else
+                        } else
                         {
                             skipping = false;
                             oss << indent << "  " << addrtohex( addr) << ":    " << valtohex( val) << endl;
@@ -354,17 +354,16 @@ string FuncMemory::dump( string indent) const
                         offset_last = k;
                     }
                     offset_last++;
-                    if ( this->OffsetSize % 4)
+                    if ( this->Offset_Size % 4)
                     {
-                        uint64 addr = this->OffsetSize * this->PageSize * i + this->OffsetSize * j + offset_last * 4;
-                        uint64 val = this->read( addr, this->OffsetSize % 4);
+                        uint64 addr = this->Offset_Size * this->Page_Size * i + this->Offset_Size * j + offset_last * 4;
+                        uint64 val = this->read( addr, this->Offset_Size % 4);
                         if ( val == 0)
                         {
                             if ( !skipping)
                                 oss << indent << endl << indent << "          ....  " << endl << indent << endl;
                             skipping = true;
-                        }
-                        else
+                        } else
                         {
                             skipping = false;
                             oss << indent << "  " << addrtohex( addr) << ":    " << valtohex( val) << endl;

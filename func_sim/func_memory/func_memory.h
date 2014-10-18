@@ -30,6 +30,10 @@
  * v. 1.5: created 18.10.2014 18:20
  *         fixed bug in dump function
  *
+ * v. 1.6: created 18.10.2014 22:10
+ *         some changes in coding style
+ *         added new function PageWrite
+ *         corrected some grammar mistakes
  */
 
 // protection from multi-include
@@ -77,13 +81,13 @@ class FuncMemory
 public:
 
     MemSet** memory;
-    uint64 SetSize;
-    uint64 PageSize;
-    uint64 OffsetSize;
+    uint64 Set_Size;
+    uint64 Page_Size;
+    uint64 Offset_Size;
     uint64 PCstart_addr;
-    uint64 SetBits;
-    uint64 PageBits;
-    uint64 OffsetBits;
+    uint64 Set_Bits;
+    uint64 Page_Bits;
+    uint64 Offset_Bits;
 
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
@@ -94,6 +98,7 @@ public:
     
     uint64 read( uint64 addr, unsigned short num_of_bytes = 4) const;
     void   write( uint64 value, uint64 addr, unsigned short num_of_bytes = 4);
+    void   PageWrite( uint8* value, uint64* addr, uint64* size);
     void   MemWrite( uint8* value, uint64 addr, uint64 size);
     uint64 startPC() const;
     
