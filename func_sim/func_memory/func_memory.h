@@ -27,6 +27,9 @@
  *         added comments
  *         added some checks
  *
+ * v. 1.5: created 18.10.2014 18:20
+ *         fixed bug in dump function
+ *
  */
 
 // protection from multi-include

@@ -27,6 +27,9 @@
  *         added comments
  *         added some checks
  *
+ * v. 1.5: created 18.10.2014 18:20
+ *         fixed bug in dump function
+ *
  */
 
 // Generic C
@@ -355,10 +358,11 @@ string FuncMemory::dump( string indent) const
                     {
                         uint64 addr = this->OffsetSize * this->PageSize * i + this->OffsetSize * j + offset_last * 4;
                         uint64 val = this->read( addr, this->OffsetSize % 4);
-                        if ( val == 0 && !skipping)
+                        if ( val == 0)
                         {
+                            if ( !skipping)
+                                oss << indent << endl << indent << "          ....  " << endl << indent << endl;
                             skipping = true;
-                            oss << indent << endl << indent << "          ....  " << endl << indent << endl;
                         }
                         else
                         {
