@@ -192,8 +192,8 @@ void FuncMemory::write( uint64 value, uint64 addr, unsigned short num_of_bytes)
             }
         }
     }
-
-    for ( int i = 0; i < sections_array.size(); ++i)
+    /* first way to write into non initialized memory */
+    /*for ( int i = 0; i < sections_array.size(); ++i)
     {
         if ( strcmp( sections_array[i].name, ".text") != 0)
         {
@@ -223,9 +223,17 @@ void FuncMemory::write( uint64 value, uint64 addr, unsigned short num_of_bytes)
                 }
             }
         }
-    }
+    }*/
+    ElfSection section( sections_array[0]);
+    section.name = new char;
+    section.size = num_of_bytes;
+    section.start_addr = addr;
+    section.content = new uint8[ num_of_bytes];
+    sections_array.push_back( section);
+    write( value, addr, num_of_bytes);
 }
 
+/* formated output, it make output in 8 symbols */
 string FuncMemory::getFormatted( uint64 val, int num, char fill)
 {
     ostringstream result;
