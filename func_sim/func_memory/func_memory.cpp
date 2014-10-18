@@ -2,6 +2,7 @@
  * func_memory.cpp - the module implementing the concept of
  * programer-visible memory space accesing via memory address.
  * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
+ * performed by Semyon Abramov <semyon.abramov.mipt@gmail.com>
  * Copyright 2012 uArchSim iLab project
  */
 
@@ -27,13 +28,12 @@
 
 // uArchSim modules
 #include "func_memory.h"
-#include "extra_functions.h"
 
 using namespace std;
 
 
 /* toBin represents number of type uint8 in binary */
-vector<int> toBin( uint64 val)
+vector<int> FuncMemory::toBin( uint64 val)
 {
     uint64 valCop = val;
     int size = sizeof(val) * 8;
@@ -49,7 +49,7 @@ vector<int> toBin( uint64 val)
 }
 
 /* toBin represents number of type uint8 in binary */
-vector<int> toBin( uint8 val)
+vector<int> FuncMemory::toBin( uint8 val)
 {
     uint8 valCop = val;
     int size = sizeof( val) * 8;
@@ -66,7 +66,7 @@ vector<int> toBin( uint8 val)
 }
 
 /* fromBin represents number from binary to uint64 */
-uint64 fromBin( vector<int> data)
+uint64 FuncMemory::fromBin( vector<int> data)
 {
     int size = data.size();
 
@@ -82,7 +82,7 @@ uint64 fromBin( vector<int> data)
 }
 
 /* write input value to content */
-void myWrite( uint8* content,
+void FuncMemory::myWrite( uint8* content,
                uint64 value,
                uint64 from,
                uint64 count)
@@ -226,12 +226,39 @@ void FuncMemory::write( uint64 value, uint64 addr, unsigned short num_of_bytes)
     }
 }
 
+string FuncMemory::getFormatted( uint64 val, int num, char fill)
+{
+    ostringstream result;
+
+    result.width( num);
+    result.fill( fill);
+
+    result << hex << val;
+
+    return result.str();
+}
+
+
 string FuncMemory::dump( string indent) const
 {
     ostringstream oss;
     for( unsigned int i = 0; i < sections_array.size(); ++i)
     {
-        oss << sections_array[ i].dump( indent) << endl;
+        //oss << sections_array[i].dump(indent) << endl;
+        oss << dec;
+        oss << indent << "Dump ELF section \"" << sections_array[ i].name << "\"" << endl;
+        oss << indent << "\tsize = " << sections_array[ i].size << " Bytes" << endl;
+
+        oss << hex;
+        oss << indent << "\tstart_addr = 0x" << sections_array[ i].start_addr << endl;
+        oss << indent << "\tContent:" << endl;
+        uint64 sum = sections_array[ i].start_addr + sections_array[ i].size;
+
+        for ( uint64 j = sections_array[ i].start_addr; j < sum; j += 4)
+        {
+            oss << indent << "\t\t0x" << j << ":\t" << getFormatted( read( j, 4)) << endl;
+        }
+
     }
 
     return oss.str();
