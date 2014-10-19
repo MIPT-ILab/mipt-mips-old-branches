@@ -23,8 +23,9 @@ int main (int argc, char* argv[])
         // create the functiona memory
         FuncMemory func_mem( file_name, 32, 10, 12);
         // print content of the memory
-        cout << func_mem.read( 0x300000)<< endl;
-       // cout << func_mem.dump() << endl;
+        func_mem.write( 0x300000, 0x300000, 4);
+        cout << hex << func_mem.read( 0x300000)<< endl;
+        cout << func_mem.dump() << endl;
  
     } else if ( argc - 1 > num_of_args)
     {

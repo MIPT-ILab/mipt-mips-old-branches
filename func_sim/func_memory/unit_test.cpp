@@ -31,7 +31,6 @@ TEST( Func_memory_init, Process_Wrong_Args_Of_Constr)
 TEST( Func_memory, StartPC_Method_Test)
 {
     FuncMemory func_mem( valid_elf_file);
-
     ASSERT_EQ( func_mem.startPC(), 0x4000b0 /*address of the ".text" section*/);
 }
 
