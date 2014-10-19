@@ -1,242 +1,370 @@
 /**
+ * I AM EXTREMELY SORRY FOR SUCH MUDDY CODE AND NO COMMENTS. CLEAN VERSION DON'T WORK AT 23.42 OCTOBER 18 
  * func_memory.cpp - the module implementing the concept of
  * programer-visible memory space accesing via memory address.
- * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
- * Copyright 2012 uArchSim iLab project
+ * @author Alexander Titov <alexander.igorevich.titov@gmail.com>, Dmitry Ermilov <ermilov@phystech.edu>
+ * Copyright 2012 uArchSim iLab project, 2012 uArchSim iLab project
  */
 
-// Generic C
+// Genereic C
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 // Generic C++
+#include <iostream>
+#include <string>
+#include <sstream>
 
 // uArchSim modules
 #include <func_memory.h>
-using namespace std;
-
-uint8 invert(uint8 var)
-{
-	uint8 inv_var = 0;
-	uint8 data_var1 = 0;
-	
-	inv_var = var << 7;
-	for (int i = 6 ; i >= 0; i--)
-	{
-		data_var1 = ((var >> (7-i)) << 7) >> (7 - i);
-		inv_var = data_var1 | inv_var;
-	}	
-return (inv_var);		
-} 
-
-
-
-uint64 maskfunc(uint64 addr_size_len, uint64 size_right, uint64 size)
-{
-	uint64 mask_data1 = 1;
-	uint64 mask_data2 = 1;
-	uint64 data_data  = 1;
-	uint64 use_mask   = 0;
-
-	
-	for (int i = (addr_size_len - size_right); i > 0; i--)
-		mask_data1 = data_data << 1;
-	
-	for(int j = 0; j < size; j++)
-	{
-		for (int i = (addr_size_len - size_right - j); i > 0; i--)
-			mask_data2 = data_data<<1;
-		
-		use_mask = mask_data2 | mask_data1;
-		mask_data1 = mask_data2;
-	}
-	return(use_mask);
-}
 
 FuncMemory::FuncMemory( const char* executable_file_name,
                         uint64 addr_size,
                         uint64 page_bits,
                         uint64 offset_bits)
 {
-	int num = 0;
-	vector<ElfSection> SLT_vector;
-	uint64 addr_size_tmp = addr_size;
-	uint64 page_bits_tmp = page_bits;
-	uint64 offset_bits_tmp = offset_bits;
-	uint64 start_addres = 0;
-		
+//    cerr << "*^*" << addr_size << "," << page_bits << "," << offset_bits <<endl;
+    if ( !addr_size | ! page_bits | ! offset_bits )
+    {
+        exit( EXIT_FAILURE);
+    }
 
-	ElfSection::getAllElfSections(executable_file_name, SLT_vector);
-	num = SLT_vector.size();
+    vector<ElfSection> elfs_array;
+    ElfSection::getAllElfSections( executable_file_name, elfs_array);
+//    cout << "*" << endl;
+    this->addr_size = addr_size;
+    this->set_bits = addr_size - page_bits - offset_bits;
+    this->page_bits = page_bits;
+    this->offset_bits = offset_bits;
+    
+    int i = 0;
+    for ( ; strcmp( elfs_array[ i].name, ".text") != 0; i++);
+    this->text_start = elfs_array[ i].start_addr;
+//    cout << "**" << endl;
+    uint64 array_size = 1ULL << ( this->set_bits);
+    this->set_array = new uint8**[ array_size];
+    memset( this->set_array, 0, array_size);
+    
+    uint8* its_content;
+    uint64 its_size;
+    uint64 set_size = 1ULL << this->page_bits;
+    uint64 page_size = 1ULL << offset_bits;
+//	cout << array_size << "." << set_size << "," << page_size << "," << this->offset_bits <<endl;
+//    cout << "****" << endl;
+    for ( int i = 0; i < elfs_array.size(); i++)
+    {
+//        cout << hex << elfs_array[ i].start_addr << "***" << dec << endl;
+	uint64* addr = addr_read( elfs_array[ i].start_addr);
+//    cout << i << endl;
+        its_content = elfs_array[ i].content;
+        its_size = elfs_array[ i].size;
 
+//        assert( addr[ 1] >= set_size);
 
-	for(int i = 1; i <= num; i++)
-	{
-		for(int j = 0; j < SLT_vector[i].size; j++)
-			write ( SLT_vector[i].content[j], SLT_vector[i].start_addr + j, 1);
+        do
+        {
+            addr[ 1] %= set_size;
 
-		if(SLT_vector[i].name == ".text")
-			start_addres = SLT_vector[i].start_addr;	
-	}
-	
-	 
-	 
-	
+            if ( !this->set_array[ addr[ 0]])
+            {
+                this->set_array[ addr[ 0]] = set_add();
+            }
+            if ( !this->set_array[ addr[ 0]][ addr[ 1]])
+            {
+                this->set_array[ addr[ 0]][ addr[ 1]] = page_add();
+            }
 
+  //          cout << addr[ 0] << "," << addr[ 1] << "," << addr[ 2] << endl;
+    //        fprintf( stderr, "%p", its_content );
+//	    cout << "," << its_size << "," << page_size << endl;
+//	    fprintf( stderr, "%p\n",  this->set_array[ addr[ 0]][ addr[ 1]]);
+            while ( ( addr[ 2] + its_size) >  page_size)
+            {
+                uint64 first = page_size - addr[ 2];
+  //              cout << first << ",*" << its_content << "," << its_size << endl; 
+		memcpy( this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2],
+                        its_content,
+                        first);
+                addr[ 1]++;
+                addr[ 2] = 0;
+//	        cout << first << "*," << its_content << "," << its_size << endl;
+                its_content += first;
+                its_size -= first;
 
+                if ( addr[ 1] >= set_size )
+                {
+                    addr[ 0]++;
+                    break;
+                }
+
+                if ( !this->set_array[ addr[ 0]][ addr[ 1]])
+                {
+                    this->set_array[ addr[ 0]][ addr[ 1]] = page_add();
+                }
+            }
+        } while ( addr[ 1] >= set_size);
+  //      cout << "^^^" << endl;
+   /*     memcpy( this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2], 
+                its_content,
+                its_size);*/
+	uint8* offs = this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2];
+	for( int j = 0; j < its_size; j++)
+        {
+//	     fprintf( stderr, "%p\t%p\n", offs, its_content);
+	     *offs = *its_content;
+	     offs++;
+	     its_content++;
+        }
+//	cout << "()" << endl;
+        addr_close( addr);
+    }
 }
 
 FuncMemory::~FuncMemory()
 {
-/**nothing**/		
+    delete [] this->set_array;
+}
+
+uint64* FuncMemory::addr_read( uint64 address ) const
+{
+    assert( address);
+
+    uint64 uint_size = 64;
+    address = address << ( uint_size - addr_size);
+//    cout << "address =" << hex << address << dec << endl;
+    uint64* addr = new uint64[ 3]; 
+    addr[ 0] = address >> ( uint_size - this->addr_size 
+                          + this->page_bits + this->offset_bits);
+    addr[ 1] = address << ( this->set_bits);
+    addr[ 1] = addr[ 1] >> ( uint_size - this->addr_size 
+                           + this->set_bits + this->offset_bits);
+//    cout << "addr2 = " << hex << address << dec << endl;
+    addr[ 2] = address << ( this->set_bits + this->page_bits);
+//    cout << "addr[ 2] =" << hex << addr[ 2] << dec << endl;
+    addr[ 2] = addr[ 2] >> ( uint_size - this->addr_size 
+                           + this->set_bits + this->page_bits);
+//    cout << "addr[ 2] =" << hex << addr[ 2] << dec << endl;
+    assert( addr);
+    return addr;
+}
+
+void FuncMemory::addr_close( uint64* addr ) const
+{
+    assert( addr);
+//    cerr << "Adress set: " << addr[ 0] << " page: " << addr[ 1] 
+//    << " offset: " << addr[ 2] << " was closed." << endl;
+
+    delete [] addr;
+}
+
+
+uint8** FuncMemory::set_add()
+{
+//	cout << "set_add begins" << endl;
+    uint64 set_size = 1ULL << this->page_bits;
+    uint8** set_mem = new uint8*[ set_size];
+    memset( set_mem, 0, set_size);
+//	cout << "set_add ends" << endl;
+
+//    assert( set_mem);
+    return set_mem;
+}
+
+uint8* FuncMemory::page_add()
+{
+//	cout << "page_add begins" << endl;
+    uint64 page_size = 1ULL << this->offset_bits;
+    uint8* page_mem = new uint8[ page_size];
+    
+//    memset( page_mem, 0, page_size);
+//	cout<< "page_add ends" << endl;
+    return page_mem;
+
 }
 
 uint64 FuncMemory::startPC() const
 {
-	return(start_addres);	
+    return this->text_start;
 }
 
-uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
+uint64 FuncMemory::read( uint64 address, unsigned short num_of_bytes) const
 {
-	uint64 mask_set_bits = 0;
-	uint64 mask_page_bits = 0;
-	uint64 mask_offset_bits = 0;
-	uint64 set_bits = addr_size_tmp - page_bits_tmp - offset_bits_tmp;
-	uint64 addr_set = 0;
-	uint64 addr_page = 0;
-	uint64 addr_offset = 0;
-	uint64 value = 0;
-	uint64 value_data1 = 0;
-	uint64 value_data2 = 0;
-	
-	mask_set_bits = maskfunc( addr_size_tmp, 0, set_bits);
-	mask_page_bits = maskfunc( addr_size_tmp, set_bits, page_bits_tmp);
-	mask_offset_bits = maskfunc( addr_size_tmp, set_bits + page_bits_tmp, offset_bits_tmp);
-	
-	addr_set = (addr & mask_set_bits) >> (page_bits_tmp + offset_bits_tmp);
-	addr_page = (addr & mask_page_bits) >> (offset_bits_tmp);
-	addr_offset = addr & mask_offset_bits;
-	
+    assert( num_of_bytes);
+//	cerr << "Num=" << num_of_bytes << endl;
+    uint64* addr = this->addr_read( address);
+    if ( !this->set_array[ addr[ 0]])
+    {
+//        ceer << "ERROR: No information in set. It hasn't written yet." << endl;
+        assert( 0);
+    }
+    if ( !this->set_array[ addr[ 0]][ addr[ 1]])
+    {
+//        ceer << "ERROR: No information in page. It hasn't written yet " << endl;
+        assert( 0);
+    }
 
-	if (memory.size() < addr_set)
-		return(0);
-	else{
-		if (memory[addr_set].size() < addr_page)
-			return(0);
-		else{
-			if (memory[addr_set][addr_page].size() < addr_offset)
-				return(0);
-			else
-				value = memory[addr_set][addr_page][addr_offset];
-		}
-	}
-	
-	
+    uint64 set_size = 1ULL << this->page_bits;
+    uint64 page_size = 1ULL << this->offset_bits;
+    uint64 value = 0;
+    uint64 offs_val = 0;
+    uint64 shift = 0;
+    uint8* offset_pt = this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2];
+    if ( (addr[ 2] + num_of_bytes) > page_size)
+    {
+//        cerr << "><" << addr[ 2] << "," << page_size << endl;
+	for( uint64 i = addr[ 2]; i < page_size; i++, num_of_bytes)
+        {
+            
+	        offs_val = *offset_pt << 8 * shift; 
+            value = value | offs_val;
+//	    cerr << value << "-value" << endl;
+            offset_pt++;
+	        shift++;
+            
+        }
 
-	for (int i = 1; i < num_of_bytes; i++)
-	{
-		value_data2 = memory[addr_set][addr_page][addr_offset + i];
-		value_data1 = value << 8;
-		value = value_data1 | value_data2;	
-	}
-	
-	return (value);
+        if ( ( addr[ 1] + 1) >= set_size)
+        {
+//	cerr << "}{" << endl;
+            addr[ 0]++;
+            addr[ 1] = 0;
+        }
+        else
+        {
+            addr[ 1]++;
+        }
+
+        addr[ 2] = 0;
+        offset_pt = this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2];
+    }
+
+    this->addr_close( addr);
+
+    for( int i = shift; i < num_of_bytes; i++)
+    {
+        offs_val = *offset_pt << 8 * shift; 
+        value = value | offs_val;
+        offset_pt++;
+        shift++;
+    }
+    // put your code here
+
+    return value;
 }
 
-void FuncMemory::write( uint64 value, uint64 addr, unsigned short num_of_bytes)
+void FuncMemory::write( uint64 value, uint64 address, unsigned short num_of_bytes)
 {
-	uint64 mask_set_bits = 0;
-	uint64 mask_page_bits = 0;
-	uint64 mask_offset_bits = 0;
-	uint64 set_bits = addr_size_tmp - page_bits_tmp - offset_bits_tmp;
-	uint64 addr_set = 0;
-	uint64 addr_page = 0;
-	uint64 addr_offset = 0;
-	uint64 mask_byte[8] = {};
-	uint64 mask_data = 1;
-	int k = 0;
-	int j = 0;
-	
-	mask_set_bits = maskfunc( addr_size_tmp, 0, set_bits);
-	mask_page_bits = maskfunc( addr_size_tmp, set_bits, page_bits_tmp);
-	mask_offset_bits = maskfunc( addr_size_tmp, set_bits + page_bits_tmp, offset_bits_tmp);
-	
-	addr_set = (addr & mask_set_bits) >> (page_bits_tmp + offset_bits_tmp);
-	addr_page = (addr & mask_page_bits) >> (offset_bits_tmp);
-	addr_offset = addr & mask_offset_bits;
-	
-	for (int i = 0; i < 8; i++)
-		mask_byte[i] = maskfunc(64, i*8, 8);
+    assert( num_of_bytes);
+//	cout << "num_of_bytes=" << num_of_bytes << endl;
+    uint64* addr = this->addr_read( address);
+//   cout << "value=" << hex << value << dec << endl;  
+//    cout << hex << address << dec << "-address" << endl;
+//    cout << addr[ 0] << "," << addr[ 1] << "," << addr[ 2] << endl;
+    if ( !this->set_array[ addr[ 0]])
+    {
+        this->set_array[ addr[ 0]] = set_add();
+    }
+    if ( !this->set_array[ addr[ 0]][ addr[ 1]])
+    {
+        this->set_array[ addr[ 0]][ addr[ 1]] = page_add();
+    }
 
+    uint64 set_size = 1ULL << this->page_bits;
+    uint64 page_size = 1ULL << this->offset_bits;
+    uint8* offset_pt = this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2];
+    uint64 shift = 0x000000ff;
+    uint64 shift1 = 0;
+    
+    if ( (addr[ 2] + num_of_bytes) > page_size)
+    {
+//	cout << ")(\t" << hex << value << dec << "," << addr[ 2] << "," << page_size << endl;
+        for( uint64 i = addr[ 2]; i < page_size; i++)
+        {
+//		cout << "i=" << i << endl;
+//		fprintf( stderr, "*off = %i\t", *offset_pt );
+		    uint64 in = value & shift ;
+//		cout << "val=" << hex << value << dec << "\t";
+//		cout << "shift=" << hex << shift << dec << "\t";
+//                fprintf( stderr, "in=%u\t", in );
+//		cout << "shift1=" << shift1 << endl;
+		    *offset_pt = in >> 8 * shift1;
+//		fprintf( stderr, "offset = %p\n", offset_pt );
+		    shift1++;
+//		fprintf( stderr, "*0ffs = %u\n", *offset_pt );
+            offset_pt++; 
+            shift = shift << 8;
+        }
 
-	for (int i = num_of_bytes - 1; i >= 0; i--)
-	{	
-		if (memory.size() > addr_set){
-			if (memory[addr_set].size() > addr_page){
-				if (memory[addr_set][addr_page].size() > addr_offset + i)
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				else{
-					memory[addr_set][addr_page].resize(addr_offset + i + 1);
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				}
-			}
-			else{
-				memory[addr_set].resize(addr_page + 1);
-				if (memory [addr_set][addr_page].size() > addr_offset + i)
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				else{
-					memory[addr_set][addr_page].resize(addr_offset + i + 1);
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				}
-			}
-		}
-		else{
-			memory.resize(addr_set + 1);
-			if (memory[addr_set].size() > addr_page){
-				if (memory[addr_set][addr_page].size() > addr_offset + i)
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				else{
-					memory[addr_set][addr_page].resize(addr_offset + i + 1);
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				}
-			}
-			else{
-				memory[addr_set].resize(addr_page + 1);
-				if (memory [addr_set][addr_page].size() > addr_offset + i)
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				else{
-					memory[addr_set][addr_page].resize(addr_offset + i + 1);
-					memory[addr_set][addr_page][addr_offset + i] = invert ((value & mask_byte[8 - k]) >> (num_of_bytes - i - 1) * 8);
-				}
-			}
-		}	
-		k++;
-	}
+        if ( ( addr[ 1] + 1) >= set_size)
+        {
+//            cout << "<>" << endl;
+	        addr[ 0]++;
+            addr[ 1] = 0;
+            if ( !this->set_array[ addr[ 0]])
+            {
+                this->set_array[ addr[ 0]] = set_add();
+            }   
+        }
+        else
+        {
+            addr[ 1]++;
+        }
+        if ( !this->set_array[ addr[ 0]][ addr[ 1]])
+            {
+                this->set_array[ addr[ 0]][ addr[ 1]] = page_add();
+            }
 
+        addr[ 2] = 0;
+        offset_pt = this->set_array[ addr[ 0]][ addr[ 1]] + addr[ 2];
+    }
+
+    this->addr_close( addr);
+
+    for( uint64 i = shift1; i < num_of_bytes; i++ )
+    {
+//	cout << "i="  << i << endl;
+//	fprintf( stderr, "**off = %i\t", *offset_pt);
+	    uint64 in = value & shift ;
+//	cout << "val=" << hex << in << dec <<  endl;
+        *offset_pt = in >> 8 * shift1;
+	    shift1++;
+//	fprintf( stderr, "**0ffs = %i\n", *offset_pt);
+        offset_pt++; 
+        shift = shift << 8;
+    }
+    // put your code here
+}
+
+void FuncMemory::set_dump( int set_num) const
+{
+    uint64 set_size = 1ULL << this->page_bits;
+    for ( int i = 0; i < set_size; i++)
+    {
+        if ( this->set_array[ set_num][ i])
+            cout << "Page " << i << "begins with address " 
+                 << this->set_array[ set_num][ i] << endl;
+    }
 }
 
 string FuncMemory::dump( string indent) const
 {
-	ostringstream oss;
-	int size_set = 0;
-	int size_page = 0;
-	int size_offset = 0;
-	
-	size_set = memory.size();
-	size_page = memory[size_set].size();
-	size_offset = memory[size_set][size_page].size();
+    cout << "Dump FuncMemory:" << endl
+         << "address size is " << this->addr_size << endl
+         << "amount of set bits is " << this->set_bits << endl
+         << "amount of page bits is " << this->page_bits << endl
+         << "amount of offset bits is " << this->offset_bits << endl;
 
-	
-	oss << indent << "Dump Functional memory " << endl;
-	  
-	for (int i = 1; i <= size_set; i++)
-	{
-		for (int j = 1; j <= size_page; j++)
-		{
-			for (int k = 1; k <=size_offset; k++)
-			oss << indent << "  " << i << "  " << j << "  " << k << "  " << endl;
-		} 
-		
-	}   
-    
-	
-    return oss.str();
+    uint64 array_size = 1ULL << this->set_bits;
+    for ( int i = 0; i < array_size; i++)
+    {
+        if ( this->set_array[ i])
+        {
+            cout << "Set " << i << " consists of :" << endl;
+            this->set_dump( i);
+            cout << endl;
+        }
+    }
+    // put your code here
+    return string("ERROR: You need to implement FuncMemory!");
 }

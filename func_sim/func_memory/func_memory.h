@@ -1,8 +1,9 @@
 /**
- * func_memory.h - Header of module implementing the concept of 
+ * I AM EXTREMELY SORRY FOR SUCH MUDDY CODE AND NO COMMENTS. CLEAN VERSION DON'T WORK AT 23.42 OCTOBER 18 
+ * func_memory.cpp - the module implementing the concept of
  * programer-visible memory space accesing via memory address.
- * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
- * Copyright 2012 uArchSim iLab project
+ * @author Alexander Titov <alexander.igorevich.titov@gmail.com>, Dmitry Ermilov <ermilov@phystech.edu>
+ * Copyright 2012 uArchSim iLab project, 2012 uArchSim iLab project
  */
 
 // protection from multi-include
@@ -12,14 +13,10 @@
 // Generic C++
 #include <string>
 #include <cassert>
-#include <iostream>
-#include <sstream>
 
 // uArchSim modules
 #include <types.h>
 #include <elf_parser.h>
-
-#include <vector>
 
 using namespace std;
 
@@ -28,14 +25,15 @@ class FuncMemory
     // You could not create the object
     // using this default constructor
     FuncMemory(){}
-    uint64 addr_size_tmp;
-    uint64 page_bits_tmp;
-    uint64 offset_bits_tmp;
-    vector<vector<vector<uint8> > > memory;
-    uint64 start_addres;
-        
 
 public:
+
+    uint64 text_start;
+    uint64 addr_size;
+    uint64 set_bits;
+    uint64 page_bits;
+    uint64 offset_bits;
+    uint8*** set_array;
 
     FuncMemory ( const char* executable_file_name,
                  uint64 addr_size = 32,
@@ -50,8 +48,15 @@ public:
     uint64 startPC() const;
     
     string dump( string indent = "") const;
+
+    uint64* addr_read( uint64 address ) const;
+    void addr_close( uint64* addr ) const;
+
+    uint8** set_add();
+    uint8* page_add();
+
+    void set_dump( int set_num) const;
+
 };
 
-uint64 maskfunc(uint64 addr_size_len, uint64 size_right, uint64 size);
-uint8 invert(uint8 var);
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
