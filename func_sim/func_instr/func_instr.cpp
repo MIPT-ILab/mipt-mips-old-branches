@@ -55,7 +55,7 @@ FuncInstr::FuncInstr(uint32 bytes)
             this->parseJ(bytes);
             break;
         default:
-            assert("undknown format");
+            assert(!"undknown format");
     }
 }
 
@@ -87,7 +87,7 @@ std::string FuncInstr::Dump( std::string indent) const
                         << getREGname(this->bytes.asR.s) << endl;
                     break;
                 default:
-                    assert("undefined type of instruction");
+                    assert(!"undefined type of instruction");
             }
             break;
         case FORMAT_I:
@@ -113,7 +113,7 @@ std::string FuncInstr::Dump( std::string indent) const
                 << "0x" << hex << this->bytes.asJ.addres << dec << endl;
             break;
         default:
-            assert("Invalid command format");
+            assert(!"Invalid command format");
     }
     return oss.str();
 }
@@ -147,12 +147,16 @@ void FuncInstr::parseR(uint32 bytes)
 
 void FuncInstr::parseI(uint32 bytes)
 {
-
+    this->bytes.raw = bytes;
+    this->tReg = this->bytes.asI.t;
+    this->sReg = this->bytes.asI.s;
+    this->imm  = this->bytes.asI.imm;
 }
 
 void FuncInstr::parseJ(uint32 bytes)
 {
-
+    this->bytes.raw = bytes;
+    this->addr = this->bytes.asJ.addres;
 }
 
 
@@ -165,8 +169,8 @@ uint8 FuncInstr::getISAFromTable(const uint8 opcode, const uint8 func) const
             return i;
         }
     }
-    assert("Instruction not found");
-    return (uint8)-1;
+    assert(!"Instruction not found");
+    return (uint32)-1;
 }
 
 const char *FuncInstr::getISAname(const uint8 id) const
@@ -174,7 +178,7 @@ const char *FuncInstr::getISAname(const uint8 id) const
     if(id < ISA_TABLE_SIZE ) {
         return isaTable[id].name;
     }
-    assert("Instruction not found");
+    assert(!"Instruction not found");
     return NULL;
 }
 
@@ -219,7 +223,7 @@ const string FuncInstr::getREGname(const uint8 reg) const
         return string("$fp");
     if(reg == 31)
         return string("$ra");
-    assert("undknown register");
+    assert(!"undknown register");
     return NULL;
 }
 

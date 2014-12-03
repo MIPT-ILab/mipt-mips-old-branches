@@ -46,6 +46,7 @@ class FuncInstr
     uint8 tReg;
     uint8 sReg;
     uint8 imm;
+    uint8 addr;
 
 public:
     enum Format
