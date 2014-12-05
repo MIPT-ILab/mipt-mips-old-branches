@@ -36,92 +36,66 @@ using namespace std;
     # define ASSERT( cond, messege )
 #endif
 
+// TYPES ***************************//
+enum REG                            //
+{                                   //
+    ZERO,                           //
+    AT,                             //
+    V0, V1,                         //
+    A0, A1, A3,                     //
+    T0, T1, T2, T3, T4, T5, T6, T7, //
+    S0, S1, S2, S3, S4, S5, S6, S7, //
+    T8, T9,                         //
+    K0, K1,                         //
+    GP,                             //
+    SP,                             //
+    FP,                             //
+    RA,                             //
+};                                  //
+                                    // 
+enum REGTYPE { S, T, D };           //
+                                    //
+enum FORMAT { R, I, J, UNEXP };     //
+                                    //
+enum TYPE                           //
+{                                   //
+    ADD,                            //
+    SUB,                            //
+    SHIFT,                          //
+    BRNCH,                          //
+    JUMP                            //
+};                                  //
+                                    //
+union Parsed                        //
+{                                   //
+    struct                          //
+    {                               //
+        unsigned imm:16;            //
+        unsigned t:5;               //
+        unsigned s:5;               //
+        unsigned opcode:6;          //
+    } I;                            //
+    struct                          //
+    {                               //
+        unsigned funct:6;           //
+        unsigned shamt:5;           //
+        unsigned d:5;               //
+        unsigned t:5;               //
+        unsigned s:5;               //
+        unsigned opcode:6;          //
+    } R;                            //
+    struct                          //
+    {                               //
+        unsigned addr:26;           //
+        unsigned opcode:6;          //
+    } J;                            //
+    uint32 raw;                     //
+} typedef Parsed;                   //
+//**********************************//
+
 class InstrList
 {
 public:
-    // TYPES ***************************//
-    enum REG                            //
-    {                                   //
-        ZERO,                           //
-        AT,                             //
-        V0, V1,                         //
-        A0, A1, A3,                     //
-        T0, T1, T2, T3, T4, T5, T6, T7, //
-        S0, S1, S2, S3, S4, S5, S6, S7, //
-        T8, T9,                         //
-        K0, K1,                         //
-        GP,                             //
-        SP,                             //
-        FP,                             //
-        RA,                             //
-    };                                  //
-                                        // 
-    enum REGTYPE { S, T, D };           //
-                                        //
-    enum FORMAT { R, I, J, UNEXP };     //
-                                        //
-    enum TYPE                           //
-    {                                   //
-        ADD,                            //
-        SUB,                            //
-        SHIFT,                          //
-        BRNCH,                          //
-        JUMP                            //
-    };                                  //
-                                        //
-    union Parsed                        //
-    {                                   //
-        struct                          //
-        {                               //
-            unsigned imm:16;            //
-            unsigned t:5;               //
-            unsigned s:5;               //
-            unsigned opcode:6;          //
-        } I;                            //
-        struct                          //
-        {                               //
-            unsigned funct:6;           //
-            unsigned shamt:5;           //
-            unsigned d:5;               //
-            unsigned t:5;               //
-            unsigned s:5;               //
-            unsigned opcode:6;          //
-        } R;                            //
-        struct                          //
-        {                               //
-            unsigned addr:26;           //
-            unsigned opcode:6;          //
-        } J;                            //
-        uint32 raw;                     //
-     } typedef Parsed;                  //
-     //*********************************//
-
-	// INNER CLASS ************************************//
-    class FuncInstr                                    //
-    {                                                  //
-    public:                                            //
-        friend class InstrList;                        //
-                                                       //
-        // INTERFACE ******************************//  //
-        FuncInstr(uint32 bytes);                   //  //
-       ~FuncInstr() {};                            //  //
-        void initFormat(uint32 bytes);             //  //
-        void parseR    (uint32 bytes);             //  //
-        void parseI    (uint32 bytes);             //  //
-        void parseJ    (uint32 bytes);             //  //
-        const char *get_name(REGTYPE type) const;  //  //
-        string Dump(string indent = " ") const;    //  //
-        //*****************************************//  //
-    private:                                           //
-        // DATA ***********************************//  //
-        Parsed instr;                              //  //
-        FORMAT format;                             //  //
-        TYPE type;                                 //  //
-        const char *name;                          //  //
-        //*****************************************//  //
-    };                                                 //
-    //*************************************************//
-
     // INTERFACE ***********************************//
     InstrList(const char *name):                    //
         section_name(name) {}                       //
@@ -145,6 +119,33 @@ inline ostream &operator<<(ostream &out, const InstrList &instr)
     out << instr.Dump("");
     return out;
 }
+
+// INNER CLASS ************************************//
+class FuncInstr                                    //
+{                                                  //
+public:                                            //
+    friend class InstrList;                        //
+                                                   //
+    // INTERFACE ******************************//  //
+    FuncInstr(uint32 bytes);                   //  //
+   ~FuncInstr() {};                            //  //
+    void initFormat(uint32 bytes);             //  //
+    void parseR    (uint32 bytes);             //  //
+    void parseI    (uint32 bytes);             //  //
+    void parseJ    (uint32 bytes);             //  //
+    const char *get_name(REGTYPE type) const;  //  //
+    string Dump(string indent = " ") const;    //  //
+    //*****************************************//  //
+private:                                           //
+    // DATA ***********************************//  //
+    Parsed instr;                              //  //
+    FORMAT format;                             //  //
+    TYPE type;                                 //  //
+    const char *name;                          //  //
+    //*****************************************//  //
+};                                                 //
+//*************************************************//
+
 
 inline ostream &operator<<(ostream &out, const FuncInstr &instr)
 {

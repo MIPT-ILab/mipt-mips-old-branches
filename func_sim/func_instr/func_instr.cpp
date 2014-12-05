@@ -28,7 +28,7 @@ uint32 get_instr(uint8 *where)
     return instr;
 }
 
-InstrList::FuncInstr::FuncInstr(uint32 bytes)
+FuncInstr::FuncInstr(uint32 bytes)
 {
     instr.raw = bytes;
 
@@ -49,7 +49,7 @@ InstrList::FuncInstr::FuncInstr(uint32 bytes)
     }
 };
 
-void InstrList::FuncInstr::initFormat(uint32 bytes)
+void FuncInstr::initFormat(uint32 bytes)
 {
     switch (instr.R.opcode) {
     case 0:
@@ -66,7 +66,7 @@ void InstrList::FuncInstr::initFormat(uint32 bytes)
     }
 }
 
-void InstrList::FuncInstr::parseR(uint32 bytes)
+void FuncInstr::parseR(uint32 bytes)
 {
     switch (instr.R.funct) {
     case 32:
@@ -102,7 +102,7 @@ void InstrList::FuncInstr::parseR(uint32 bytes)
     }
 }
 
-void InstrList::FuncInstr::parseI(uint32 bytes)
+void FuncInstr::parseI(uint32 bytes)
 {
     switch (instr.I.opcode) {
     case 8:
@@ -126,13 +126,13 @@ void InstrList::FuncInstr::parseI(uint32 bytes)
     }
 }
 
-void InstrList::FuncInstr::parseJ(uint32 bytes)
+void FuncInstr::parseJ(uint32 bytes)
 {
     type = JUMP;
     name = "j";
 }
 
-const char *InstrList::FuncInstr::get_name(REGTYPE type) const
+const char *FuncInstr::get_name(REGTYPE type) const
 {
     uint8 bits; 
     switch (type) {
@@ -166,7 +166,7 @@ const char *InstrList::FuncInstr::get_name(REGTYPE type) const
     }
 }
 
-string InstrList::FuncInstr::Dump(string indent) const
+string FuncInstr::Dump(string indent) const
 {
     ostringstream oss;
 
@@ -227,3 +227,10 @@ string InstrList::Dump(string indent) const
 
     return oss.str();
 }
+FuncInstr::
+FuncInstr::
+FuncInstr::
+FuncInstr::
+FuncInstr::
+FuncInstr::
+FuncInstr::
