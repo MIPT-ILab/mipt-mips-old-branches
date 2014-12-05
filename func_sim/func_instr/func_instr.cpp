@@ -112,9 +112,11 @@ void FuncInstr::parseR( uint32 bytes)
     }
 	if ( oper_type == UNDEF)                                                    // check if operation type is not defined
 	{
-		/*cout << "ILLEGAL INSTRUCTION:  " << endl;
-		cout << "THERE IS NOT SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
-		assert( 0);*/
+		#if ASSERT
+            cout << "ILLEGAL INSTRUCTION:  " << endl;
+            cout << "THERE IS NOT SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
+            assert( 0);
+		#endif
 		cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
 		cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
 		exit(EXIT_FAILURE);
