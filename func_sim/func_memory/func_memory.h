@@ -31,8 +31,8 @@ class FuncMemory
         
         uint64 set_mask;
         uint64 page_mask;
-        uint64 offset_mask;        
-        
+        uint64 offset_mask;
+
         inline size_t get_set( uint64 addr) const
         {
             return ( addr & set_mask) >> ( page_bits + offset_bits);
@@ -81,6 +81,18 @@ class FuncMemory
         void write( uint64 value, uint64 addr, unsigned short num_of_bytes = 4);
         inline uint64 startPC() const { return startPC_addr; }
         std::string dump( string indent = "") const;
+
+         struct section
+        {
+            char* name;
+            int size;
+            int start_addr;
+        
+            inline section( char* name, int size, int start);
+        };
+
+        std::vector<section> sections;
+        section FindInVector( char* name) const;
 };
 
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H

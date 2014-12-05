@@ -43,6 +43,7 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 
     for ( vector<ElfSection>::iterator it = sections_array.begin(); it != sections_array.end(); ++it)
     {
+        sections.emplace_back( it->name, it->size, it->start_addr);
         if ( !strcmp( ".text", it->name))
         {
             startPC_addr = it->start_addr;
@@ -163,4 +164,18 @@ string FuncMemory::dump( string indent) const
     }
 
     return oss.str();
+}
+
+inline FuncMemory::section::section( char* name, int size, int start):
+        start_addr( start),
+        size( 1 << size)
+{
+    strcpy( this->name, name);
+}
+
+FuncMemory::section FuncMemory::FindInVector( char* name) const
+{
+    for( vector<section>::iterator it; it != sections.end; ++it)
+        if ( !strcmp( it->name, name))
+            return *it;
 }
