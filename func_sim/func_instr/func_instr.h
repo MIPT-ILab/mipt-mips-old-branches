@@ -66,14 +66,14 @@ private:
         uint32 raw;
     } bytes;
 
-    void InitFormat( uint32 bytes);
+    void InitFormat( uint32 _bytes);
     void ParseR();
     void ParseI();
     void ParseJ();
     const uint32 opcMask;
     const uint32 funcMask;
     uint32 format;
-    char* name, *reg1, *reg2, *reg3;
+    string name, reg1, reg2, reg3;
     uint32 cnst; //const
 
 
@@ -88,14 +88,12 @@ public:
     
         FuncInstr::Format format;
         FuncInstr::Type type;
-    } ;
-    static const ISAEntry isaTable[];
+    };
+    static const ISAEntry isaTable[12];
     struct Reg
     {
         const char* name;
-        uint8 num;
-        uint32 val;
-        
+        uint8 num; 
     };
     static const Reg regTable[];
 
@@ -105,26 +103,4 @@ public:
 };
 
 std::ostream& operator<<( std::ostream& out, FuncInstr& instr);
-const FuncInstr::ISAEntry FuncInstr::isaTable[] = 
-{
-    //name  opcode func  format               type
-    { "add ", 0x0, 0x20, FuncInstr::FORMAT_R, FuncInstr::ADD },
-    { "addu ", 0x0, 0x21, FuncInstr::FORMAT_R, FuncInstr::ADDU },
-    { "sub ", 0x0, 0x22, FuncInstr::FORMAT_R, FuncInstr::SUB },
-    { "subu ", 0x0, 0x23, FuncInstr::FORMAT_R, FuncInstr::SUBU },
-    { "addi ", 0x8, 0, FuncInstr::FORMAT_I, FuncInstr::ADDI },
-    { "addiu ", 0x9, 0, FuncInstr::FORMAT_I, FuncInstr::ADDIU },
-    { "sll ", 0x0, 0x0, FuncInstr::FORMAT_R, FuncInstr::SLL },
-    { "srl ", 0x0, 0x2, FuncInstr::FORMAT_R, FuncInstr::SRL },
-    { "beq ", 0x4, 0, FuncInstr::FORMAT_I, FuncInstr::BEQ },
-    { "bne ", 0x5, 0, FuncInstr::FORMAT_I, FuncInstr::BNE },
-    { "j ", 0x2, 0, FuncInstr::FORMAT_J, FuncInstr::J },
-    { "jr ", 0x0, 0x8, FuncInstr::FORMAT_R, FuncInstr::JR }
-};
-const FuncInstr::Reg FuncInstr::regTable[] = 
-{
-    { "$zero ", 0, 0 },
-    { "$at ", 1, 0 },
-};
-
 #endif

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <iomanip>
+#include <stdlib.h>
 #include <func_instr.h>
 using namespace::std;
 
@@ -20,11 +21,5 @@ int main( int argc, char** argv)
         FuncInstr cmd( mem.read( i));
         cout << cmd << endl;
     }
-    return 0;
-
-
-
-        
-
-
+    return 0;    
 }
