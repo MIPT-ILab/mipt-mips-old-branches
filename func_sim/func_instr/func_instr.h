@@ -93,6 +93,36 @@ union Parsed                        //
 } typedef Parsed;                   //
 //**********************************//
 
+class FuncInstr                                    
+{                                                  
+public:                                            
+    friend class InstrList;                        
+                                                   
+    // INTERFACE ******************************//  
+    FuncInstr(uint32 bytes);                   //  
+   ~FuncInstr() {};                            //  
+    void initFormat(uint32 bytes);             //  
+    void parseR    (uint32 bytes);             //  
+    void parseI    (uint32 bytes);             //  
+    void parseJ    (uint32 bytes);             //  
+    const char *get_name(REGTYPE type) const;  //  
+    string Dump(string indent = " ") const;    //  
+    //*****************************************//  
+private:                                           
+    // DATA ***********************************//  
+    Parsed instr;                              //  
+    FORMAT format;                             //  
+    TYPE type;                                 //  
+    const char *name;                          //  
+    //*****************************************//  
+};                                                 
+
+inline ostream &operator<<(ostream &out, const FuncInstr &instr)
+{
+    out << instr.Dump("");
+    return out;
+}
+
 class InstrList
 {
 public:
@@ -115,39 +145,6 @@ private:
 };
 
 inline ostream &operator<<(ostream &out, const InstrList &instr)
-{
-    out << instr.Dump("");
-    return out;
-}
-
-// INNER CLASS ************************************//
-class FuncInstr                                    //
-{                                                  //
-public:                                            //
-    friend class InstrList;                        //
-                                                   //
-    // INTERFACE ******************************//  //
-    FuncInstr(uint32 bytes);                   //  //
-   ~FuncInstr() {};                            //  //
-    void initFormat(uint32 bytes);             //  //
-    void parseR    (uint32 bytes);             //  //
-    void parseI    (uint32 bytes);             //  //
-    void parseJ    (uint32 bytes);             //  //
-    const char *get_name(REGTYPE type) const;  //  //
-    string Dump(string indent = " ") const;    //  //
-    //*****************************************//  //
-private:                                           //
-    // DATA ***********************************//  //
-    Parsed instr;                              //  //
-    FORMAT format;                             //  //
-    TYPE type;                                 //  //
-    const char *name;                          //  //
-    //*****************************************//  //
-};                                                 //
-//*************************************************//
-
-
-inline ostream &operator<<(ostream &out, const FuncInstr &instr)
 {
     out << instr.Dump("");
     return out;

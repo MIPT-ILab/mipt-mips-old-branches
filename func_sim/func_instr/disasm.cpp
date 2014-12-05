@@ -13,6 +13,8 @@
 
 // Generic C++
 #include <iostream>
+#include <cstring>
+#include <bitset>
 
 // uArchSim modules
 #include <func_instr.h>
@@ -26,23 +28,25 @@ int main(int argc, char *argv[])
 	vector<ElfSection> sections;
     ElfSection::getAllElfSections(argv[1], sections);
 
-    bool got_it = 0;
-    vector<ElfSection>::iterator curr_sec;
+    vector<ElfSection>::iterator curr_sec = sections.begin();
 
-    for (curr_sec = sections.begin(); curr_sec != sections.end(); ++curr_sec) {
-    	if (curr_sec->name == argv[2]) {
-    		got_it = 1;
-    		break;
-    	}
-    }
+    while (curr_sec != sections.end() && strcmp(curr_sec->name, argv[2]) != 0)
+        ++curr_sec;
 
-    ASSERT(got_it, "no needed section");
+    cout << curr_sec->name << endl;
+
+    ASSERT(curr_sec != sections.end(), "no needed section");
     ASSERT(!(curr_sec->size % 4), "not a full instruction");
 
     InstrList instr(argv[2]);
 
-    for (uint64 i = 0; i < curr_sec->size / 4; i++)
+    for (uint64 i = 0; i < curr_sec->size / 4; i++) {
+        cout << bitset<8>(curr_sec->content[i])
+             << bitset<8>(curr_sec->content[i + 1])
+             << bitset<8>(curr_sec->content[i + 2])
+             << bitset<8>(curr_sec->content[i + 3]) << endl;
     	instr.add(get_instr(curr_sec->content + i * 4));
+    }
 
     cout << instr;
 

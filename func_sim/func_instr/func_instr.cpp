@@ -13,6 +13,7 @@
 
 // Generic C++
 #include <sstream>
+#include <bitset>
 
 // uArchSim modules
 #include <func_instr.h>
@@ -22,14 +23,18 @@ uint32 get_instr(uint8 *where)
     ASSERT(where != NULL, "bad address");
 
     uint32 instr = 0;
-    for(uint8 i = 0; i < 4; i++)
+    for(uint8 i = 0; i < 4; i++) {
+        cout << bitset<8>(where[i]);
         instr |= where[i] << 8 * (3 - i);
+    }
 
+    cout << endl;
     return instr;
 }
 
 FuncInstr::FuncInstr(uint32 bytes)
 {
+    cout << bitset<32>(bytes) << endl;
     instr.raw = bytes;
 
     initFormat(bytes);
@@ -68,6 +73,7 @@ void FuncInstr::initFormat(uint32 bytes)
 
 void FuncInstr::parseR(uint32 bytes)
 {
+    cout << "|" << instr.R.funct << "|" << endl;
     switch (instr.R.funct) {
     case 32:
         type = ADD;
@@ -227,10 +233,3 @@ string InstrList::Dump(string indent) const
 
     return oss.str();
 }
-FuncInstr::
-FuncInstr::
-FuncInstr::
-FuncInstr::
-FuncInstr::
-FuncInstr::
-FuncInstr::
