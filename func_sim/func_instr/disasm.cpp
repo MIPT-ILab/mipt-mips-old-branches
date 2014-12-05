@@ -23,13 +23,13 @@ int main(int argc, char *argv[])
 {
 	ASSERT(argc == 3, "bad input");
 
-	std::vector<ElfSection> sections;
+	vector<ElfSection> sections;
     ElfSection::getAllElfSections(argv[1], sections);
 
     bool got_it = 0;
     vector<ElfSection>::iterator curr_sec;
 
-    for (curr_sec = sections.begin(); curr_sec != sections.end(); ++it) {
+    for (curr_sec = sections.begin(); curr_sec != sections.end(); ++curr_sec) {
     	if (curr_sec->name == argv[2]) {
     		got_it = 1;
     		break;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     ASSERT(got_it, "no needed section");
     ASSERT(!(curr_sec->size % 4), "not a full instruction");
 
-    FuncInstr instr;
+    FuncInstr instr(argv[2]);
 
     for (uint64 i = 0; i < curr_sec->size / 4; i++)
     	instr.add(get_instr(curr_sec->content + i * 4));
