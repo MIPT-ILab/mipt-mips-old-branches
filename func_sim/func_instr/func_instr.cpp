@@ -28,7 +28,7 @@ uint32 get_instr(uint8 *where)
     return instr;
 }
 
-FuncInstr::ISAEntry::ISAEntry(uint32 bytes)
+InstrList::FuncInstr::FuncInstr(uint32 bytes)
 {
     instr.raw = bytes;
 
@@ -49,7 +49,7 @@ FuncInstr::ISAEntry::ISAEntry(uint32 bytes)
     }
 };
 
-void FuncInstr::ISAEntry::initFormat(uint32 bytes)
+void InstrList::FuncInstr::initFormat(uint32 bytes)
 {
     switch (instr.R.opcode) {
     case 0:
@@ -66,7 +66,7 @@ void FuncInstr::ISAEntry::initFormat(uint32 bytes)
     }
 }
 
-void FuncInstr::ISAEntry::parseR(uint32 bytes)
+void InstrList::FuncInstr::parseR(uint32 bytes)
 {
     switch (instr.R.funct) {
     case 32:
@@ -102,7 +102,7 @@ void FuncInstr::ISAEntry::parseR(uint32 bytes)
     }
 }
 
-void FuncInstr::ISAEntry::parseI(uint32 bytes)
+void InstrList::FuncInstr::parseI(uint32 bytes)
 {
     switch (instr.I.opcode) {
     case 8:
@@ -126,13 +126,13 @@ void FuncInstr::ISAEntry::parseI(uint32 bytes)
     }
 }
 
-void FuncInstr::ISAEntry::parseJ(uint32 bytes)
+void InstrList::FuncInstr::parseJ(uint32 bytes)
 {
     type = JUMP;
     name = "j";
 }
 
-const char *FuncInstr::ISAEntry::get_name(REGTYPE type) const
+const char *InstrList::FuncInstr::get_name(REGTYPE type) const
 {
     uint8 bits; 
     switch (type) {
@@ -166,57 +166,64 @@ const char *FuncInstr::ISAEntry::get_name(REGTYPE type) const
     }
 }
 
-string FuncInstr::Dump(string indent) const
+string InstrList::FuncInstr::Dump(string indent) const
+{
+    ostringstream oss;
+
+    oss << indent << name << hex;
+    switch (format) {
+    case R:
+        switch (type) {
+        case ADD: case SUB:
+        oss << indent
+            << " $" << get_name(S) << ","
+            << " $" << get_name(T) << ","
+            << " $" << get_name(D) << endl;
+            break;
+        case SHIFT:
+            oss << indent
+            << " $" << get_name(S) << ","
+            << " $" << get_name(T) << ","
+            << " " << instr.R.d << endl;
+            break;
+        case JUMP:
+            oss << indent << " $" << get_name(S) << endl;
+            break;
+        }
+        break;
+    case I:
+        switch (type) {
+        case ADD:
+            oss << " $" << get_name(S) << ","
+                << " $" << get_name(T) << ","
+                << " $" << instr.I.imm << endl;
+            break;
+        case BRNCH:
+            oss << " $" << get_name(T) << ","
+                << " $" << get_name(S) << ","
+                << " $" << instr.I.imm << endl;
+            break;
+        }
+        break;
+    case J:
+        oss << instr.J.addr << endl;
+        break;
+    default:
+        ASSERT(0, "unexpected format");
+    } 
+
+    return oss.str();
+}
+
+string InstrList::Dump(string indent) const
 {
     ostringstream oss;
     
     oss << "section \"" << section_name << "\":" << endl;
 
-    for (vector<ISAEntry>::const_iterator it = isaTable.begin();
-         it != isaTable.end(); 
-         ++it) {
-        oss << indent << it->name << hex;
-        switch (it->format) {
-        case R:
-            switch (it->type) {
-            case ADD: case SUB:
-                oss << indent
-                    << " $" << it->get_name(S) << ","
-                    << " $" << it->get_name(T) << ","
-                    << " $" << it->get_name(D) << endl;
-                break;
-            case SHIFT:
-                oss << indent
-                    << " $" << it->get_name(S) << ","
-                    << " $" << it->get_name(T) << ","
-                    << " " << it->instr.R.d << endl;
-                break;
-            case JUMP:
-                oss << indent << " $" << it->get_name(S) << endl;
-                break;
-            }
-            break;
-        case I:
-            switch (it->type) {
-            case ADD:
-                oss << " $" << it->get_name(S) << ","
-                    << " $" << it->get_name(T) << ","
-                    << " $" << it->instr.I.imm << endl;
-                break;
-            case BRNCH:
-                oss << " $" << it->get_name(T) << ","
-                    << " $" << it->get_name(S) << ","
-                    << " $" << it->instr.I.imm << endl;
-                break;
-            }
-            break;
-        case J:
-            oss << it->instr.J.addr << endl;
-            break;
-        default:
-            ASSERT(0, "unexpected format");
-        }
-    }
+    for (vector<FuncInstr>::const_iterator it = isaTable.begin();
+         it != isaTable.end(); ++it)
+        oss << it->Dump(indent);
 
     return oss.str();
 }

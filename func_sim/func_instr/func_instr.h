@@ -36,7 +36,7 @@ using namespace std;
     # define ASSERT( cond, messege )
 #endif
 
-class FuncInstr
+class InstrList
 {
 public:
     // TYPES ***************************//
@@ -97,19 +97,20 @@ public:
      //*********************************//
 
 	// INNER CLASS ************************************//
-    class ISAEntry                                     //
+    class FuncInstr                                    //
     {                                                  //
     public:                                            //
-        friend class FuncInstr;                        //
+        friend class InstrList;                        //
                                                        //
         // INTERFACE ******************************//  //
-        ISAEntry(uint32 bytes);                    //  //
-       ~ISAEntry() {};                             //  //
+        FuncInstr(uint32 bytes);                   //  //
+       ~FuncInstr() {};                            //  //
         void initFormat(uint32 bytes);             //  //
         void parseR    (uint32 bytes);             //  //
         void parseI    (uint32 bytes);             //  //
         void parseJ    (uint32 bytes);             //  //
         const char *get_name(REGTYPE type) const;  //  //
+        string Dump(string indent = " ") const;    //  //
         //*****************************************//  //
     private:                                           //
         // DATA ***********************************//  //
@@ -122,12 +123,12 @@ public:
     //*************************************************//
 
     // INTERFACE ***********************************//
-    FuncInstr(const char *name):                    //
+    InstrList(const char *name):                    //
         section_name(name) {}                       //
-   ~FuncInstr() {}                                  //
+    InstrList() {}                                  //
     inline void add(uint32 bytes)                   //  
     {                                               //
-        ISAEntry entry(bytes);                      // 
+        FuncInstr entry(bytes);                     // 
         isaTable.push_back(entry);                  //
     }                                               //
     string Dump(string indent = " ") const;         //
@@ -135,9 +136,15 @@ public:
 private:
     // DATA ****************************************//
     const char *section_name;                       //
-    vector<ISAEntry> isaTable;                      //
+    vector<FuncInstr> isaTable;                     //
     // *********************************************//
 };
+
+inline ostream &operator<<(ostream &out, const InstrList &instr)
+{
+    out << instr.Dump("");
+    return out;
+}
 
 inline ostream &operator<<(ostream &out, const FuncInstr &instr)
 {

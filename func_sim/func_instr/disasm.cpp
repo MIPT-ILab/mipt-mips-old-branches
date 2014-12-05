@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     ASSERT(got_it, "no needed section");
     ASSERT(!(curr_sec->size % 4), "not a full instruction");
 
-    FuncInstr instr(argv[2]);
+    InstrList instr(argv[2]);
 
     for (uint64 i = 0; i < curr_sec->size / 4; i++)
     	instr.add(get_instr(curr_sec->content + i * 4));
