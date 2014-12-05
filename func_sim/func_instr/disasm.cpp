@@ -15,10 +15,11 @@ int main( int argc, char** argv)
     }
     FuncMemory mem( argv[1]);
     FuncMemory::section workin_sect = mem.FindInVector( argv[2]);
-    //int cmd = 0;
-    for ( int i = workin_sect.start_addr; i < workin_sect.start_addr + (workin_sect.size >> 2); i += 4)
+    int cmd1 = 0;
+    for ( int i = workin_sect.start_addr; i < workin_sect.start_addr + workin_sect.size; i += 4)
     {
-        FuncInstr cmd( mem.read( i));
+        cmd1 = mem.read( i);
+        FuncInstr cmd( cmd1);
         cout << cmd << endl;
     }
     return 0;    

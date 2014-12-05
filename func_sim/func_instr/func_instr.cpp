@@ -129,7 +129,7 @@ void FuncInstr::ParseR()
             reg2 =  regTable[bytes.asR.s2].name;
             break;
         default:
-            cerr << "ERROR: wrong command\n";
+            cerr << "ERROR: wrong command R\n";
             exit( EXIT_FAILURE);
     }
 }
@@ -151,7 +151,7 @@ void FuncInstr::ParseI()
             name = isaTable[BEQ].name;
             break;
         default:
-            cerr << "ERROR: wrong command\n";
+            cerr << "ERROR: wrong command I\n";
             exit( EXIT_FAILURE);
     }
 }
@@ -165,7 +165,7 @@ void FuncInstr::ParseJ()
             cnst = bytes.asJ.addr;
             break;
         default:
-            cerr << "ERROR: wrong command\n";
+            cerr << "ERROR: wrong command J\n";
             exit( EXIT_FAILURE);
     }
 }
@@ -191,7 +191,7 @@ std::string FuncInstr::Dump( std::string indent) const
     return oss.str();
 }
 
-std::ostream& operator<<( std::ostream& out, FuncInstr& instr)
+std::ostream& operator << ( std::ostream& out, FuncInstr& instr)
 {
     return out << instr.Dump("");
 }
