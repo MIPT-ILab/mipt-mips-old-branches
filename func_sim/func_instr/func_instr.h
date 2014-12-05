@@ -130,5 +130,5 @@ class FuncInstr
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
 
-#endif FUNC_INSTR
+#endif // #ifndef FUNC_INSTR
 
