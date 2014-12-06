@@ -3,6 +3,10 @@
  * programer-visible memory space accesing via memory address.
  * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
  * Copyright 2012 uArchSim iLab project
+ * 
+ * Changed by Mikhail Lyubogoschev <lyubogoshchev@phystech.edu>
+ * In order to add some usefull methods for mips disassembler
+ * Copyright 2014 uArhSim iLab project
  */
 
 // Generic C
@@ -167,16 +171,20 @@ string FuncMemory::dump( string indent) const
     return oss.str();
 }
 
-inline FuncMemory::section::section( char* name, int size, int start):
+inline FuncMemory::section::section( char* name, uint64 size, uint64 start):
         start_addr( start),
-        size( 1 << size)
+        name( name),
+        size( size)
+{}
+
+FuncMemory::section FuncMemory::FindInVector( char* name)
 {
-    strcpy( this->name, name);
+    for( vector<section>::iterator it = sections.begin(); it != sections.end(); ++it)
+    {
+        if ( !it->name.compare( name))
+        {
+            return *it;
+        }
+    }
 }
 
-FuncMemory::section FuncMemory::FindInVector( char* name) const
-{
-    for( vector<section>::iterator it; it != sections.end(); ++it)
-        if ( !strcmp( it->name, name))
-            return *it;
-}

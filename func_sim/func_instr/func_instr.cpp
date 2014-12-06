@@ -1,3 +1,10 @@
+/**
+ * func_instr.cpp - The methods for implementing the concept of
+ * disassembler of MIPS ISA.
+ * @author Mikhail Lyubogoschev <lyubogoshchev@phystech.edu>
+ * Copyright 2014 uArchSim iLab project
+ */
+
 #include <func_instr.h>
 #include <sstream>
 #include <iomanip>
@@ -61,6 +68,7 @@ FuncInstr::FuncInstr( uint32 bytes):
 {
     if ( bytes == ~0ull)
         exit( EXIT_FAILURE);
+    dumpstr << hex << showbase;
     this->InitFormat( bytes);
     switch ( format)
     {
@@ -101,32 +109,35 @@ void FuncInstr::InitFormat( uint32 _bytes)
 void FuncInstr::ParseR()
 {
     reg1 =  regTable[bytes.asR.d].name;
+    reg2 = regTable[bytes.asR.s1].name;
     reg3 = regTable[bytes.asR.t].name;
     switch ( bytes.asR.funct)
     {
         case 0x20:
             name = isaTable[ADD].name;
-            reg2 = regTable[bytes.asR.s1].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
             break;
         case 0x21:
             name = isaTable[ADDU].name;
-            reg2 = regTable[bytes.asR.s1].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
             break;
         case 0x22:
             name = isaTable[SUB].name;
-            reg2 = regTable[bytes.asR.s1].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
             break;
         case 0x23:
             name = isaTable[SUBU].name;
-            reg2 = regTable[bytes.asR.s1].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
             break;
         case 0x0:
             name = isaTable[SLL].name;
-            reg2 = regTable[bytes.asR.s2].name;
+            cnst = bytes.asR.s2;
+            dumpstr << name << reg1 << ", " << reg3 << ", " << cnst;
             break;
         case 0x2:
             name = isaTable[SRL].name;
-            reg2 =  regTable[bytes.asR.s2].name;
+            cnst = bytes.asR.s2;
+            dumpstr << name << reg1 << ", " << reg3 << ", " << cnst;
             break;
         default:
             cerr << "ERROR: wrong command R\n";
@@ -143,12 +154,15 @@ void FuncInstr::ParseI()
     {
         case 0x8:
             name = isaTable[ADDI].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << cnst;
             break;
         case 0x9:
             name = isaTable[ADDIU].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << cnst;
             break;
         case 0x4:
             name = isaTable[BEQ].name;
+            dumpstr << name << reg1 << ", " << reg2 << ", " << cnst;
             break;
         default:
             cerr << "ERROR: wrong command I\n";
@@ -163,6 +177,7 @@ void FuncInstr::ParseJ()
         case 0x2:
             name = isaTable[J].name;
             cnst = bytes.asJ.addr;
+            dumpstr << name << cnst;
             break;
         default:
             cerr << "ERROR: wrong command J\n";
@@ -170,25 +185,9 @@ void FuncInstr::ParseJ()
     }
 }
 
-std::string FuncInstr::Dump( std::string indent) const
+inline std::string FuncInstr::Dump( std::string indent) const
 {
-    std::ostringstream oss;
-    oss << hex << showbase << indent << name;
-    switch ( format )
-    {
-        case FORMAT_R:
-            oss << reg1 << ", " << reg2 << ", " << reg3 ;
-            break;
-        case FORMAT_I:
-            oss << reg1 << ", " << reg2 << ", " << cnst;
-            break;
-        case FORMAT_J:
-            oss << cnst;
-            break;
-        default:
-            assert( 0);
-    }
-    return oss.str();
+    return indent + dumpstr.str();
 }
 
 std::ostream& operator << ( std::ostream& out, FuncInstr& instr)

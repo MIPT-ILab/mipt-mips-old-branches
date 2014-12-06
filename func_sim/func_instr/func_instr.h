@@ -8,6 +8,8 @@
 #ifndef FUNC_INSTR_H
 #define FUNC_INSTR_H
 
+#include <sstream>
+#include <iomanip>
 #include <string>
 #include <ostream>
 #include <cassert>
@@ -75,7 +77,7 @@ private:
     uint32 format;
     string name, reg1, reg2, reg3;
     uint32 cnst; //const
-
+    std::ostringstream dumpstr;
 
 public:
     FuncInstr( uint32 bytes);
@@ -99,7 +101,7 @@ public:
 
 
     
-    std::string Dump( std::string indent = " ") const;
+    inline std::string Dump( std::string indent = " ") const;
 };
 
 std::ostream& operator<<( std::ostream& out, FuncInstr& instr);

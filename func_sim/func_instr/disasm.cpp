@@ -1,3 +1,9 @@
+/**
+ * disasm.cpp - The main program, launching an implementation 
+ * of disassembler of MIPS ISA.
+ * @author Mikhail Lyubogoschev <lyubogoshchev@phystech.edu>
+ * Copyright 2014 uArchSim iLab project
+ */
 #include <iostream>
 #include <cassert>
 #include <iomanip>
