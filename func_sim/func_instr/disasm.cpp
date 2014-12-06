@@ -1,3 +1,9 @@
+#include <cassert>
+#include <cstdlib>
+#include <cstring> 
+
+#include <iostream>
+
 #include <func_memory.h>
 #include <func_instr.h>
 
@@ -11,10 +17,7 @@ int main( int argc, char* argv[])
     {
         const char* file_name = argv[1];
         const char* section = argv[2];        
-        
-        // create the functiona memory
-        FuncMemory func_mem( file_name, 32, 10, 12);
-
+    
         vector<ElfSection> sections_array;
         ElfSection::getAllElfSections( argv[1], sections_array); 
 
@@ -25,8 +28,9 @@ int main( int argc, char* argv[])
         uint64 address = sections_array[i].start_addr;
         for ( int j = 0; j < sections_array[i].size; j++, ptr++)
         {
-            FuncInstr instr( read( ptr, 1));
-            cout << "    " << instr << endl;
+//            FuncInstr instr( func_mem.read( address, 1));
+            FuncInstr instr( *ptr);
+            cout << instr;
         }
     } 
     else if ( argc - 1 > num_of_args)

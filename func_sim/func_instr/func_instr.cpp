@@ -23,18 +23,18 @@ using namespace std;
 const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // name     opcode    func      format              type
-    { "add ",   0x0,     0x20, FuncInstr::FORMAT_R, FuncInstr::ADD /*...*/ },
-    { "addu ",  0x0,     0x21, FuncInstr::FORMAT_R, FuncInstr::ADDU /*...*/ },
-    { "sub ",   0x0,     0x22, FuncInstr::FORMAT_R, FuncInstr::SUB /*...*/ },
-    { "subu ",  0x0,     0x23, FuncInstr::FORMAT_R, FuncInstr::SUBU /*...*/ },
-    { "addi ",  0x8,     0x0,  FuncInstr::FORMAT_I, FuncInstr::ADDI /*...*/ },
-    { "addiu ", 0x9,     0x0,  FuncInstr::FORMAT_I, FuncInstr::ADDIU /*...*/ },
-    { "sll ",   0x0,     0x0,  FuncInstr::FORMAT_R, FuncInstr::SLL /*...*/ },
-    { "srl ",   0x0,     0x2,  FuncInstr::FORMAT_R, FuncInstr::SRL /*...*/ },
-    { "beq ",   0x4,     0x0,  FuncInstr::FORMAT_I, FuncInstr::BEQ /*...*/ },
-    { "bne ",   0x5,     0x0,  FuncInstr::FORMAT_I, FuncInstr::BNE /*...*/ },
-    { "j ",     0x2,     0x0,  FuncInstr::FORMAT_J, FuncInstr::J /*...*/ },
-    { "jr ",    0x0,     0x8,  FuncInstr::FORMAT_R, FuncInstr::JR /*...*/ }
+    { "add ",   0x0,     0x20, FuncInstr::FORMAT_R, FuncInstr::ADD },
+    { "addu ",  0x0,     0x21, FuncInstr::FORMAT_R, FuncInstr::ADDU },
+    { "sub ",   0x0,     0x22, FuncInstr::FORMAT_R, FuncInstr::SUB },
+    { "subu ",  0x0,     0x23, FuncInstr::FORMAT_R, FuncInstr::SUBU },
+    { "addi ",  0x8,     0x0,  FuncInstr::FORMAT_I, FuncInstr::ADDI },
+    { "addiu ", 0x9,     0x0,  FuncInstr::FORMAT_I, FuncInstr::ADDIU },
+    { "sll ",   0x0,     0x0,  FuncInstr::FORMAT_R, FuncInstr::SLL },
+    { "srl ",   0x0,     0x2,  FuncInstr::FORMAT_R, FuncInstr::SRL },
+    { "beq ",   0x4,     0x0,  FuncInstr::FORMAT_I, FuncInstr::BEQ },
+    { "bne ",   0x5,     0x0,  FuncInstr::FORMAT_I, FuncInstr::BNE },
+    { "j ",     0x2,     0x0,  FuncInstr::FORMAT_J, FuncInstr::J },
+    { "jr ",    0x0,     0x8,  FuncInstr::FORMAT_R, FuncInstr::JR }
 };
 
 //Initialization of table which contain information about registers 
@@ -69,7 +69,7 @@ FuncInstr::FuncInstr( uint64 bytes_)
                 this->parseI( (uint32) bytes_);
                 break;
             case FORMAT_J:
-                this->parseJ( (uint32) bytes_;
+                this->parseJ( (uint32) bytes_);
                 break;
             default:
                 assert(0);
