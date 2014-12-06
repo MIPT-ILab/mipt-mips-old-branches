@@ -27,10 +27,9 @@ using namespace std;
         if ( !( cond ) )             \
                                       \
         {                              \
-            cerr << "Fatal error: "     \
-                 << message << ", "      \
-                 << endl;                 \
-            abort();                       \
+            cerr << message             \
+                 << endl;                \
+            exit(EXIT_FAILURE);           \
         }
 #else
     # define ASSERT( cond, messege )
@@ -42,7 +41,7 @@ enum REG                            //
     ZERO,                           //
     AT,                             //
     V0, V1,                         //
-    A0, A1, A3,                     //
+    A0, A1, A2, A3,                 //
     T0, T1, T2, T3, T4, T5, T6, T7, //
     S0, S1, S2, S3, S4, S5, S6, S7, //
     T8, T9,                         //
@@ -137,7 +136,7 @@ public:
     }                                               //
     string Dump(string indent = " ") const;         //
     // *********************************************//
-private:
+//private:
     // DATA ****************************************//
     const char *section_name;                       //
     vector<FuncInstr> isaTable;                     //

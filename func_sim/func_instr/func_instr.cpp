@@ -23,12 +23,9 @@ uint32 get_instr(uint8 *where)
     ASSERT(where != NULL, "bad address");
 
     uint32 instr = 0;
-    for(uint8 i = 0; i < 4; i++) {
-        cout << bitset<8>(where[i]);
+    for(uint8 i = 0; i < 4; i++)
         instr |= where[i] << 8 * (3 - i);
-    }
 
-    cout << endl;
     return instr;
 }
 
@@ -50,7 +47,7 @@ FuncInstr::FuncInstr(uint32 bytes)
         parseJ(bytes);
         break;
     default:
-        ASSERT(0, "unexpected instruction format");
+        ASSERT(0, "ERROR.*");
     }
 };
 
@@ -73,7 +70,6 @@ void FuncInstr::initFormat(uint32 bytes)
 
 void FuncInstr::parseR(uint32 bytes)
 {
-    cout << "|" << instr.R.funct << "|" << endl;
     switch (instr.R.funct) {
     case 32:
         type = ADD;
@@ -146,10 +142,10 @@ const char *FuncInstr::get_name(REGTYPE type) const
         bits = instr.R.s;
         break;
     case T:
-        bits = instr.R.s;
+        bits = instr.R.t;
         break;
     case D:
-        bits = instr.R.s;
+        bits = instr.R.d;
         break;
     default:
         ASSERT(0, "wrong type");
@@ -182,37 +178,37 @@ string FuncInstr::Dump(string indent) const
         switch (type) {
         case ADD: case SUB:
         oss << indent
+            << " $" << get_name(D) << ","
             << " $" << get_name(S) << ","
-            << " $" << get_name(T) << ","
-            << " $" << get_name(D) << endl;
+            << " $" << get_name(T);
             break;
         case SHIFT:
             oss << indent
-            << " $" << get_name(S) << ","
+            << " $" << get_name(D) << ","
             << " $" << get_name(T) << ","
-            << " " << instr.R.d << endl;
+            << " 0x" << instr.R.d;
             break;
         case JUMP:
-            oss << indent << " $" << get_name(S) << endl;
+            oss << indent << " 0x" << get_name(S);
             break;
         }
         break;
     case I:
         switch (type) {
         case ADD:
-            oss << " $" << get_name(S) << ","
-                << " $" << get_name(T) << ","
-                << " $" << instr.I.imm << endl;
-            break;
-        case BRNCH:
             oss << " $" << get_name(T) << ","
                 << " $" << get_name(S) << ","
-                << " $" << instr.I.imm << endl;
+                << " 0x" << instr.I.imm;
+            break;
+        case BRNCH:
+            oss << " $" << get_name(S) << ","
+                << " $" << get_name(T) << ","
+                << " 0x" << instr.I.imm;
             break;
         }
         break;
     case J:
-        oss << instr.J.addr << endl;
+        oss << " 0x" << instr.J.addr;
         break;
     default:
         ASSERT(0, "unexpected format");
@@ -229,7 +225,7 @@ string InstrList::Dump(string indent) const
 
     for (vector<FuncInstr>::const_iterator it = isaTable.begin();
          it != isaTable.end(); ++it)
-        oss << it->Dump(indent);
+        oss << it->Dump(indent) << endl;
 
     return oss.str();
 }
