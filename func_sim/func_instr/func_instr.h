@@ -24,12 +24,10 @@ using namespace std;
 
 #ifndef NDEBUG
     #define ASSERT( cond, message ) \
-        if ( !( cond ) )             \
-                                      \
-        {                              \
-            cerr << message             \
-                 << endl;                \
-            exit(EXIT_FAILURE);           \
+        if ( !( cond ) ) {           \
+            cerr << message           \
+                 << endl;              \
+            exit(EXIT_FAILURE);         \
         }
 #else
     # define ASSERT( cond, messege )
@@ -86,7 +84,7 @@ public:
         TYPE type;                      //
         uint8 reg_num;                  //
         uint8 const_num;                //
-    }                                   //
+    } typedef ISAEntry;                 //
     //**********************************//
 
     // INTERFACE ******************************//  
@@ -100,10 +98,11 @@ public:
     //*****************************************//  
 private:                                           
     // DATA ***********************************//  
+    FORMAT format;                             //
     Parsed instr;                              //
                                                //
-    static const ISAEntry[] isaTable;          //
-    static const char[][] reg_names;           //  
+    static const ISAEntry isaTable[];          //
+    static const char *reg_names[];            //  
                                                //
     ISAEntry instr_feat;                       //
     vector<const char *> regist;               //
@@ -146,4 +145,4 @@ inline ostream &operator<<(ostream &out, const InstrList &instr)
 
 // Functions for disassembler:
 uint32 get_instr(uint8 *where);
-void print_sec(vector<FuncInstr>::iterator it);
+void print_sec(vector<ElfSection>::iterator it);

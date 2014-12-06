@@ -13,11 +13,12 @@
 
 // Generic C++
 #include <sstream>
+#include <bitset>
 
 // uArchSim modules
 #include <func_instr.h>
 
-const char[][] FuncInstr::reg_names =
+const char *FuncInstr::reg_names[] =
 {
     "$zero",
     "$at",
@@ -33,7 +34,7 @@ const char[][] FuncInstr::reg_names =
     "$ra"
 };
 
-const FuncInstr::ISAEntry[] FuncInstr::isaTable =
+const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // name   opcode  func     format          type        reg_num|const_num
     { "add",   0x0,   0x20, FuncInstr::R, FuncInstr::ADD,     3,       0    },
@@ -109,19 +110,19 @@ void FuncInstr::parseR(uint32 bytes)
 {
     switch (instr.R.funct) {
     case 0x20:
-        inrst_feat = isaTable[0];  break;
+        instr_feat = isaTable[0];  break;
     case 0x21:
-        inrst_feat = isaTable[1];  break;
+        instr_feat = isaTable[1];  break;
     case 0x22:
-        inrst_feat = isaTable[2];  break;
+        instr_feat = isaTable[2];  break;
     case 0x23:
-        inrst_feat = isaTable[3];  break;
+        instr_feat = isaTable[3];  break;
     case 0x0:
-        inrst_feat = isaTable[6];  break;
+        instr_feat = isaTable[6];  break;
     case 0x2:
-        inrst_feat = isaTable[7];  break;
+        instr_feat = isaTable[7];  break;
     case 0x8:
-        inrst_feat = isaTable[11]; break;
+        instr_feat = isaTable[11]; break;
     default:
         ASSERT(0, "bad function type");
     }
@@ -146,13 +147,13 @@ void FuncInstr::parseI(uint32 bytes)
 {
     switch (instr.I.opcode) {
     case 0x8:
-        inrst_feat = isaTable[4]; break;
+        instr_feat = isaTable[4]; break;
     case 0x9:
-        inrst_feat = isaTable[5]; break;
+        instr_feat = isaTable[5]; break;
     case 0x4:
-        inrst_feat = isaTable[8]; break;
+        instr_feat = isaTable[8]; break;
     case 0x5:
-        inrst_feat = isaTable[9]; break;
+        instr_feat = isaTable[9]; break;
     default:
         ASSERT(0, "bad operation code");
     }
@@ -173,7 +174,7 @@ void FuncInstr::parseI(uint32 bytes)
 
 void FuncInstr::parseJ(uint32 bytes)
 {
-    inrst_feat = isaTable[10];
+    instr_feat = isaTable[10];
     const_val = instr.J.addr;
 }
 
@@ -184,7 +185,7 @@ string FuncInstr::Dump(string indent) const
     oss << indent << instr_feat.name;
     
     for (uint8 i = 0; i < instr_feat.reg_num; i++) {
-        oss << " $" << regist[i];
+        oss << " " << regist[i];
         if (i != 2) oss << ",";
     }
 
