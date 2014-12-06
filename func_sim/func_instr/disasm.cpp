@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 
 	vector<ElfSection> sections;
     ElfSection::getAllElfSections(argv[1], sections);
+    FuncMemory memory(argv[1]);
 
     vector<ElfSection>::iterator it = sections.begin();
 
@@ -35,11 +36,11 @@ int main(int argc, char *argv[])
             ++it;
 
         ASSERT(it != sections.end(), "no needed section");
-        
-        print_sec(it);
+                    
+        print_sec(it, memory);
     } else {
         for (it = sections.begin(); it != sections.end(); ++it)
-            print_sec(it);
+            print_sec(it, memory);
     }
 
     return 0;

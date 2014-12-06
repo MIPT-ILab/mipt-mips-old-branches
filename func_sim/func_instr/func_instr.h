@@ -144,5 +144,4 @@ inline ostream &operator<<(ostream &out, const InstrList &instr)
 }
 
 // Functions for disassembler:
-uint32 get_instr(uint8 *where);
-void print_sec(vector<ElfSection>::iterator it);
+void print_sec(vector<ElfSection>::iterator it, FuncMemory memory);

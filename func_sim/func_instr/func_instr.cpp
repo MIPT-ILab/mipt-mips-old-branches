@@ -51,25 +51,14 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
     { "jr",    0x0,   0x8,  FuncInstr::R, FuncInstr::JUMP,    1,       0    },
 };
 
-uint32 get_instr(uint8 *where)
-{
-    ASSERT(where != NULL, "bad address");
-
-    uint32 instr = 0;
-    for(uint8 i = 0; i < 4; i++)
-        instr |= where[i] << 8 * (3 - i);
-
-    return instr;
-}
-
-void print_sec(vector<ElfSection>::iterator it)
+void print_sec(vector<ElfSection>::iterator it, FuncMemory memory)
 {
     ASSERT(!(it->size % 4), "not a full instruction");
 
     InstrList instr(it->name);
 
-    for (uint64 i = 0; i < it->size / 4; i++)
-        instr.add(get_instr(it->content + i * 4));
+    for (uint64 i = 0; i < it->size; i += 4)
+        instr.add(memory.read(it->start_addr + i, 4));
             
     cout << instr;
 }
