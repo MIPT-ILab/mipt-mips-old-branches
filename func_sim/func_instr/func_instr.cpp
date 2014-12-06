@@ -8,29 +8,13 @@ FuncInstr::FuncInstr( uint32 bytes)
     switch ( this->format)
     {
         case FORMAT_R:
-            for ( int i = 0; i < numCom; i++)
-                if (( this->bytes.asR.opcode == isaTable[ i].opcode) && ( this->bytes.asR.funct == isaTable[ i].funct)) 
-                { 
-                    this->type = isaTable [ i].type;
-                    break;
-                }
+            parseR ( bytes);
             break;
         case FORMAT_J:
-            for ( int i = 0; i < numCom; i++)
-                if ( this->bytes.asJ.opcode == isaTable[ i].opcode)
-                {    
-                    this->type = isaTable [ i].type;
-                    break;
-                }
+            parseJ ( bytes);
             break;
         case FORMAT_I:
-            for ( int i = 0; i < numCom; i++)
-                if ( this->bytes.asI.opcode == isaTable[ i].opcode)
-                {
-                    this->type = isaTable [ i].type;
-                    break;
-                }
-
+            parseI ( bytes);
             break;
         default:
             assert (0);
@@ -39,16 +23,34 @@ FuncInstr::FuncInstr( uint32 bytes)
 
 void FuncInstr::parseI( uint32 bytes)
 {
+    for ( int i = 0; i < numCom; i++)
+        if ( this->bytes.asI.opcode == isaTable[ i].opcode)
+        {
+            this->type = isaTable [ i].type;
+            break;
+        }
 
 }
 
 void FuncInstr::parseR( uint32 bytes)
 {
+    for ( int i = 0; i < numCom; i++)
+        if (( this->bytes.asR.opcode == isaTable[ i].opcode) && ( this->bytes.asR.funct == isaTable[ i].funct))
+        {
+            this->type = isaTable [ i].type;
+            break;
+        }
 
 }
 
 void FuncInstr::parseJ( uint32 bytes)
 {
+    for ( int i = 0; i < numCom; i++)
+       if ( this->bytes.asJ.opcode == isaTable[ i].opcode)
+       {
+            this->type = isaTable [ i].type;
+            break;
+       }
 
 }
 
