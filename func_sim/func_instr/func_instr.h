@@ -7,7 +7,7 @@
 
 class FuncInstr
 {
-    union Command
+    union 
     {
         struct
         {
