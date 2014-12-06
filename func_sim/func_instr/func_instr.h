@@ -1,21 +1,24 @@
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <cassert>
 #include <types.h>
 #include <func_memory.h>
+#include <sstream>
+
+using namespace std;
 
 
 #ifndef NDEBUG
-	#define ASSERT(cond, messege)			\
+	#define ASSERT(cond, message)			\
 		if (!(cond))				\
 		{					\
-			printf ("Fatal error: %s, "	\
-				"file: %s, line:%d \n", \
-			#messege, __FILE__, __LINE__);  \
-			abort();			\
+			cerr << message 		\
+			    << endl;  			\
+			exit(EXIT_FAILURE);		\
 		}
 #else
-	# define ASSERT(cond, messege)
+	# define ASSERT(cond, message)
 #endif
 
 
@@ -23,17 +26,19 @@ class FuncInstr
 {
 	public:
 		FuncInstr(uint32 bytes);
-		std::string Dump(std::string indent = "") const;
-		void FuncInstr::initFormat(uint32 bytes);
-		void FuncInstr::parser(uint32 bytes);
-		char FuncInstr::initreg(uint32 num);
+		~FuncInstr();
+		std::string Dump(std::string indent = "") ;
+		void initformat(uint32 bytes);
+		void parser(uint32 bytes);
+		string initreg(uint8 num);
 
 	
 	enum Format
 	{
 		FORMAT_R,
 		FORMAT_I,
-		FORMAT_J
+		FORMAT_J,
+		UNIX
 	} format;
 	
 	int spformat;
@@ -43,7 +48,7 @@ class FuncInstr
 	{
 		struct
 		{
-			unsigned imm:16;
+			unsigned C:16;
 			unsigned t:5;
 			unsigned s:5;
 			unsigned opcode:6;
@@ -64,11 +69,12 @@ class FuncInstr
 		{
 			unsigned A:26; 
 			unsigned opcode:6;
-		} asJ
+		} asJ;
 
 		
-		uint 32 raw;
+		uint32 raw;
 	} info;
 };
 
+uint32 get_instr (uint8 *pointer);
 		
