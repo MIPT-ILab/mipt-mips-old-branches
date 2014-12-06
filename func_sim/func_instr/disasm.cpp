@@ -28,37 +28,18 @@ int main(int argc, char *argv[])
 	vector<ElfSection> sections;
     ElfSection::getAllElfSections(argv[1], sections);
 
-    vector<ElfSection>::iterator curr_sec = sections.begin();
+    vector<ElfSection>::iterator it = sections.begin();
 
     if (argc == 3) {
-        while (curr_sec != sections.end() && strcmp(curr_sec->name, argv[2]) != 0)
-            ++curr_sec;
+        while (it != sections.end() && strcmp(it->name, argv[2]) != 0)
+            ++it;
 
-        cout << curr_sec->name << endl;
-
-        ASSERT(curr_sec != sections.end(), "no needed section");
-        ASSERT(!(curr_sec->size % 4), "not a full instruction");
-
-        InstrList instr(argv[2]);
-
-        for (uint64 i = 0; i < curr_sec->size / 4; i++)
-    	    instr.add(get_instr(curr_sec->content + i * 4));
-
-        cout << instr;
+        ASSERT(it != sections.end(), "no needed section");
+        
+        print_sec(it);
     } else {
-        for (vector<ElfSection>::iterator it = sections.begin();
-             it != sections.end(); ++it) {
-            ASSERT(!(it->size % 4), "not a full instruction");
-
-            InstrList instr(it->name);
-
-            for (uint64 i = 0; i < it->size / 4; i++) {
-                instr.add(get_instr(it->content + i * 4));
-                cout << instr.isaTable.back() << endl;
-            }
-            
-            cout << instr;
-        } 
+        for (it = sections.begin(); it != sections.end(); ++it)
+            print_sec(it);
     }
 
     return 0;

@@ -13,10 +13,42 @@
 
 // Generic C++
 #include <sstream>
-#include <bitset>
 
 // uArchSim modules
 #include <func_instr.h>
+
+const char[][] FuncInstr::reg_names =
+{
+    "$zero",
+    "$at",
+    "$v0", "$v1",
+    "$a0", "$a1", "$a2", "$a3",
+    "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7",
+    "$s0", "$s1", "$s2", "$s3", "$s4", "$s5", "$s6", "$s7",
+    "$t8", "$t9",
+    "$k0", "$k1",
+    "$gp",
+    "$sp",
+    "$fp",
+    "$ra"
+};
+
+const FuncInstr::ISAEntry[] FuncInstr::isaTable =
+{
+    // name   opcode  func     format          type        reg_num|const_num
+    { "add",   0x0,   0x20, FuncInstr::R, FuncInstr::ADD,     3,       0    },
+    { "addu",  0x0,   0x21, FuncInstr::R, FuncInstr::ADD,     3,       0    },
+    { "sub",   0x0,   0x22, FuncInstr::R, FuncInstr::SUB,     3,       0    },
+    { "subu",  0x0,   0x23, FuncInstr::R, FuncInstr::SUB,     3,       0    },
+    { "addi",  0x8,   0x0,  FuncInstr::I, FuncInstr::ADD,     2,       1    },
+    { "addiu", 0x9,   0x0,  FuncInstr::I, FuncInstr::ADD,     2,       1    },
+    { "sll",   0x0,   0x0,  FuncInstr::R, FuncInstr::SHIFT,   2,       1    },
+    { "srl",   0x0,   0x2,  FuncInstr::R, FuncInstr::SHIFT,   2,       1    },
+    { "beq",   0x4,   0x0,  FuncInstr::I, FuncInstr::BRNCH,   2,       1    },
+    { "bne",   0x5,   0x0,  FuncInstr::I, FuncInstr::BRNCH,   2,       1    },
+    { "j",     0x2,   0x0,  FuncInstr::J, FuncInstr::JUMP,    0,       1    },
+    { "jr",    0x0,   0x8,  FuncInstr::R, FuncInstr::JUMP,    1,       0    },
+};
 
 uint32 get_instr(uint8 *where)
 {
@@ -29,23 +61,31 @@ uint32 get_instr(uint8 *where)
     return instr;
 }
 
+void print_sec(vector<ElfSection>::iterator it)
+{
+    ASSERT(!(it->size % 4), "not a full instruction");
+
+    InstrList instr(it->name);
+
+    for (uint64 i = 0; i < it->size / 4; i++)
+        instr.add(get_instr(it->content + i * 4));
+            
+    cout << instr;
+}
+
 FuncInstr::FuncInstr(uint32 bytes)
 {
-    cout << bitset<32>(bytes) << endl;
     instr.raw = bytes;
 
     initFormat(bytes);
 
     switch (format) {
     case R:
-        parseR(bytes);
-        break;
+        parseR(bytes); break;
     case I:
-        parseI(bytes);
-        break;
+        parseI(bytes); break;
     case J:
-        parseJ(bytes);
-        break;
+        parseJ(bytes); break;
     default:
         ASSERT(0, "ERROR.*");
     }
@@ -54,15 +94,12 @@ FuncInstr::FuncInstr(uint32 bytes)
 void FuncInstr::initFormat(uint32 bytes)
 {
     switch (instr.R.opcode) {
-    case 0:
-        format = R;
-        break;
-    case 8: case 9: case 4: case 5:
-        format = I;
-        break;
-    case 2:
-        format = J;
-        break;
+    case 0x0:
+        format = R; break;
+    case 0x8: case 0x9: case 0x4: case 0x5:
+        format = I; break;
+    case 0x2:
+        format = J; break;
     default:
         format = UNEXP;
     }
@@ -71,148 +108,88 @@ void FuncInstr::initFormat(uint32 bytes)
 void FuncInstr::parseR(uint32 bytes)
 {
     switch (instr.R.funct) {
-    case 32:
-        type = ADD;
-        name = "add";
-        break;
-    case 33:
-        type = ADD;
-        name = "addu";
-        break;
-    case 34:
-        type = SUB;
-        name = "sub";
-        break;
-    case 35:
-        type = SUB;
-        name = "subu";
-        break;
-    case 0:
-        type = SHIFT;
-        name = "sll";
-        break;
-    case 2:
-        type = SHIFT;
-        name = "srl";
-        break;
-    case 8:
-        type = JUMP;
-        name = "jr";
-        break;
+    case 0x20:
+        inrst_feat = isaTable[0];  break;
+    case 0x21:
+        inrst_feat = isaTable[1];  break;
+    case 0x22:
+        inrst_feat = isaTable[2];  break;
+    case 0x23:
+        inrst_feat = isaTable[3];  break;
+    case 0x0:
+        inrst_feat = isaTable[6];  break;
+    case 0x2:
+        inrst_feat = isaTable[7];  break;
+    case 0x8:
+        inrst_feat = isaTable[11]; break;
     default:
         ASSERT(0, "bad function type");
+    }
+
+    switch (instr.R.funct) {
+    case 0x20: case 0x21: case 0x22: case 0x23:
+        regist.push_back(reg_names[instr.R.d]);
+        regist.push_back(reg_names[instr.R.s]);
+        regist.push_back(reg_names[instr.R.t]);
+        break;
+    case 0x0: case 0x2:
+        regist.push_back(reg_names[instr.R.d]);
+        regist.push_back(reg_names[instr.R.t]);
+        const_val = instr.R.shamt;
+        break;
+    case 0x8:
+        regist.push_back(reg_names[instr.R.s]);
     }
 }
 
 void FuncInstr::parseI(uint32 bytes)
 {
     switch (instr.I.opcode) {
-    case 8:
-        type = ADD;
-        name = "addi";
-        break;
-    case 9:
-        type = ADD;
-        name = "addiu";
-        break;
-    case 4:
-        type = BRNCH;
-        name = "beq";
-        break;
-    case 5:
-        type = BRNCH;
-        name = "bne";
-        break;
+    case 0x8:
+        inrst_feat = isaTable[4]; break;
+    case 0x9:
+        inrst_feat = isaTable[5]; break;
+    case 0x4:
+        inrst_feat = isaTable[8]; break;
+    case 0x5:
+        inrst_feat = isaTable[9]; break;
     default:
         ASSERT(0, "bad operation code");
     }
+
+    switch (instr.I.opcode) {
+    case 0x8: case 0x9:
+        regist.push_back(reg_names[instr.I.t]);
+        regist.push_back(reg_names[instr.I.s]);
+        break;
+    case 0x4: case 0x5:
+        regist.push_back(reg_names[instr.I.s]);
+        regist.push_back(reg_names[instr.I.t]);
+        break;
+    }
+
+    const_val = instr.I.imm;
 }
 
 void FuncInstr::parseJ(uint32 bytes)
 {
-    type = JUMP;
-    name = "j";
-}
-
-const char *FuncInstr::get_name(REGTYPE type) const
-{
-    uint8 bits; 
-    switch (type) {
-    case S:
-        bits = instr.R.s;
-        break;
-    case T:
-        bits = instr.R.t;
-        break;
-    case D:
-        bits = instr.R.d;
-        break;
-    default:
-        ASSERT(0, "wrong type");
-    }
-    
-    switch (bits) {
-    case ZERO: return "zero";
-    case AT:   return "at";
-    case T0:   return "t0";
-    case T1:   return "t1";
-    case T2:   return "t2";
-    case T3:   return "t3";
-    case T4:   return "t4";
-    case T5:   return "t5";
-    case T6:   return "t6";
-    case T7:   return "t7";
-    case T8:   return "t8";
-    case T9:   return "t9";
-    default: ASSERT(0, "unexpected register");
-    }
+    inrst_feat = isaTable[10];
+    const_val = instr.J.addr;
 }
 
 string FuncInstr::Dump(string indent) const
 {
     ostringstream oss;
 
-    oss << indent << name << hex;
-    switch (format) {
-    case R:
-        switch (type) {
-        case ADD: case SUB:
-        oss << indent
-            << " $" << get_name(D) << ","
-            << " $" << get_name(S) << ","
-            << " $" << get_name(T);
-            break;
-        case SHIFT:
-            oss << indent
-            << " $" << get_name(D) << ","
-            << " $" << get_name(T) << ","
-            << " 0x" << instr.R.d;
-            break;
-        case JUMP:
-            oss << indent << " 0x" << get_name(S);
-            break;
-        }
-        break;
-    case I:
-        switch (type) {
-        case ADD:
-            oss << " $" << get_name(T) << ","
-                << " $" << get_name(S) << ","
-                << " 0x" << instr.I.imm;
-            break;
-        case BRNCH:
-            oss << " $" << get_name(S) << ","
-                << " $" << get_name(T) << ","
-                << " 0x" << instr.I.imm;
-            break;
-        }
-        break;
-    case J:
-        oss << " 0x" << instr.J.addr;
-        break;
-    default:
-        ASSERT(0, "unexpected format");
-    } 
+    oss << indent << instr_feat.name;
+    
+    for (uint8 i = 0; i < instr_feat.reg_num; i++) {
+        oss << " $" << regist[i];
+        if (i != 2) oss << ",";
+    }
+
+    if (instr_feat.const_num)
+        oss << " 0x" << hex << const_val;
 
     return oss.str();
 }
@@ -223,8 +200,8 @@ string InstrList::Dump(string indent) const
     
     oss << "section \"" << section_name << "\":" << endl;
 
-    for (vector<FuncInstr>::const_iterator it = isaTable.begin();
-         it != isaTable.end(); ++it)
+    for (vector<FuncInstr>::const_iterator it = list.begin();
+         it != list.end(); ++it)
         oss << it->Dump(indent) << endl;
 
     return oss.str();
