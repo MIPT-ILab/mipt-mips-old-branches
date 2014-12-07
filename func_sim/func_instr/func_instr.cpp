@@ -40,7 +40,6 @@ const FuncInstr::ISAEntry[] FuncInstr::isaTable =
 
 const char* FuncInstr::regTable[] =
 {
-    // name
     "$zero",
     "$at",
     "$t0",
@@ -64,7 +63,7 @@ void FuncInstr::FuncInstr( uint32 bytes)
     switch (this->format)
     {
         case FORMAT_R:
-            this->parser(bytes);
+            this->parserR(bytes);
             break;
         case FORMAT_I:
             this->parseI(bytes);
@@ -115,7 +114,7 @@ int format = bytes >> (26);
     {
         this->format = FORMAT_I;
     }
-    cout << hex <<format << dec <<endl;
+    cout << hex << format <<endl;
 }
 string FuncInstr::getREGname(const uint8 reg) const
 {   if(reg == 28)
@@ -167,14 +166,14 @@ std::string FuncInstr::Dump( std::string indent) const
             switch(isaTable[instrId].type) {
                 case ADD:
                  parsed << getISAname(instrId) << " "
-                        << getREGname(this->bytes.asI.t) << ", "
-                        << getREGname(this->bytes.asI.s) << ", "
+                        << getREGname(this->bytes.asI.t) << ","
+                        << getREGname(this->bytes.asI.s) << ","
                         << this->bytes.asI.imm << endl;
                     break;
                 case BRANCH:
                  parsed << getISAname(instrId) << " "
-                        << getREGname(this->bytes.asI.s) << ", "
-                        << getREGname(this->bytes.asI.t) << ", "
+                        << getREGname(this->bytes.asI.t) << ","
+                        << getREGname(this->bytes.asI.s) << ","
                         << this->bytes.asI.imm << endl;
                     break;
             }

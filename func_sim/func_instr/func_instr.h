@@ -1,13 +1,14 @@
 
 #include <iostream>
-#include <types.h>
 #include <elf_parser.h>
-#include <func_memory.h>
 #include <stdlib.h>
+#include <types.h>
+#include <func_memory.h>
 
 class FuncInstr
 {
-    union 
+  public:
+    union Parsed
     {
         struct
         {
@@ -32,13 +33,13 @@ class FuncInstr
         uint32 raw;
     } bytes;
     
-    int initFormat( uint32 bytes);
+    void initFormat( uint32 bytes);
     void parseR(uint32 bytes);
     void parseI(uint32 bytes);
     void parseJ(uint32 bytes);
     uint8 getISAFromTable(const uint8 opcode, const uint8 func = 0x0) const;
-    const char *getISAname(const uint8 id = 0) const;
-    const string getREGname(const uint8 reg = 0) const;
+    const char *getISAname(const uint8 id = 0);
+    const string getREGname(const uint8 reg = 0);
 
     uint8 dReg;
     uint8 tReg;
@@ -46,7 +47,6 @@ class FuncInstr
     uint8 imm;
     uint8 addr;
 
-public:
 
     FuncInstr( uint32 bytes);
     std::string Dump( std::string indent = " ") const;
