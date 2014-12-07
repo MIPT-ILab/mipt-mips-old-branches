@@ -134,7 +134,8 @@ string FuncInstr::getREGname(const uint8 reg) const
 }
 
 std::string FuncInstr::Dump( std::string indent) const
-{
+{   
+    std::ostringstream oss;
     switch (this->format)
     {
         case FORMAT_R:
@@ -142,19 +143,19 @@ std::string FuncInstr::Dump( std::string indent) const
             switch(isaTable[instrId].type) {
                 case FuncInstr::ADD:
                 case FuncInstr::SUB:
-                 parsed << getISAname(instrId) << " "
+                 oss << getISAname(instrId) << " "
                         << getREGname(this->bytes.asR.d) << ","
                         << getREGname(this->bytes.asR.s) << ","
                         << getREGname(this->bytes.asR.t) << endl;
                     break;
                 case FuncInstr::SHIFT:
-                 parsed << getISAname(instrId) << " "
+                 oss << getISAname(instrId) << " "
                         << getREGname(this->bytes.asR.d) << ","
                         << getREGname(this->bytes.asR.t) << ","
                         << getREGname(this->bytes.asR.S) << endl;
                     break;
                 case FuncInstr::JUMP:
-                 parsed << getISAname(instrId) << " "
+                 oss << getISAname(instrId) << " "
                         << getREGname(this->bytes.asR.s) << endl;
                     break;
                 default:
@@ -165,13 +166,13 @@ std::string FuncInstr::Dump( std::string indent) const
             instrId = getISAFromTable(this->bytes.asI.opcode);
             switch(isaTable[instrId].type) {
                 case ADD:
-                 parsed << getISAname(instrId) << " "
+                 oss << getISAname(instrId) << " "
                         << getREGname(this->bytes.asI.t) << ","
                         << getREGname(this->bytes.asI.s) << ","
                         << this->bytes.asI.imm << endl;
                     break;
                 case BRANCH:
-                 parsed << getISAname(instrId) << " "
+                 oss << getISAname(instrId) << " "
                         << getREGname(this->bytes.asI.t) << ","
                         << getREGname(this->bytes.asI.s) << ","
                         << this->bytes.asI.imm << endl;
