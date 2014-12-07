@@ -64,10 +64,10 @@ void FuncInstr::initFormat( uint32 bytes)
 
     }
     if( format == UNDEF_FORMAT)
-	{
+    {
 		cerr << "ERROR.*" << endl;   // return error if instruction's format isn't defined
 		exit(EXIT_FAILURE);
-	}
+    }
 }
 
 
@@ -110,16 +110,16 @@ void FuncInstr::parseR( uint32 bytes)
         }
 
     }
-	if ( oper_type == UNDEF)                                                    // check if operation type is not defined
-	{
-		#if ASSERT
+    if ( oper_type == UNDEF)                                                    // check if operation type is not defined
+    {
+        #if ASSERT
             cout << "ILLEGAL INSTRUCTION:  " << endl;
             cout << "THERE IS NOT SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
             assert( 0);
-		#endif
-		cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
-		cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
-		exit(EXIT_FAILURE);
+        #endif
+        cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
+        cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
+        exit(EXIT_FAILURE);
     }
     /* parsing according to operation type */
     switch( oper_type)
@@ -179,18 +179,18 @@ void FuncInstr::parseI( uint32 bytes)
 /* This function parses input 4 bytes according to J format */
 void FuncInstr::parseJ( uint32 bytes)
 {
-     for( int i = 0; i < isaTable_size; ++i)
-     {
-         if ( this -> bytes.asI.opcode == isaTable[ i].opcode)
-         {
-             oper_name = isaTable[ i].name;
-             oper_type = isaTable[ i].type;
-             break;
-         }
-         else
-         {
+    for( int i = 0; i < isaTable_size; ++i)
+    {
+        if ( this -> bytes.asI.opcode == isaTable[ i].opcode)
+        {
+            oper_name = isaTable[ i].name;
+            oper_type = isaTable[ i].type;
+            break;
+        }
+        else
+        {
              oper_type = UNDEF;
-		 }
+        }
      }
      if ( oper_type == UNDEF)                                                   //  check if operation type is not defined
      {
