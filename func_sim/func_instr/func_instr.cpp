@@ -60,13 +60,11 @@ void FuncInstr::initFormat( uint32 bytes)
         {
             format = UNDEF_FORMAT;
         }
-
-
     }
     if( format == UNDEF_FORMAT)
     {
-		cerr << "ERROR.*" << endl;   // return error if instruction's format isn't defined
-		exit(EXIT_FAILURE);
+        cerr << "ERROR.*" << endl;   // return error if instruction's format isn't defined
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -121,6 +119,7 @@ void FuncInstr::parseR( uint32 bytes)
         cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
         exit(EXIT_FAILURE);
     }
+
     /* parsing according to operation type */
     switch( oper_type)
     {
@@ -191,20 +190,21 @@ void FuncInstr::parseJ( uint32 bytes)
         {
              oper_type = UNDEF;
         }
-     }
-     if ( oper_type == UNDEF)                                                   //  check if operation type is not defined
-     {
+    }
+    if ( oper_type == UNDEF)                                                   //  check if operation type is not defined
+    {
         cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
         cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
-		exit(EXIT_FAILURE);
-	 }
-     jump_addr = this -> bytes.asJ.addr;                                        // if operation type is defined it gets jump address
+        exit(EXIT_FAILURE);
+    }
+    jump_addr = this -> bytes.asJ.addr;                                        // if operation type is defined it gets jump address
 }
 
 /* This method  returns disassembly of instructions */
 string FuncInstr::Dump( string indent) const
 {
     std::ostringstream oss;
+
     /* disassembling according to operation format */
     switch( this -> format)
     {
@@ -239,7 +239,6 @@ string FuncInstr::Dump( string indent) const
 }
 
 /* implementation of operator "<<" overloading for class FuncInstr */
-
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
      return out << instr.Dump( "");
