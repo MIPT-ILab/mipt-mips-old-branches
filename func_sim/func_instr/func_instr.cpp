@@ -195,7 +195,7 @@ void FuncInstr::parseJ( uint32 bytes)
      if ( oper_type == UNDEF)                                                   //  check if operation type is not defined
      {
         cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
-		cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
+        cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
 		exit(EXIT_FAILURE);
 	 }
      jump_addr = this -> bytes.asJ.addr;                                        // if operation type is defined it gets jump address
