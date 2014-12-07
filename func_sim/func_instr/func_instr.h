@@ -113,7 +113,6 @@ class FuncInstr
 
     public:
         FuncInstr( uint32 bytes);
-
         #if DESTRUCTOR
             ~FuncInstr( uint32 bytes);                              //there are no objects which must be deleted
         #endif
