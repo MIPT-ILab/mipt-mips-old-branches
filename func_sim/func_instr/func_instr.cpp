@@ -164,11 +164,11 @@ void FuncInstr::parseI( uint32 bytes)
 
     }
     if ( oper_type == UNDEF)                                                   //  check if operation type is not defined
-	{
-		cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
-		cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
-		exit(EXIT_FAILURE);
-	}
+    {
+        cout << "ILLEGAL INSTRUCTION:  " << endl;                               // return error if operation type is not defined
+        cout << "THERE IS NO SUCH INSTRUCTION IN THE MIPS ISA !!!" << endl;
+        exit(EXIT_FAILURE);
+    }
     /* if operation type is defined it gets registers names and immediate value */
     Reg_t = regTable[ this -> bytes.asI.t];
     Reg_s = regTable[ this -> bytes.asI.s];

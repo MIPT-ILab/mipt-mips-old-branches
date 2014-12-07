@@ -115,7 +115,7 @@ class FuncInstr
         FuncInstr( uint32 bytes);
 
         #if DESTRUCTOR
-        ~FuncInstr( uint32 bytes);                              //there are no objects which must be deleted
+            ~FuncInstr( uint32 bytes);                              //there are no objects which must be deleted
         #endif
         void initFormat( uint32 bytes);
         std::string Dump( std::string indent = " ") const;
