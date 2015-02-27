@@ -154,7 +154,7 @@ string FuncMemory::dump( string indent) const
                         if (memory[set][page][offset])
                         {
                             oss << "addr 0x" << get_addr( set, page, offset) 
-                                << ": data 0x" << memory[set][page][offset] << std::endl;
+                                << ": data 0x" << (uint32) memory[set][page][offset] << std::endl;
                         }
                     }
                 }
