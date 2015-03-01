@@ -1,51 +1,32 @@
-/*
- * disasm.cpp - mips disassembler implemented using elf_parser
- * @author Pavel Kryukov pavel.kryukov@phystech.edu
- * Copyright 2015 MIPT-MIPS 
+/**
+ * disasm.cpp - The main program, launching an implementation 
+ * of disassembler of MIPS ISA.
+ * @author Mikhail Lyubogoschev <lyubogoshchev@phystech.edu>
+ * Copyright 2014 uArchSim iLab project
  */
-
-
-#include <cstring>
-#include <cstdlib>
-
 #include <iostream>
+#include <cassert>
 #include <iomanip>
-
+#include <stdlib.h>
 #include <func_instr.h>
-#include <elf_parser.h>
+using namespace::std;
 
-int main( int argc, char* argv[])
+
+int main( int argc, char** argv)
 {
-    if ( argc != 3)
+    if ( argc < 3) 
     {
-        std::cout << "2 arguments required: mips_exe filename and section name" << endl;
-        std::exit(EXIT_FAILURE);
+        cout << "You shold pass 2 arguments to the function" << endl;
+        exit( 1);
     }
-
-    std::vector<ElfSection> section;
-    ElfSection::getAllElfSections( argv[1], section);
-    size_t i;
-    for ( i = 0; i < section.size(); i++)
-        if ( !strcmp( section[i].name, argv[2]))
-            break;
-
-    if ( i == section.size())
+    FuncMemory mem( argv[1]);
+    FuncMemory::section workin_sect = mem.FindInVector( argv[2]);
+    int cmd1 = 0;
+    for ( int i = workin_sect.start_addr; i < workin_sect.start_addr + workin_sect.size; i += 4)
     {
-        std::cout << "Section was not found" << std::endl;
-        std::exit(EXIT_FAILURE);
+        cmd1 = mem.read( i);
+        FuncInstr cmd( cmd1);
+        cout << cmd << endl;
     }
-
-    size_t j = 0;
-    do
-    {
-        FuncInstr instr((( uint32*) section[i].content)[j]);
-        std::cout << std::hex << std::setfill( '0')
-                  << "0x" << std::setw( 8)
-		  << ( section[i].start_addr + ( j * 4))
-	          << '\t' << instr << std::dec << std::endl;
-	++j;
-    } while (j < section[i].size);
-
-    return 0;
+    return 0;    
 }
-

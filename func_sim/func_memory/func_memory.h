@@ -3,6 +3,11 @@
  * programer-visible memory space accesing via memory address.
  * @author Alexander Titov <alexander.igorevich.titov@gmail.com>
  * Copyright 2012 uArchSim iLab project
+ *
+ * Changed by Mikhail Lyubogoschev <lyubogoshchev@phystech.edu>
+ * In order to add some usefull methods for mips disassembler
+ * Copyright 2014 uArhSim iLab project
+
  */
 
 // protection from multi-include
@@ -31,8 +36,8 @@ class FuncMemory
         
         uint64 set_mask;
         uint64 page_mask;
-        uint64 offset_mask;        
-        
+        uint64 offset_mask;
+
         inline size_t get_set( uint64 addr) const
         {
             return ( addr & set_mask) >> ( page_bits + offset_bits);
@@ -81,6 +86,19 @@ class FuncMemory
         void write( uint64 value, uint64 addr, unsigned short num_of_bytes = 4);
         inline uint64 startPC() const { return startPC_addr; }
         std::string dump( string indent = "") const;
+
+        struct section
+        {
+            string name;
+            uint64 size;
+            uint64 start_addr;
+        
+            inline section( char* name, uint64 size, uint64 start);
+        };
+
+
+        std::vector<section> sections;
+        section FindInVector( char* name);
 };
 
 #endif // #ifndef FUNC_MEMORY__FUNC_MEMORY_H
