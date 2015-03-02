@@ -19,10 +19,21 @@
 class FuncInstr
 {
     public:
+        uint32 v_src1;
+        uint32 v_src2;
+        uint32 v_dst;
+        uint32 mem_addr;
+        uint32 PC_delta;
+
+        uint32 i_dst;
+        uint32 i_src1;
+        uint32 i_src2;
+
         FuncInstr( uint32 bytes);
         std::string Dump( std::string indent = " ") const;
 
     private:
+        
         enum Format
         {
             FORMAT_R,
@@ -36,8 +47,12 @@ class FuncInstr
             OUT_R_ARITHM,
             OUT_R_SHAMT,
             OUT_R_JUMP,
+            OUT_R_LOG,
             OUT_I_ARITHM,
             OUT_I_BRANCH,
+            OUT_I_LOG,
+            OUT_I_MEM,
+            OUT_I_SHIFT,
             OUT_J_JUMP
         } operation;
 
@@ -94,6 +109,11 @@ class FuncInstr
         void initI();
         void initJ();
         void initUnknown();
+
+        std::string outSrc1();
+        std::string outSrc2();
+        std::string outDst();
+        std::string outC();
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);

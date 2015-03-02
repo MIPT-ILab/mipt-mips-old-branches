@@ -1,0 +1,20 @@
+The third assignment: single-cycle implementation
+Author: Alexander Pronin <alexander.pronin.mipt@gmail.com>
+
+03/03/15 0:25 version 1.0:
+
+Start working with project. Created new objects:
+- func_sim.cpp
+- func_sim.h
+- Makefile
+- main.cpp
+
+Changes in func_sim.h and func_sim.cpp:
+- added main functions for implementation
+
+Changes in func_instr.h and func_instr.cpp:
+- added new operation types
+- added helpful function for dump
+- added some variables in FuncInstr to do execution
+
+The task hasn't been done yet. Program isn't work because of it.
