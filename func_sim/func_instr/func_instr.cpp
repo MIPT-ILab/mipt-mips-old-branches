@@ -20,21 +20,27 @@
 const ISAEntry isaTable[ lastType + 1] =
 {
     // name     opcode    func   format    type
-    { "add",   0x0,     0x20, FORMAT_R,  ADD  },
-    { "addu",   0x0,     0x21, FORMAT_R,  ADDU },
-    { "sub",   0x0,     0x22, FORMAT_R,  SUB  },
-    { "subu",   0x0,     0x23, FORMAT_R,  SUBU },
-    { "addi",   0x8,     0x0,  FORMAT_I,  ADDI },
-    { "addiu",   0x9,     0x0,  FORMAT_I,  ADDIU},
+    { "add", 0x0, 0x20, FORMAT_R, ADD},
+    { "addu", 0x0, 0x21, FORMAT_R, ADDU},
+    { "sub", 0x0, 0x22, FORMAT_R, SUB},
+    { "subu", 0x0, 0x23, FORMAT_R, SUBU},
+    { "addi", 0x8, 0x0, FORMAT_I, ADDI},
+    { "addiu", 0x9, 0x0, FORMAT_I, ADDIU},
 
-    { "sll",   0x0,     0x0,  FORMAT_R,  SLL  },
-    { "srl",   0x0,     0x2,  FORMAT_R,  SRL  },
+    { "sll", 0x0, 0x0, FORMAT_R, SLL},
+    { "srl", 0x0, 0x2, FORMAT_R, SRL},
 
-    { "beq",   0x4,     0x0,  FORMAT_I,  BEQ  },
-    { "bne",   0x5,     0x0,  FORMAT_I,  BNE  },
+    { "beq", 0x4, 0x0, FORMAT_I, BEQ},
+    { "bne", 0x5, 0x0, FORMAT_I, BNE},
 
-    { "j",   0x2,     0x0,  FORMAT_J,  J    },
-    { "jr",   0x0,     0x8,  FORMAT_R,  JR   }
+    { "j", 0x2, 0x0, FORMAT_J, J},
+    { "jr", 0x0, 0x8, FORMAT_R, JR},
+
+    { "lb", 0x20, 0x0, FORMAT_I, LB},
+    { "lw", 0x23, 0x0, FORMAT_I, LW},
+
+    { "sb", 0x28, 0x0, FORMAT_I, SB},
+    { "sw", 0x2b, 0x0, FORMAT_I, SW}
 };
 
 const RegEntry regTable[ 32] =
@@ -163,6 +169,30 @@ std::string FuncInstr::Dump( std::string indent) const
         break;
     case JR:
         oss << " " << regTable[ this->operation.asR.s].name;
+        break;
+    case LB:
+        oss << " "  << regTable[ this->operation.asI.t].name
+            << ", " << hexi( this->operation.asI.imm)
+            << "("  << regTable[ this->operation.asI.s].name
+            << ")";
+        break;
+    case LW:
+        oss << " "  << regTable[ this->operation.asI.t].name
+            << ", " << hexi( this->operation.asI.imm)
+            << "("  << regTable[ this->operation.asI.s].name
+            << ")";
+        break;
+    case SB:
+        oss << " "  << regTable[ this->operation.asI.t].name
+            << ", " << hexi( this->operation.asI.imm)
+            << "("  << regTable[ this->operation.asI.s].name
+            << ")";
+        break;
+    case SW:
+        oss << " "  << regTable[ this->operation.asI.t].name
+            << ", " << hexi( this->operation.asI.imm)
+            << "("  << regTable[ this->operation.asI.s].name
+            << ")";
         break;
     }
     return oss.str();

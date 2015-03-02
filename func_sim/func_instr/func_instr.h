@@ -37,7 +37,11 @@ static const Type BEQ   =  8;
 static const Type BNE   =  9;
 static const Type J     = 10;
 static const Type JR    = 11;
-static const Type lastType = JR;
+static const Type LB    = 12;
+static const Type LW    = 13;
+static const Type SB    = 14;
+static const Type SW    = 15;
+static const Type lastType = SW;
 
 
 std::string hexi( unsigned val);
