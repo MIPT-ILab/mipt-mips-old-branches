@@ -28,9 +28,28 @@ class FuncInstr
         uint32 i_dst;
         uint32 i_src1;
         uint32 i_src2;
+        
+        uint32 jaddr;
 
-        FuncInstr( uint32 bytes);
-        std::string Dump( std::string indent = " ") const;
+        enum _type
+        {
+            BYTE,
+            HWORD,
+            WORD,
+            UBYTE,
+            UHWORD
+        } type;
+
+        enum LoadStore
+        {
+            nothing,
+            load,
+            store
+        } memOp;
+
+        FuncInstr( uint32 bytes); // READY
+        std::string Dump( std::string indent = " ") const; // READY
+        void execute(); // READY
 
     private:
         
@@ -95,6 +114,8 @@ class FuncInstr
 
             Format format;
             OperationType operation;
+
+            void (*function)();
         };
         uint32 isaNum;
 
@@ -104,19 +125,54 @@ class FuncInstr
 
         std::string disasm;
                                                                
-        void initFormat();
-        void initR();
-        void initI();
-        void initJ();
-        void initUnknown();
+        void initFormat(); //READY
+        void initR(); // READY
+        void initI(); // READY
+        void initJ(); // READY
+        void initUnknown(); // READY
 
-        std::string outSrc1();
-        std::string outSrc2();
-        std::string outDst();
-        std::string outC();
+        std::string outSrc1(); // READY
+        std::string outSrc2(); // READY
+        std::string outDst(); // READY
+        std::string outC(); // READY
+        void ( *function)();
+
+        void add();
+        void addu();
+        void sub();
+        void subu();
+        void addi();
+        void addiu();
+
+        void sll();
+        void srl();
+        void lui();
+
+        void and();
+        void or();
+        void xor();
+        void andi();
+        void ori();
+        void xori();
+
+        void beq();
+        void bne();
+
+        void j();
+        void jr();
+
+        void lb();
+        void lh();
+        void lw();
+        void lbu();
+        void lhu();
+
+        void sb();
+        void sh();
+        void sw();
 };
 
-std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
+std::ostream& operator<<( std::ostream& out, const FuncInstr& instr); // READY
 
 #endif //FUNC_INSTR_H
 

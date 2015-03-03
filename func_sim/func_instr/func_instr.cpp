@@ -16,29 +16,33 @@
 const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // name  opcode  func   format    operation
-    { "add",    0x0,  0x20,  FORMAT_R, OUT_R_ARITHM},
-    { "addu",   0x0,  0x21,  FORMAT_R, OUT_R_ARITHM},
-    { "sub",    0x0,  0x22,  FORMAT_R, OUT_R_ARITHM},
-    { "subu",   0x0,  0x23,  FORMAT_R, OUT_R_ARITHM},
-    { "addi",   0x8,  0x0,   FORMAT_I, OUT_I_ARITHM},
-    { "addiu",  0x9,  0x0,   FORMAT_I, OUT_I_ARITHM},
-    { "sll",    0x0,  0x0,   FORMAT_R, OUT_R_SHAMT},
-    { "srl",    0x0,  0x2,   FORMAT_R, OUT_R_SHAMT},
-    { "lui",    0xF,  0x0,   FORMAT_I, OUT_I_SHIFT},
-    { "and",    0x0,  0x24,  FORMAT_R, OUT_R_LOG},
-    { "or",     0x0,  0x25,  FORMAT_R, OUT_R_LOG},
-    { "xor",    0x0,  0x26,  FORMAT_R, OUT_R_LOG},
-    { "andi",   0xC,  0x0,   FORMAT_I, OUT_I_LOG},
-    { "ori",    0xD,  0x0,   FORMAT_I, OUT_I_LOG},
-    { "xori",   0xE,  0x0,   FORMAT_I, OUT_I_LOG},
-    { "beq",    0x4,  0x0,   FORMAT_I, OUT_I_BRANCH},
-    { "bne",    0x5,  0x0,   FORMAT_I, OUT_I_BRANCH},
-    { "j",      0x2,  0x0,   FORMAT_J, OUT_J_JUMP},
-    { "jr",     0x0,  0x8,   FORMAT_R, OUT_R_JUMP},
-    { "lb",     0x20, 0x0,   FORMAT_I, OUT_I_MEM},
-    { "lw",     0x23, 0x0,   FORMAT_I, OUT_I_MEM},
-    { "sb",     0x28, 0x0,   FORMAT_I, OUT_I_MEM},
-    { "sw",     0x2B, 0x0,   FORMAT_I, OUT_I_MEM}
+    { "add",    0x0,  0x20,  FORMAT_R, OUT_R_ARITHM, add},
+    { "addu",   0x0,  0x21,  FORMAT_R, OUT_R_ARITHM, addu},
+    { "sub",    0x0,  0x22,  FORMAT_R, OUT_R_ARITHM, sub},
+    { "subu",   0x0,  0x23,  FORMAT_R, OUT_R_ARITHM, subu},
+    { "addi",   0x8,  0x0,   FORMAT_I, OUT_I_ARITHM, addi},
+    { "addiu",  0x9,  0x0,   FORMAT_I, OUT_I_ARITHM, addiu},
+    { "sll",    0x0,  0x0,   FORMAT_R, OUT_R_SHAMT,  sll},
+    { "srl",    0x0,  0x2,   FORMAT_R, OUT_R_SHAMT,  srl},
+    { "lui",    0xF,  0x0,   FORMAT_I, OUT_I_SHIFT,  lui},
+    { "and",    0x0,  0x24,  FORMAT_R, OUT_R_LOG,    and},
+    { "or",     0x0,  0x25,  FORMAT_R, OUT_R_LOG,    or},
+    { "xor",    0x0,  0x26,  FORMAT_R, OUT_R_LOG,    xor},
+    { "andi",   0xC,  0x0,   FORMAT_I, OUT_I_LOG,    andi},
+    { "ori",    0xD,  0x0,   FORMAT_I, OUT_I_LOG,    ori},
+    { "xori",   0xE,  0x0,   FORMAT_I, OUT_I_LOG,    xori},
+    { "beq",    0x4,  0x0,   FORMAT_I, OUT_I_BRANCH, beq},
+    { "bne",    0x5,  0x0,   FORMAT_I, OUT_I_BRANCH, bne},
+    { "j",      0x2,  0x0,   FORMAT_J, OUT_J_JUMP,   j},
+    { "jr",     0x0,  0x8,   FORMAT_R, OUT_R_JUMP,   jr},
+    { "lb",     0x20, 0x0,   FORMAT_I, OUT_I_MEM,    lb},
+    { "lh",     0x21, 0x0,   FORMAT_I, OUT_I_MEM,    lh},
+    { "lw",     0x23, 0x0,   FORMAT_I, OUT_I_MEM,    lw},
+    { "lbu",    0x24, 0x0,   FORMAT_I, OUT_I_MEM,    lbu},
+    { "lhu",    0x25, 0x0,   FORMAT_I, OUT_I_MEM,    lhu},
+    { "sb",     0x28, 0x0,   FORMAT_I, OUT_I_MEM,    sb},
+    { "sh",     0x29, 0x0,   FORMAT_I, OUT_I_MEM,    sh},
+    { "sw",     0x2B, 0x0,   FORMAT_I, OUT_I_MEM,    sw}
 };
 
 // number of known operations
@@ -61,9 +65,11 @@ const char *FuncInstr::regTable[] =
     "ra"
 };
 
-// start work with the operation
+// start work with the operation READY
 FuncInstr::FuncInstr( uint32 bytes) : instr(bytes)
 {
+    PC_delta = 4;
+    memOp = nothing;
     initFormat(); 
     switch ( format)
     {
@@ -82,13 +88,13 @@ FuncInstr::FuncInstr( uint32 bytes) : instr(bytes)
     }
 }
 
-// get dump of operation
+// get dump of operation READY
 std::string FuncInstr::Dump( std::string indent) const
 {
     return indent + disasm;
 }
 
-// get information about operation format
+// get information about operation format READY
 void FuncInstr::initFormat()
 {
     for ( size_t i = 0; i < isaTableSize; i++) {
@@ -97,13 +103,14 @@ void FuncInstr::initFormat()
             format = isaTable[ i].format;
             operation = isaTable[ i].operation;
             isaNum = i;
+            function = isaTable[ i].function;
             return;
         }
     }
     format = FORMAT_UNKNOWN;
 }
 
-// execute the operation and prepare its dump
+// prepare the dump of operation and get ready to execute it READY
 void FuncInstr::initR()
 {
     // find instr by functor
@@ -174,7 +181,7 @@ void FuncInstr::initR()
     disasm = oss.str();
 }
 
-// execute the operation and prepare its dump
+// prepare the dump of operation and get ready to execute it READY
 void FuncInstr::initI()
 {
     std::ostringstream oss;
@@ -228,7 +235,7 @@ void FuncInstr::initI()
             break;
 
         case OUT_I_MEM:
-            i_dst = NULL; // if we load data it is set in execute function
+            i_dst = NULL; // if we load data it is being set in execute function
             i_src1 = instr.asI.rt;
             i_src2 = instr.asi.rs;
 
@@ -242,7 +249,7 @@ void FuncInstr::initI()
     disasm = oss.str();
 }
 
-// execute the operation and prepare its dump
+// prepare the dump of operation and get ready to execute it READY
 void FuncInstr::initJ()
 {
     std::ostringstream oss;
@@ -252,7 +259,7 @@ void FuncInstr::initJ()
     disasm = oss.str();
 }
 
-// give the message about error if the operation is unknown
+// give the message about error if the operation is unknown READY
 void FuncInstr::initUnknown()
 {
     std::ostringstream oss;
@@ -263,12 +270,13 @@ void FuncInstr::initUnknown()
     exit(EXIT_FAILURE);
 }
 
-// usefull thing for easy dump
+// usefull thing for easy dump READY
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
     return out << instr.Dump( "");
 }
 
+// print imm in hex READY
 std::string FuncInstr::outImm()
 {
     std::ostringstream oss;
@@ -276,6 +284,7 @@ std::string FuncInstr::outImm()
     return oss.str();
 }
 
+// print value of src1 in hex READY
 std::string FuncInstr::outSrc1()
 {
     std::ostringstream oss;
@@ -283,6 +292,7 @@ std::string FuncInstr::outSrc1()
     return oss.str();
 }
 
+// print value of src2 in hex READY
 std::string FuncInstr::outSrc2()
 {
     std::ostringstream oss;
@@ -290,9 +300,150 @@ std::string FuncInstr::outSrc2()
     return oss.str();
 }
 
+// print value of dst in hex READY
 std::string FuncInstr::outDst()
 {
     std::ostringstream oss;
     oss << " [" << std::hex << "0x" << static_cast< signed int>( v_Dst) << std::dec << "]";
     return oss.str();
+}
+
+// execute the operation READY
+void FuncInstr::execute() {
+    ( *function)();
+}
+
+
+
+void FuncInstr::add() {
+    v_dst = v_src1 + v_src2;
+}
+
+void FuncInstr::addu() {
+    v_dst = v_src1 + v_src2;
+}
+
+void FuncInstr::sub() {
+    v_dst = v_src2 - v_src1;
+}
+
+void FuncInstr::subu() {
+    v_dst = v_src2 - v_src1;
+}
+
+void FuncInstr::addi() {
+    v_dst = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::addiu() {
+    v_dst = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::sll() {
+    v_dst = v_src1 << instr.asR.shamt;
+}
+
+void FuncInstr::srl() {
+    v_dst = v_src1 >> instr.asR.shamt;
+}
+
+void FuncInstr::lui() {
+    v_dst = instr.asI.imm << 16;
+}
+
+void FuncInstr::and() {
+    v_dst = v_src1 & v_src2;
+}
+
+void FuncInstr::or() {
+    v_dst = v_src1 | v_src2;
+}
+
+void FuncInstr::xor() {
+    v_dst = v_src1 ^ v_src2;
+}
+
+void FuncInstr::andi() {
+    v_dst = v_src1 & instr.asI.imm;
+}
+
+void FuncInstr::ori() {
+    v_dst = v_src1 | instr.asI.imm;
+}
+
+void FuncInstr::xori() {
+    v_dst = v_src1 ^ instr.asI.imm;
+}
+
+void FuncInstr::beq() {
+    if ( v_src1 == v_src2)
+        PC_delta += ( instr.asI.imm << 2);
+}
+
+void FuncInstr::bne() {
+    if ( v_src1 != v_src2)
+        PC_delta += ( instr.asI.imm << 2);
+}
+
+void FuncInstr::j() {
+    PC_delta = 0;
+    jaddr = ( instr.asJ.imm << 2);
+}
+
+void FuncInstr::jr() {
+    PC_delta = 0;
+    jaddr = 0;
+}
+
+void FuncInstr::lb() {
+    type = BYTE;
+    memOp = load;
+    mem_addr = v_src2 + instr.asI.imm;
+    i_dst = i_src1;
+}
+
+void FuncInstr::lh() {
+    type = HWORD;
+    memOp = load;
+    mem_addr = v_src2 + instr.asI.imm;
+    i_dst = i_src1;
+}
+
+void FuncInstr::lw() {
+    type = WORD;
+    memOp = load;
+    mem_addr = v_src2 + instr.asI.imm;
+    i_dst = i_src1;
+}
+
+void FuncInstr::lbu() {
+    type = UBYTE;
+    memOp = load;
+    mem_addr = v_src2 + instr.asI.imm;
+    i_dst = i_src1;
+}
+
+void FuncInstr::lhu() {
+    type = UHWORD;
+    memOp = load;
+    mem_addr = v_src2 + instr.asI.imm;
+    i_dst = i_src1;
+}
+
+void FuncInstr::sb() {
+    type = BYTE;
+    memOp = store;
+    mem_addr = v_src2 + instr.asI.imm;
+}
+
+void FuncInstr::sh() {
+    type = HWORD;
+    memOp = store;
+    mem_addr = v_src2 + instr.asI.imm;
+}
+
+void FuncInstr::sw() {
+    type = WORD;
+    memOp = store;
+    mem_addr = v_src2 + instr.asI.imm;
 }

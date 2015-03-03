@@ -26,14 +26,16 @@ class MIPS {
         FuncMemory* mem;
 
     public:
-        MIPS();
-        void read_reg( FuncInstr& instr);
-        void run( const string&, uint instr_to_run);
-        void load( FuncInstr& instr); // load information from memory
-        void store( const FuncInstr& instr); // store information in memory
-        void ld_st( FuncInstr& instr); // calls load for loads, store for stores, nothing otherwise NOT DONE YET
-        void updatePC( const FuncInstr& instr); // update PC
-        uint32 fetch() const;
+        MIPS(); // READY
+        virtual ~MIPS(); // READY
+        void read_reg( FuncInstr& instr); // get the values from working registers READY
+        void wb(const FuncInstr& instr); // save value of dst register READY
+        void run( const string&, uint instr_to_run); // run the program READY
+        void load( FuncInstr& instr); // load information from memory READY
+        void store( const FuncInstr& instr); // store information in memory READY
+        void ld_st( FuncInstr& instr); // calls load for loads, store for stores, nothing otherwise READY
+        void updatePC( const FuncInstr& instr); // update PC READY
+        uint32 fetch() const; // READY
 };
 
 enum RegNum {
@@ -55,11 +57,11 @@ enum RegNum {
 class RF {
        uint32 array[ MAX_REG]; // values of registers
    public:
-       RF();
+       RF(); // stores NULL in $zero register READY
 
-       uint32 read( RegNum index) const; // get value from register
-       void write( RegNum index, uint32 data); // write value to register if it is not a $zero register
-       void reset( RegNum index); // clears register to 0 value
+       uint32 read( RegNum index) const; // get value from register READY
+       void write( RegNum index, uint32 data); // write value to register if it is not a $zero register READY
+       void reset( RegNum index); // clears register to 0 value READY
 
    };
 
