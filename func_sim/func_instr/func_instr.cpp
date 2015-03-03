@@ -12,19 +12,30 @@
 #include <cstdlib>
 const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
-    //name  opcode func  format               type
-    { "add ", 0x0, 0x20, FuncInstr::FORMAT_R, FuncInstr::ADD },
-    { "addu ", 0x0, 0x21, FuncInstr::FORMAT_R, FuncInstr::ADDU },
-    { "sub ", 0x0, 0x22, FuncInstr::FORMAT_R, FuncInstr::SUB },
-    { "subu ", 0x0, 0x23, FuncInstr::FORMAT_R, FuncInstr::SUBU },
-    { "addi ", 0x8, 0, FuncInstr::FORMAT_I, FuncInstr::ADDI },
-    { "addiu ", 0x9, 0, FuncInstr::FORMAT_I, FuncInstr::ADDIU },
-    { "sll ", 0x0, 0x0, FuncInstr::FORMAT_R, FuncInstr::SLL },
-    { "srl ", 0x0, 0x2, FuncInstr::FORMAT_R, FuncInstr::SRL },
-    { "beq ", 0x4, 0, FuncInstr::FORMAT_I, FuncInstr::BEQ },
-    { "bne ", 0x5, 0, FuncInstr::FORMAT_I, FuncInstr::BNE },
-    { "j ", 0x2, 0, FuncInstr::FORMAT_J, FuncInstr::J },
-    { "jr ", 0x0, 0x8, FuncInstr::FORMAT_R, FuncInstr::JR }
+    //name  opcode func  format               type              comm_type
+    { "add ", 0x0, 0x20, FuncInstr::FORMAT_R, FuncInstr::ADD, FuncInstr::R_ARITHM },
+    { "addu ", 0x0, 0x21, FuncInstr::FORMAT_R, FuncInstr::ADDU, FuncInstr::R_ARITHM },
+    { "sub ", 0x0, 0x22, FuncInstr::FORMAT_R, FuncInstr::SUB, FuncInstr::R_ARITHM },
+    { "subu ", 0x0, 0x23, FuncInstr::FORMAT_R, FuncInstr::SUBU, FuncInstr::R_ARITHM },
+    { "addi ", 0x8, 0, FuncInstr::FORMAT_I, FuncInstr::ADDI, FuncInstr::I_ARITHM },
+    { "addiu ", 0x9, 0, FuncInstr::FORMAT_I, FuncInstr::ADDIU, FuncInstr::I_ARITHM },
+    { "sll ", 0x0, 0x0, FuncInstr::FORMAT_R, FuncInstr::SLL, FuncInstr::R_ARITHM },
+    { "srl ", 0x0, 0x2, FuncInstr::FORMAT_R, FuncInstr::SRL, FuncInstr::R_ARITHM },
+    { "lui ", 0xf, 0, FuncInstr::FORMAT_I, FuncInstr::LUI, FuncInstr::I_LUI },
+    { "and ", 0x0, 0x24, FuncInstr::FORMAT_R, FuncInstr::AND, FuncInstr::R_ARITHM},
+    { "or ", 0x0, 0x25, FuncInstr::FORMAT_R, FuncInstr::OR, FuncInstr::R_ARITHM},
+    { "xor ", 0x0, 0x26, FuncInstr::FORMAT_R, FuncInstr::XOR, FuncInstr::R_ARITHM},
+    { "andi ", 0xc, 0, FuncInstr::FORMAT_I, FuncInstr::ANDI, FuncInstr::I_ARITHM},
+    { "ori ", 0xd, 0, FuncInstr::FORMAT_I, FuncInstr::ORI, FuncInstr::I_ARITHM},
+    { "xori ", 0xe, 0, FuncInstr::FORMAT_I, FuncInstr::XORI, FuncInstr::I_ARITHM},
+    { "beq ", 0x4, 0, FuncInstr::FORMAT_I, FuncInstr::BEQ, FuncInstr::I_BRANCH },
+    { "bne ", 0x5, 0, FuncInstr::FORMAT_I, FuncInstr::BNE, FuncInstr::I_BRANCH },
+    { "j ", 0x2, 0, FuncInstr::FORMAT_J, FuncInstr::J, FuncInstr::J_JUMP },
+    { "jr ", 0x0, 0x8, FuncInstr::FORMAT_R, FuncInstr::JR, FuncInstr::R_JUMP },
+    { "lb", 0x20, 0, FuncInstr::FORMAT_I, FuncInstr::LB, FuncInstr::I_MEMORY },
+    { "lw", 0x23, 0, FuncInstr::FORMAT_I, FuncInstr::LW, FuncInstr::I_MEMORY },
+    { "sb", 0x28, 0, FuncInstr::FORMAT_I, FuncInstr::SB, FuncInstr::I_MEMORY },
+    { "sw", 0x2b, 0, FuncInstr::FORMAT_I, FuncInstr::SW, FuncInstr::I_MEMORY }
 };
 const FuncInstr::Reg FuncInstr::regTable[] =
 {
@@ -64,7 +75,8 @@ const FuncInstr::Reg FuncInstr::regTable[] =
 
 FuncInstr::FuncInstr( uint32 bytes):
     opcMask( 0xff << 26),
-    funcMask( 0x3f)
+    funcMask( 0x3f),
+    exe( NULL)
 {
     if ( bytes == ~0ull)
         exit( EXIT_FAILURE);
@@ -108,36 +120,59 @@ void FuncInstr::InitFormat( uint32 _bytes)
 
 void FuncInstr::ParseR()
 {
-    reg1 =  regTable[bytes.asR.d].name;
-    reg2 = regTable[bytes.asR.s1].name;
-    reg3 = regTable[bytes.asR.t].name;
+    if ( bytes.asR.funct != 0x8)
+    {
+        reg1 =  regTable[bytes.asR.d].name;
+        reg2 = regTable[bytes.asR.s1].name;
+        reg3 = regTable[bytes.asR.t].name;
+        operation = R_ARITHM;
+    } else {
+        reg1 = regTable[bytes.asR.s1].name;
+        operation = R_JUMP;
+    }
     switch ( bytes.asR.funct)
     {
         case 0x20:
             name = isaTable[ADD].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
+            exe = &add;
             break;
         case 0x21:
             name = isaTable[ADDU].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
+            exe = &add;
             break;
         case 0x22:
             name = isaTable[SUB].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
+            exe = &sub;
             break;
         case 0x23:
             name = isaTable[SUBU].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << reg3;
+            exe = &sub;
             break;
         case 0x0:
             name = isaTable[SLL].name;
             cnst = bytes.asR.s2;
-            dumpstr << name << reg1 << ", " << reg3 << ", " << cnst;
+            exe = &sll;
             break;
         case 0x2:
             name = isaTable[SRL].name;
             cnst = bytes.asR.s2;
-            dumpstr << name << reg1 << ", " << reg3 << ", " << cnst;
+            exe = &srl;
+            break;
+        case 0x24:
+            name = isaTable[AND].name;
+            exe = &and;
+            break;
+        case 0x25:
+            name = isaTable[OR].name;
+            exe = &or;
+            break;
+        case 0x26:
+            name = isaTable[XOR].name;
+            exe = &xor;
+            break;
+        case 0x8:
+            name = isaTable[JR].name;
+            exe = &jr;
             break;
         default:
             cerr << "ERROR: wrong command R\n";
@@ -154,15 +189,58 @@ void FuncInstr::ParseI()
     {
         case 0x8:
             name = isaTable[ADDI].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << cnst;
+            exe = &addi;
+            operation = I_ARITHM;
             break;
         case 0x9:
             name = isaTable[ADDIU].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << cnst;
+            exe = &addi;
+            operation = I_ARITHM;
             break;
         case 0x4:
             name = isaTable[BEQ].name;
-            dumpstr << name << reg1 << ", " << reg2 << ", " << cnst;
+            exe = &beq;
+            operation = I_BRANCH;
+            break;
+        case 0xf:
+            name = isaTable[LUI].name;
+            exe = &lui;
+            operation = I_LUI;
+            break;
+        case 0xc:
+            name = isaTable[ANDI].name;
+            exe = &andi;
+            operation = I_ARITHM;
+            break;
+         case 0xd:
+            name = isaTable[ORI].name;
+            exe = &ori;
+            operation = I_ARITHM;
+            break;
+        case 0xe:
+            name = isaTable[XORI].name;
+            exe = &xori;
+            operation = I_ARITHM;
+            break;
+        case 0x20:
+            name = isaTable[LB].name;
+            exe = &lb;
+            operation = I_MEMORY;
+            break;
+        case 0x23:
+            name = isaTable[LW].name;
+            exe = &lw;
+            operation = I_MEMORY;
+            break;
+        case 0x28:
+            name = isaTable[SB].name;
+            exe = &sb;
+            operation = I_MEMORY;
+            break;
+        case 0x2b:
+            name = isaTable[SW].name;
+            exe = &sw;
+            operation = I_MEMORY;
             break;
         default:
             cerr << "ERROR: wrong command I\n";
@@ -177,7 +255,7 @@ void FuncInstr::ParseJ()
         case 0x2:
             name = isaTable[J].name;
             cnst = bytes.asJ.addr;
-            dumpstr << name << cnst;
+            exe = NULL;
             break;
         default:
             cerr << "ERROR: wrong command J\n";
@@ -185,12 +263,59 @@ void FuncInstr::ParseJ()
     }
 }
 
-inline std::string FuncInstr::Dump( std::string indent) const
+inline std::string FuncInstr::Dump( std::string indent) 
 {
+    switch ( operation)
+    {
+        case R_ARITHM:
+            dumpstr << name << reg1 << " [" << v_dst << "], " <<  reg2 << " [" << v_src << "], " << reg3 << " [" << v_tgt << "]";
+            break;
+        case I_ARITHM:
+            dumpstr << name << reg1 << " [" << v_src << "], " <<  reg2 << " [" << v_tgt << "], " << cnst;
+            break;
+        case I_BRANCH:
+            dumpstr << name << reg1 << " [" << v_src << "], " <<  reg2 << " [" << v_tgt << "], " << cnst;
+            break;
+        case R_JUMP:
+            dumpstr << name << reg1 << " [" << v_src << "]";
+            break;
+        case J_JUMP:
+            dumpstr << name << cnst;
+            break;
+        case I_MEMORY:
+            dumpstr << name << reg1 << " [" << v_tgt << "], " << cnst << "(" << reg2 << " [" << v_src << "])";
+            break;
+    }
     return indent + dumpstr.str();
 }
 
 std::ostream& operator << ( std::ostream& out, FuncInstr& instr)
 {
     return out << instr.Dump("");
+}
+
+
+RegNum FuncInstr::get_src_num_index() const
+{
+    if (format != FORMAT_J)
+        return (RegNum) bytes.asI.s;
+    else
+        return ZERO;
+}
+
+
+RegNum FuncInstr::get_tgt_num_index() const
+{
+    if ( format != FORMAT_J)
+        return ( RegNum) bytes.asI.t;
+    else
+        return ZERO;
+}
+
+RegNum FuncInstr::get_dst_num_index() const
+{
+    if ( format != FORMAT_J)
+        return ( RegNum) bytes.asR.d;
+    else
+        return ZERO;
 }

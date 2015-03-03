@@ -16,17 +16,13 @@
 
 #include <types.h>
 #include <func_memory.h>
+#include <func_sim.h>
 
 
 class FuncInstr
 {
 private:
-    enum Format
-    {
-        FORMAT_R,
-        FORMAT_I,
-        FORMAT_J
-    };
+    
     enum Type
     {
         ADD = 0,
@@ -37,10 +33,21 @@ private:
         ADDIU,
         SLL,
         SRL,
+        LUI,
+        AND,
+        OR,
+        XOR,
+        ANDI,
+        ORI,
+        XORI,
         BEQ,
         BNE,
         J,
-        JR
+        JR,
+        LB,
+        LW,
+        SB,
+        SW
     };
     union
     {
@@ -68,20 +75,61 @@ private:
         uint32 raw;
     } bytes;
 
+
+
     void InitFormat( uint32 _bytes);
     void ParseR();
     void ParseI();
     void ParseJ();
     const uint32 opcMask;
     const uint32 funcMask;
-    uint32 format;
+    
     string name, reg1, reg2, reg3;
-    uint32 cnst; //const
+    
     std::ostringstream dumpstr;
 
 public:
+    enum Format
+    {
+        FORMAT_R,
+        FORMAT_I,
+        FORMAT_J
+    };
+    enum OpType
+    {
+        R_ARITHM,
+        I_ARITHM,
+        R_JUMP,
+        J_JUMP,
+        I_MEMORY,
+        I_BRANCH,
+        I_LUI
+    } operation;
     FuncInstr( uint32 bytes);
     ~FuncInstr();
+    void add() { v_dst = v_src + v_tgt;};
+    void sub() { v_dst = v_tgt - v_src;};
+    void addi() { v_dst = v_src + cnst;};
+    void sll() { v_dst = v_tgt << bytes.asR.s2;};
+    void srl() { v_dst = v_tgt >> bytes.asR.s2;};
+    void beq() { if ( v_src == v_tgt) PC_delta = cnst + 4;};
+    void bnq() { if (v_src != v_tgt) PC_delta = cnst + 4;};
+    void lui() { v_tgt = (bytes.asI.imm << 16);};
+    void and() { v_dst = v_src & v_tgt;};
+    void or() { v_dst = v_src | v_tgt;};
+    void xor() { v_dst = v_src ^ v_tgt;};
+    void andi() { v_tgt = v_src & cnst;};
+    void ori() { v_tgt = v_src | cnst;};
+    void xori() { v_tgt = v_src ^ cnst;};
+    void jr() { PC_delta = v_src;};
+    void lb() { mem_addr = v_src + cnst;};
+    void lw() { mem_addr = v_src + cnst;};
+    void sb() { mem_addr = v_src + cnst;};
+    void sw() { mem_addr = v_src + cnst;};
+    void (FuncInstr::*exe) ();
+    
+
+    void execute(){ if ( exe != NULL) (this->*exe)();};
     struct ISAEntry
     {
         const char* name;
@@ -90,18 +138,32 @@ public:
     
         FuncInstr::Format format;
         FuncInstr::Type type;
+        FuncInstr::OpType operation;
     };
-    static const ISAEntry isaTable[12];
+    static const ISAEntry isaTable[];
     struct Reg
     {
         const char* name;
         uint8 num; 
     };
     static const Reg regTable[];
-
-
+    Format getFormat(){ return format;};
+    int getIOpcode(){ return bytes.asI.opcode;};
+    RegNum get_src_num_index() const;
+    RegNum get_tgt_num_index() const;
+    RegNum get_dst_num_index() const;
     
-    inline std::string Dump( std::string indent = " ") const;
+    uint32 v_src;
+    uint32 v_tgt;
+    uint32 v_dst;
+    uint32 mem_addr;
+    uint32 PC_delta;
+    uint32 cnst; //const
+    
+    
+    inline std::string Dump( std::string indent = " ");
+private:
+    Format format;
 };
 
 std::ostream& operator<<( std::ostream& out, FuncInstr& instr);
