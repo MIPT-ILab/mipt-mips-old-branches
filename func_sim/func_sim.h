@@ -17,26 +17,7 @@
 #include <types.h>
 #include <elf_parser.h>
 #include <func_memory.h>
-#include <finc_instr.h>
-
-class MIPS {
-        // storages of internal state
-        RF* rf;
-        uint32 PC;
-        FuncMemory* mem;
-
-    public:
-        MIPS(); // READY
-        virtual ~MIPS(); // READY
-        void read_reg( FuncInstr& instr); // get the values from working registers READY
-        void wb(const FuncInstr& instr); // save value of dst register READY
-        void run( const string&, uint instr_to_run); // run the program READY
-        void load( FuncInstr& instr); // load information from memory READY
-        void store( const FuncInstr& instr); // store information in memory READY
-        void ld_st( FuncInstr& instr); // calls load for loads, store for stores, nothing otherwise READY
-        void updatePC( const FuncInstr& instr); // update PC READY
-        uint32 fetch() const; // READY
-};
+#include <func_instr.h>
 
 enum RegNum {
     zero,
@@ -59,10 +40,30 @@ class RF {
    public:
        RF(); // stores NULL in $zero register READY
 
-       uint32 read( RegNum index) const; // get value from register READY
-       void write( RegNum index, uint32 data); // write value to register if it is not a $zero register READY
-       void reset( RegNum index); // clears register to 0 value READY
+       // INT INT INT !!!
+       uint32 read( int index) const; // get value from register READY
+       void write( int index, uint32 data); // write value to register if it is not a $zero register READY
+       void reset( int index); // clears register to 0 value READY
 
-   };
+};
+
+class MIPS {
+        // storages of internal state
+        RF* rf;
+        uint32 PC;
+        FuncMemory* mem;
+
+    public:
+        MIPS(); // READY
+        virtual ~MIPS(); // READY
+        void read_reg( FuncInstr& instr); // get the values from working registers READY
+        void wb(const FuncInstr& instr); // save value of dst register READY
+        void run( const string&, uint32 instr_to_run); // run the program READY
+        void load( FuncInstr& instr); // load information from memory READY
+        void store( const FuncInstr& instr); // store information in memory READY
+        void ld_st( FuncInstr& instr); // calls load for loads, store for stores, nothing otherwise READY
+        void updatePC( const FuncInstr& instr); // update PC READY
+        uint32 fetch() const; // READY
+};
 
 #endif // #ifndef FUNC_SIM__FUNC_SIM_H

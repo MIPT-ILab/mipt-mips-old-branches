@@ -6,6 +6,8 @@
 
 // methods of MIPS class
 
+#include <func_sim.h>
+
 MIPS::MIPS() {
     rf = new RF;
     mem = NULL;
@@ -19,14 +21,15 @@ MIPS::~MIPS() {
 }
 
 // run the program
-void MIPS::run( const string& tr, uint instr_to_run) {
-    mem = new FuncMemory( tr, 32, 10, 12);
+void MIPS::run( const string& tr, uint32 instr_to_run) {
+    mem = new FuncMemory( &( tr[ 0]), (uint64) 32, ( uint64) 10, ( uint64) 12);
     this->PC = mem->startPC();
-    for ( uint i = 0; i < instr_to_run; i++) {
+    for ( uint32 i = 0; i < instr_to_run; i++) {
         uint32 instr_bytes;
         instr_bytes = fetch(); // Fetch READY
         FuncInstr instr( instr_bytes); // Decode and read sources READY
-        instr.execute(); // Execute READY
+        read_reg( instr);
+	instr.execute(); // Execute READY
         ld_st( instr); // Memory access READY
         wb( instr); // Writeback READY
         updatePC( instr); // Update PC CHECK READY
@@ -39,20 +42,20 @@ void MIPS::run( const string& tr, uint instr_to_run) {
 void MIPS::load( FuncInstr& instr) {
     switch ( instr.type)
     {
-        case BYTE:
-            instr.v_dst = ( int8) mem->read( instr.mem_addr);
+        case FuncInstr::BYTE:
+            instr.v_dst = ( int8) mem->read( instr.mem_addr, 1);
             break;
-        case HWORD:
-            instr.v_dst = ( int16) mem->read( instr.mem_addr);
+        case FuncInstr::HWORD:
+            instr.v_dst = ( int16) mem->read( instr.mem_addr, 2);
             break;
-        case WORD:
-            instr.v_dst = ( int32) mem->read( instr.mem_addr);
+        case FuncInstr::WORD:
+            instr.v_dst = ( int32) mem->read( instr.mem_addr, 4);
             break;
-        case UBYTE:
-            instr.v_dst = ( uint8) mem->read( instr.mem_addr);
+        case FuncInstr::UBYTE:
+            instr.v_dst = ( uint8) mem->read( instr.mem_addr, 1);
             break;
-        case UHWORD:
-            instr.v_dst = ( uint16) mem->read( instr.mem_addr);
+        case FuncInstr::UHWORD:
+            instr.v_dst = ( uint16) mem->read( instr.mem_addr, 2);
             break;
     }
 }
@@ -61,13 +64,13 @@ void MIPS::load( FuncInstr& instr) {
 void MIPS::store( const FuncInstr& instr) {
     switch ( instr.type)
     {
-        case BYTE:
+        case FuncInstr::BYTE:
             mem->write( instr.mem_addr, instr.v_dst, 1);
             break;
-        case HWORD:
+        case FuncInstr::HWORD:
             mem->write( instr.mem_addr, instr.v_dst, 2);
             break;
-        case WORD:
+        case FuncInstr::WORD:
             mem->write( instr.mem_addr, instr.v_dst);
             break;
     }
@@ -77,12 +80,12 @@ void MIPS::store( const FuncInstr& instr) {
 void MIPS::ld_st( FuncInstr& instr) {
     switch ( instr.memOp)
     {
-        case nothing:
+        case FuncInstr::nothing:
             break;
-        case load:
+        case FuncInstr::load:
             load( instr);
             break;
-        case store:
+        case FuncInstr::store:
             store( instr);
             break;
     }
@@ -100,9 +103,9 @@ void MIPS::updatePC( const FuncInstr& instr) {
 
 // get values of working registers READY
 void MIPS::read_reg( FuncInstr& instr) {
-    instr.v_dst = rf->read( i_dst);
-    instr.v_src1 = rf->read( i_src1);
-    instr.v_src2 = rf->read( i_src2);
+    instr.v_dst = rf->read( instr.i_dst);
+    instr.v_src1 = rf->read( instr.i_src1);
+    instr.v_src2 = rf->read( instr.i_src2);
 }
 
 // save value of dst register READY
@@ -123,17 +126,17 @@ RF::RF() {
 }
 
 // get value from register READY
-uint32 RF::read( RegNum index) const {
+uint32 RF::read( int index) const {
     return array[ index];
 }
 
 // clears register to 0 value READY
-void RF::reset( RegNum index) {
+void RF::reset( int index) {
     array[ index] = 0;
 }
 
 // write value to register if it is not a $zero register READY
-void RF::write( RegNum index, uint32 data) {
+void RF::write( int index, uint32 data) {
     if ( index != 0)
         array[ index] = data;
 }

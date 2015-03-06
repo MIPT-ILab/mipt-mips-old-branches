@@ -2,6 +2,9 @@
  * func_instr.cpp - instruction parser for mips
  * @author Pavel Kryukov pavel.kryukov@phystech.edu
  * Copyright 2015 MIPT-MIPS
+ *
+ * Modified by Alexander Pronin <alexander.pronin.mipt@gmail.com>
+ * 2015 MIPT-MIPS
  */
 
 
@@ -16,33 +19,33 @@
 const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // name  opcode  func   format    operation
-    { "add",    0x0,  0x20,  FORMAT_R, OUT_R_ARITHM, add},
-    { "addu",   0x0,  0x21,  FORMAT_R, OUT_R_ARITHM, addu},
-    { "sub",    0x0,  0x22,  FORMAT_R, OUT_R_ARITHM, sub},
-    { "subu",   0x0,  0x23,  FORMAT_R, OUT_R_ARITHM, subu},
-    { "addi",   0x8,  0x0,   FORMAT_I, OUT_I_ARITHM, addi},
-    { "addiu",  0x9,  0x0,   FORMAT_I, OUT_I_ARITHM, addiu},
-    { "sll",    0x0,  0x0,   FORMAT_R, OUT_R_SHAMT,  sll},
-    { "srl",    0x0,  0x2,   FORMAT_R, OUT_R_SHAMT,  srl},
-    { "lui",    0xF,  0x0,   FORMAT_I, OUT_I_SHIFT,  lui},
-    { "and",    0x0,  0x24,  FORMAT_R, OUT_R_LOG,    and},
-    { "or",     0x0,  0x25,  FORMAT_R, OUT_R_LOG,    or},
-    { "xor",    0x0,  0x26,  FORMAT_R, OUT_R_LOG,    xor},
-    { "andi",   0xC,  0x0,   FORMAT_I, OUT_I_LOG,    andi},
-    { "ori",    0xD,  0x0,   FORMAT_I, OUT_I_LOG,    ori},
-    { "xori",   0xE,  0x0,   FORMAT_I, OUT_I_LOG,    xori},
-    { "beq",    0x4,  0x0,   FORMAT_I, OUT_I_BRANCH, beq},
-    { "bne",    0x5,  0x0,   FORMAT_I, OUT_I_BRANCH, bne},
-    { "j",      0x2,  0x0,   FORMAT_J, OUT_J_JUMP,   j},
-    { "jr",     0x0,  0x8,   FORMAT_R, OUT_R_JUMP,   jr},
-    { "lb",     0x20, 0x0,   FORMAT_I, OUT_I_MEM,    lb},
-    { "lh",     0x21, 0x0,   FORMAT_I, OUT_I_MEM,    lh},
-    { "lw",     0x23, 0x0,   FORMAT_I, OUT_I_MEM,    lw},
-    { "lbu",    0x24, 0x0,   FORMAT_I, OUT_I_MEM,    lbu},
-    { "lhu",    0x25, 0x0,   FORMAT_I, OUT_I_MEM,    lhu},
-    { "sb",     0x28, 0x0,   FORMAT_I, OUT_I_MEM,    sb},
-    { "sh",     0x29, 0x0,   FORMAT_I, OUT_I_MEM,    sh},
-    { "sw",     0x2B, 0x0,   FORMAT_I, OUT_I_MEM,    sw}
+    { "add",    0x0,  0x20,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::add},
+    { "addu",   0x0,  0x21,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::addu},
+    { "sub",    0x0,  0x22,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::sub},
+    { "subu",   0x0,  0x23,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::subu},
+    { "addi",   0x8,  0x0,   FORMAT_I, OUT_I_ARITHM, &FuncInstr::addi},
+    { "addiu",  0x9,  0x0,   FORMAT_I, OUT_I_ARITHM, &FuncInstr::addiu},
+    { "sll",    0x0,  0x0,   FORMAT_R, OUT_R_SHAMT,  &FuncInstr::sll},
+    { "srl",    0x0,  0x2,   FORMAT_R, OUT_R_SHAMT,  &FuncInstr::srl},
+    { "lui",    0xF,  0x0,   FORMAT_I, OUT_I_SHIFT,  &FuncInstr::lui},
+    { "and",    0x0,  0x24,  FORMAT_R, OUT_R_LOG,    &FuncInstr::_and},
+    { "or",     0x0,  0x25,  FORMAT_R, OUT_R_LOG,    &FuncInstr::_or},
+    { "xor",    0x0,  0x26,  FORMAT_R, OUT_R_LOG,    &FuncInstr::_xor},
+    { "andi",   0xC,  0x0,   FORMAT_I, OUT_I_LOG,    &FuncInstr::andi},
+    { "ori",    0xD,  0x0,   FORMAT_I, OUT_I_LOG,    &FuncInstr::ori},
+    { "xori",   0xE,  0x0,   FORMAT_I, OUT_I_LOG,    &FuncInstr::xori},
+    { "beq",    0x4,  0x0,   FORMAT_I, OUT_I_BRANCH, &FuncInstr::beq},
+    { "bne",    0x5,  0x0,   FORMAT_I, OUT_I_BRANCH, &FuncInstr::bne},
+    { "j",      0x2,  0x0,   FORMAT_J, OUT_J_JUMP,   &FuncInstr::j},
+    { "jr",     0x0,  0x8,   FORMAT_R, OUT_R_JUMP,   &FuncInstr::jr},
+    { "lb",     0x20, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::lb},
+    { "lh",     0x21, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::lh},
+    { "lw",     0x23, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::lw},
+    { "lbu",    0x24, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::lbu},
+    { "lhu",    0x25, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::lhu},
+    { "sb",     0x28, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::sb},
+    { "sh",     0x29, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::sh},
+    { "sw",     0x2B, 0x0,   FORMAT_I, OUT_I_MEM,    &FuncInstr::sw}
 };
 
 // number of known operations
@@ -137,8 +140,6 @@ void FuncInstr::initR()
             i_src1 = instr.asR.rs;
             i_src2 = instr.asR.rt;
 
-            MIPS::read_reg( this); // this function just like read_src on mipt-mips wiki, but it also reads the dst value
-
             oss << regTable[ instr.asR.rd] << outDst() << ", $"
                 << regTable[ instr.asR.rs] << outSrc1() << ", $"
                 << regTable[ instr.asR.rt] << outSrc2();
@@ -148,8 +149,6 @@ void FuncInstr::initR()
             i_dst = instr.asR.rd;
             i_src1 = instr.asR.rt;
             i_src2 = NULL;
-
-            MIPS::read_reg( this);
 
             oss << regTable[ instr.asR.rd] << outDst() << ", $"
                 << regTable[ instr.asR.rt] << outSrc1() << ", "
@@ -161,8 +160,6 @@ void FuncInstr::initR()
             i_src1 = instr.asR.rs;
             i_src2 = NULL;
 
-            MIPS::read_reg( this);
-
             oss << regTable[ instr.asR.rs] << outSrc1();
             break;
 
@@ -171,11 +168,9 @@ void FuncInstr::initR()
             i_src1 = instr.asR.rt;
             i_src2 = instr.asR.rs;
 
-            MIPS::read_reg( this);
-
             oss << regTable[ instr.asR.rd] << outDst() << ", $"
-            oss << regTable[ instr.asR.rt] << outSrc1() << ", $"
-            oss << regTable[ instr.asR.rs] << outSrc2();
+                << regTable[ instr.asR.rt] << outSrc1() << ", $"
+                << regTable[ instr.asR.rs] << outSrc2();
             break;
     }
     disasm = oss.str();
@@ -192,8 +187,6 @@ void FuncInstr::initI()
             i_dst = instr.asI.rt;
             i_src1 = instr.asI.rs;
             i_src2 = NULL;
-
-            MIPS::read_reg( this);
             
             oss << regTable[ instr.asI.rt] << outDst() << ", $"
                 << regTable[ instr.asI.rs] << outSrc1() << ", "
@@ -205,8 +198,6 @@ void FuncInstr::initI()
             i_src1 = instr.asI.rs;
             i_src2 = instr.asI.rt;
 
-            MIPT::read_reg( this);
-
             oss << regTable[ instr.asI.rs] << outSrc1() << ", $"
                 << regTable[ instr.asI.rt] << outSrc2() << ", "
                 << outImm();
@@ -216,18 +207,14 @@ void FuncInstr::initI()
             i_dst = instr.asI.rt;
             i_src1 = i_src2 = NULL;
 
-            MIPS::read_reg( this);
-
             oss << regTable[ instr.asI.rt] << outDst() << ", "
                 << outImm();
             break;
 
-        case OUT_I_LOGIC:
+        case OUT_I_LOG:
             i_dst = instr.asI.rt;
             i_src1 = instr.asI.rs;
             i_src2 = NULL;
-
-            MIPS::read_reg( this);
 
             oss << regTable[ instr.asI.rs] << outSrc1() << ", $"
                 << regTable[ instr.asI.rt] << outDst() << ", "
@@ -237,11 +224,9 @@ void FuncInstr::initI()
         case OUT_I_MEM:
             i_dst = NULL; // if we load data it is being set in execute function
             i_src1 = instr.asI.rt;
-            i_src2 = instr.asi.rs;
+            i_src2 = instr.asI.rs;
 
-            MIPS::read_reg( this);
-
-            oss << regTable[ instr.asI.rt] << outSrc1 << ", "
+            oss << regTable[ instr.asI.rt] << outSrc1() << ", "
                 << outImm() << "($" << regTable[ instr.asI.rs] << ")";
             break;
 
@@ -304,13 +289,13 @@ std::string FuncInstr::outSrc2()
 std::string FuncInstr::outDst()
 {
     std::ostringstream oss;
-    oss << " [" << std::hex << "0x" << static_cast< signed int>( v_Dst) << std::dec << "]";
+    oss << " [" << std::hex << "0x" << static_cast< signed int>( v_dst) << std::dec << "]";
     return oss.str();
 }
 
 // execute the operation READY
 void FuncInstr::execute() {
-    ( *function)();
+    ( this->*function)();
 }
 
 
@@ -351,15 +336,15 @@ void FuncInstr::lui() {
     v_dst = instr.asI.imm << 16;
 }
 
-void FuncInstr::and() {
+void FuncInstr::_and() {
     v_dst = v_src1 & v_src2;
 }
 
-void FuncInstr::or() {
+void FuncInstr::_or() {
     v_dst = v_src1 | v_src2;
 }
 
-void FuncInstr::xor() {
+void FuncInstr::_xor() {
     v_dst = v_src1 ^ v_src2;
 }
 

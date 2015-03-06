@@ -2,6 +2,9 @@
  * func_instr.h - instruction parser for mips
  * @author Pavel Kryukov pavel.kryukov@phystech.edu
  * Copyright 2014 MIPT-MIPS
+ * 
+ * Modified by Alexander Pronin <alexander.pronin.mipt@gmail.com>
+ * 2015 MIPT-MIPS
  */
 
 
@@ -115,7 +118,7 @@ class FuncInstr
             Format format;
             OperationType operation;
 
-            void (*function)();
+            void ( FuncInstr::*function)();
         };
         uint32 isaNum;
 
@@ -134,8 +137,8 @@ class FuncInstr
         std::string outSrc1(); // READY
         std::string outSrc2(); // READY
         std::string outDst(); // READY
-        std::string outC(); // READY
-        void ( *function)();
+        std::string outImm(); // READY
+        void ( FuncInstr::*function)();
 
         void add();
         void addu();
@@ -148,9 +151,9 @@ class FuncInstr
         void srl();
         void lui();
 
-        void and();
-        void or();
-        void xor();
+        void _and();
+        void _or();
+        void _xor();
         void andi();
         void ori();
         void xori();

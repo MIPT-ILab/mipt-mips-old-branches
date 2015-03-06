@@ -31,3 +31,24 @@ Changes in func_instr.h and func_instr.cpp:
 
 All changes haven't been debugged yet: main.cpp and Makefile are still empty.
 So program doesn't work. However, main ideas of implementation are ready to be debugged.
+
+
+
+03/07/15 0:44 version 1.2:
+
+Changes in func_sim.h and func_sim.cpp:
+- fixed some bugs
+
+Changes in func_instr.h and func_instr.cpp:
+- fixed some bugs
+
+Changes in main.cpp:
+- fixed some bugs
+- now it's ready to work
+
+Changes in Makefile
+- completed
+- now it's almost ready to work, I need to add one string for clean
+
+Program is working. Memory hasn't been debugged yet. Some problems with dump of registers values.
+New model of program counter is not implemented but program works correct with old one.
