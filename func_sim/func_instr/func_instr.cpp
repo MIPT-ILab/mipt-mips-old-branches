@@ -131,43 +131,58 @@ void FuncInstr::initR()
         return;
     }
     
-    ostringstream oss;
-    oss << isaTable[ isaNum].name << " $";
+
     switch ( operation)
     {
         case OUT_R_ARITHM:
             i_dst = instr.asR.rd;
             i_src1 = instr.asR.rs;
             i_src2 = instr.asR.rt;
-
-            oss << regTable[ instr.asR.rd] << outDst() << ", $"
-                << regTable[ instr.asR.rs] << outSrc1() << ", $"
-                << regTable[ instr.asR.rt] << outSrc2();
             break;
 
         case OUT_R_SHAMT:
             i_dst = instr.asR.rd;
             i_src1 = instr.asR.rt;
             i_src2 = NULL;
-
-            oss << regTable[ instr.asR.rd] << outDst() << ", $"
-                << regTable[ instr.asR.rt] << outSrc1() << ", "
-                << dec << instr.asR.shamt;
             break;
 
         case OUT_R_JUMP:
             i_dst = NULL;
             i_src1 = instr.asR.rs;
             i_src2 = NULL;
-
-            oss << regTable[ instr.asR.rs] << outSrc1();
             break;
 
         case OUT_R_LOG:
             i_dst = instr.asR.rd;
             i_src1 = instr.asR.rt;
             i_src2 = instr.asR.rs;
+            break;
+    }
+}
 
+void FuncInstr::DumpR()
+{   
+    ostringstream oss;
+    oss << isaTable[ isaNum].name << " $";
+    switch ( operation)
+    {
+        case OUT_R_ARITHM:
+            oss << regTable[ instr.asR.rd] << outDst() << ", $"
+                << regTable[ instr.asR.rs] << outSrc1() << ", $"
+                << regTable[ instr.asR.rt] << outSrc2();
+            break;
+
+        case OUT_R_SHAMT:
+            oss << regTable[ instr.asR.rd] << outDst() << ", $"
+                << regTable[ instr.asR.rt] << outSrc1() << ", "
+                << dec << instr.asR.shamt;
+            break;
+
+        case OUT_R_JUMP:
+            oss << regTable[ instr.asR.rs] << outSrc1();
+            break;
+
+        case OUT_R_LOG:
             oss << regTable[ instr.asR.rd] << outDst() << ", $"
                 << regTable[ instr.asR.rt] << outSrc1() << ", $"
                 << regTable[ instr.asR.rs] << outSrc2();
@@ -176,56 +191,74 @@ void FuncInstr::initR()
     disasm = oss.str();
 }
 
+
 // prepare the dump of operation and get ready to execute it READY
 void FuncInstr::initI()
 {
-    std::ostringstream oss;
-    oss << isaTable[ isaNum].name << " $";
     switch ( operation)
     {
         case OUT_I_ARITHM:
             i_dst = instr.asI.rt;
             i_src1 = instr.asI.rs;
             i_src2 = NULL;
-            
-            oss << regTable[ instr.asI.rt] << outDst() << ", $"
-                << regTable[ instr.asI.rs] << outSrc1() << ", "
-                << outImm();
             break;
 
         case OUT_I_BRANCH:
             i_dst = NULL;
             i_src1 = instr.asI.rs;
             i_src2 = instr.asI.rt;
-
-            oss << regTable[ instr.asI.rs] << outSrc1() << ", $"
-                << regTable[ instr.asI.rt] << outSrc2() << ", "
-                << outImm();
             break;
 
         case OUT_I_SHIFT:
             i_dst = instr.asI.rt;
             i_src1 = i_src2 = NULL;
-
-            oss << regTable[ instr.asI.rt] << outDst() << ", "
-                << outImm();
             break;
 
         case OUT_I_LOG:
             i_dst = instr.asI.rt;
             i_src1 = instr.asI.rs;
             i_src2 = NULL;
-
-            oss << regTable[ instr.asI.rs] << outSrc1() << ", $"
-                << regTable[ instr.asI.rt] << outDst() << ", "
-                << outImm();
             break;
 
         case OUT_I_MEM:
             i_dst = NULL; // if we load data it is being set in execute function
             i_src1 = instr.asI.rt;
             i_src2 = instr.asI.rs;
+            break;
 
+    }
+}
+
+void FuncInstr::DumpI()
+{
+    std::ostringstream oss;
+    oss << isaTable[ isaNum].name << " $";
+    switch ( operation)
+    {
+        case OUT_I_ARITHM:
+            oss << regTable[ instr.asI.rt] << outDst() << ", $"
+                << regTable[ instr.asI.rs] << outSrc1() << ", "
+                << outImm();
+            break;
+
+        case OUT_I_BRANCH:
+            oss << regTable[ instr.asI.rs] << outSrc1() << ", $"
+                << regTable[ instr.asI.rt] << outSrc2() << ", "
+                << outImm();
+            break;
+
+        case OUT_I_SHIFT:
+            oss << regTable[ instr.asI.rt] << outDst() << ", "
+                << outImm();
+            break;
+
+        case OUT_I_LOG:
+            oss << regTable[ instr.asI.rs] << outSrc1() << ", $"
+                << regTable[ instr.asI.rt] << outDst() << ", "
+                << outImm();
+            break;
+
+        case OUT_I_MEM:
             oss << regTable[ instr.asI.rt] << outSrc1() << ", "
                 << outImm() << "($" << regTable[ instr.asI.rs] << ")";
             break;
@@ -236,6 +269,11 @@ void FuncInstr::initI()
 
 // prepare the dump of operation and get ready to execute it READY
 void FuncInstr::initJ()
+{
+    
+}
+
+void FuncInstr::DumpJ()
 {
     std::ostringstream oss;
 
@@ -295,6 +333,7 @@ std::string FuncInstr::outDst()
 
 // execute the operation READY
 void FuncInstr::execute() {
+    preDump();
     ( this->*function)();
 }
 
@@ -431,4 +470,20 @@ void FuncInstr::sw() {
     type = WORD;
     memOp = store;
     mem_addr = v_src2 + instr.asI.imm;
+}
+
+void FuncInstr::preDump()
+{
+    switch ( format)
+    {
+        case FORMAT_R:
+            DumpR();
+            break;
+        case FORMAT_I:
+            DumpI();
+            break;
+        case FORMAT_J:
+            DumpJ();
+            break;
+    }
 }

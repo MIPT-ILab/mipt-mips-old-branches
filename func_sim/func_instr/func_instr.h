@@ -173,6 +173,11 @@ class FuncInstr
         void sb();
         void sh();
         void sw();
+
+        void preDump();
+        void DumpR();
+        void DumpI();
+        void DumpJ();
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr); // READY

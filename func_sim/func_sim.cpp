@@ -65,13 +65,13 @@ void MIPS::store( const FuncInstr& instr) {
     switch ( instr.type)
     {
         case FuncInstr::BYTE:
-            mem->write( instr.mem_addr, instr.v_dst, 1);
+            mem->write( instr.v_src1, instr.mem_addr, 1);
             break;
         case FuncInstr::HWORD:
-            mem->write( instr.mem_addr, instr.v_dst, 2);
+            mem->write( instr.v_src1, instr.mem_addr, 2);
             break;
         case FuncInstr::WORD:
-            mem->write( instr.mem_addr, instr.v_dst);
+            mem->write( instr.v_src1, instr.mem_addr);
             break;
     }
 }

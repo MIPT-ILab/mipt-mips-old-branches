@@ -52,3 +52,18 @@ Changes in Makefile
 
 Program is working. Memory hasn't been debugged yet. Some problems with dump of registers values.
 New model of program counter is not implemented but program works correct with old one.
+
+
+
+03/07/15 18:35 version 1.3:
+
+Changes in func_sim.h and func_sim.cpp:
+- fixed some bugs in memory functions
+
+Changes in func_instr.h and func_instr.cpp:
+- new dump algorithm
+
+Changes in main.cpp:
+- completed
+
+Now program is ready for use. There is one problem: it is still working with old PC model.
