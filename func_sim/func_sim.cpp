@@ -227,7 +227,7 @@ void MIPS::run( const string& tr, int instr_to_run)
 		instr.execute();	// execution
 		ld_st( instr);	// memory access
 		wb( instr);	// writeback 
-        updatePC( instr);	// update PC 
+		updatePC( instr);	// update PC 
 		std::cout << instr << endl;	// dump		
     }
 }
