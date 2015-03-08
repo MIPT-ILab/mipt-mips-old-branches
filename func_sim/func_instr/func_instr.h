@@ -69,8 +69,8 @@ class FuncInstr
 			_instr(uint32 bytes) 
 			{
 				raw = bytes;
-            }
-        } instr;
+			}
+		} instr;
 
 		struct ISAEntry
 		{

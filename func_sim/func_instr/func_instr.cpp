@@ -109,7 +109,7 @@ void FuncInstr::initFormat()
 void FuncInstr::initR()
 {
     // find instr by functor
-    for ( isaNum = 0; isaNum < isaTableSize; ++isaNum) 
+	for ( isaNum = 0; isaNum < isaTableSize; ++isaNum) 
 	{
 		if (( instr.asR.opcode == isaTable[ isaNum].opcode) &&
 			( instr.asR.funct == isaTable[ isaNum].funct))
@@ -182,7 +182,7 @@ void FuncInstr::initI()
 	pointer = isaTable[ isaNum].toFunction;
 	
 	switch ( operation)
-    {
+	{
 		case OUT_I_ARITHM:
 			oss1 << regTable[ instr.asI.rt];
 			oss2 << ", $" << regTable[ instr.asI.rs];
