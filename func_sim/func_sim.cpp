@@ -221,14 +221,14 @@ void MIPS::run( const string& tr, int instr_to_run)
 	for ( int i = 0; i < instr_to_run; ++i) 
 	{
 		uint32 instr_bytes;
-		instr_bytes = fetch(); 												// fetch
-		FuncInstr instr( instr_bytes, this->PC); 							// decode
-		read_src( instr); 													// read sources
-		instr.execute();													// execution
-		ld_st( instr); 														// memory access
-		wb( instr); 														// writeback 
-        updatePC( instr);   												// update PC 
-		std::cout << instr << endl;											// dump		
+		instr_bytes = fetch();	// fetch
+		FuncInstr instr( instr_bytes, this->PC);	// decode
+		read_src( instr);	// read sources
+		instr.execute();	// execution
+		ld_st( instr);	// memory access
+		wb( instr);	// writeback 
+        updatePC( instr);	// update PC 
+		std::cout << instr << endl;	// dump		
     }
 }
 
