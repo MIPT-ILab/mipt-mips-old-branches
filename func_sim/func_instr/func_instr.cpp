@@ -93,17 +93,17 @@ FuncInstr::FuncInstr( uint32 bytes, uint32 PC) : instr( bytes), PC( PC)
 
 void FuncInstr::initFormat()
 {
-    for ( size_t i = 0; i < isaTableSize; i++) 
+	for ( size_t i = 0; i < isaTableSize; i++) 
 	{
-        if ( instr.asR.opcode == isaTable[ i].opcode)
-        {
-            format = isaTable[ i].format;
-            operation = isaTable[ i].operation;
-            isaNum = i;
-            return;
-        }
-    }
-    format = FORMAT_UNKNOWN;
+		if ( instr.asR.opcode == isaTable[ i].opcode)
+		{
+			format = isaTable[ i].format;
+			operation = isaTable[ i].operation;
+			isaNum = i;
+			return;
+		}
+	}
+	format = FORMAT_UNKNOWN;
 }
 
 void FuncInstr::initR()
@@ -111,19 +111,19 @@ void FuncInstr::initR()
     // find instr by functor
     for ( isaNum = 0; isaNum < isaTableSize; ++isaNum) 
 	{
-        if (( instr.asR.opcode == isaTable[ isaNum].opcode) &&
-            ( instr.asR.funct == isaTable[ isaNum].funct))
-        {
-            operation = isaTable[ isaNum].operation;
-            pointer = isaTable[ isaNum].toFunction;
+		if (( instr.asR.opcode == isaTable[ isaNum].opcode) &&
+			( instr.asR.funct == isaTable[ isaNum].funct))
+		{
+			operation = isaTable[ isaNum].operation;
+			pointer = isaTable[ isaNum].toFunction;
 			break;
-        }
-    }
-    if ( isaNum == isaTableSize)     // if didn't found funct
-    {
-        initUnknown();
+		}
+	}
+	if ( isaNum == isaTableSize)     // if didn't found funct
+	{
+		initUnknown();
 		return;
-    }
+	}
     
 	std::ostringstream oss;
 	std::ostringstream oss1;

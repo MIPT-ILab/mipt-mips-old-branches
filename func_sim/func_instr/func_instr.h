@@ -17,17 +17,17 @@
 
 class FuncInstr
 {
-    private:
-        enum Format
-        {
-            FORMAT_R,
-            FORMAT_I,
-            FORMAT_J,
-            FORMAT_UNKNOWN
-        } format;
+	private:
+		enum Format
+		{
+			FORMAT_R,
+			FORMAT_I,
+			FORMAT_J,
+			FORMAT_UNKNOWN
+		} format;
 
-        enum OperationType
-        {
+		enum OperationType
+		{
 			OUT_R_ARITHM,
 			OUT_R_SHAMT,
 			OUT_R_JUMP,
@@ -41,39 +41,39 @@ class FuncInstr
 			OUT_I_SHAMT
 		} operation;
 
-        union _instr
-        {
-            struct
-            {
-                unsigned funct  :6;
-                unsigned shamt  :5;
-                unsigned rd     :5;
-                unsigned rt     :5;
-                unsigned rs     :5;
-                unsigned opcode :6;
-            } asR;
-            struct
-            {
-                unsigned imm    :16;
-                unsigned rt     :5;
-                unsigned rs     :5;
-                unsigned opcode :6;
-            } asI;
-            struct
-            {
-                unsigned imm    :26;
-                unsigned opcode :6;
-            } asJ;
-            uint32 raw;
+		union _instr
+		{
+			struct
+			{
+				unsigned funct  :6;
+				unsigned shamt  :5;
+				unsigned rd     :5;
+				unsigned rt     :5;
+				unsigned rs     :5;
+				unsigned opcode :6;
+			} asR;
+			struct
+			{
+				unsigned imm    :16;
+				unsigned rt     :5;
+				unsigned rs     :5;
+				unsigned opcode :6;
+			} asI;
+			struct
+			{
+				unsigned imm    :26;
+				unsigned opcode :6;
+			} asJ;
+			uint32 raw;
 
-            _instr(uint32 bytes) 
+			_instr(uint32 bytes) 
 			{
 				raw = bytes;
             }
         } instr;
 
-        struct ISAEntry
-        {
+		struct ISAEntry
+		{
 			std::string name;
 
 			uint8 opcode;
@@ -83,13 +83,13 @@ class FuncInstr
 			OperationType operation;
 			
 			void ( FuncInstr::*toFunction)();    
-        };
+		};
         
 		uint32 isaNum;
 
-        static const ISAEntry isaTable[];
-        static const uint32 isaTableSize;
-        static const char *regTable[];
+		static const ISAEntry isaTable[];
+		static const uint32 isaTableSize;
+		static const char *regTable[];
 
 		/* strings are necessary for dump method */ 
 		
