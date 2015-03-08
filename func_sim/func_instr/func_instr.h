@@ -4,7 +4,6 @@
  * Copyright 2014 MIPT-MIPS
  */
 
-
 #ifndef FUNC_INSTR_H
 #define FUNC_INSTR_H
 
@@ -18,10 +17,6 @@
 
 class FuncInstr
 {
-    public:
-        FuncInstr( uint32 bytes);
-        std::string Dump( std::string indent = " ") const;
-
     private:
         enum Format
         {
@@ -38,8 +33,13 @@ class FuncInstr
             OUT_R_JUMP,
             OUT_I_ARITHM,
             OUT_I_BRANCH,
-            OUT_J_JUMP
-        } operation;
+            OUT_J_JUMP,
+			OUT_I_LOAD,
+			OUT_I_STORE,
+			OUT_R_LOGIC,
+			OUT_I_LOGIC,
+			OUT_I_SHAMT
+		} operation;
 
         union _instr
         {
@@ -80,23 +80,108 @@ class FuncInstr
 
             Format format;
             OperationType operation;
+			
+			void ( FuncInstr::*toFunction)();    
         };
-        uint32 isaNum;
+        
+		uint32 isaNum;
 
         static const ISAEntry isaTable[];
         static const uint32 isaTableSize;
         static const char *regTable[];
 
-        std::string disasm;
-                                                               
-        void initFormat();
+		/* strings are necessary for dump method */ 
+		
+		std::string disasm;
+        std::string disasmImm;
+		std::string disasmShamt;
+		std::string disasmrd;
+		std::string disasmrs;
+		std::string disasmrt;
+		std::string dissrc1;
+		std::string dissrc2;
+		std::string disdst;
+		std::string disasmName;
+		
+		void initFormat();
         void initR();
         void initI();
         void initJ();
         void initUnknown();
+		
+		
+		int write_back;       // this variable controls wb method of class MIPS
+ 		
+	public:
+		FuncInstr( uint32 bytes, uint32 PC = 0);
+        std::string Dump( std::string indent = " ") const;
+		
+		void parseInstr(); // this function needs to parse instruction for dump 
+		
+		/* functions for execution by CPU */
+		
+		void add(); 
+        void sub(); 
+        void subu();
+		void addu();
+		void addiu();
+		void sll();
+		void srl();
+		void beq();
+		void bne();
+		void addi();
+		void j();
+		void jr();
+        void andOp();
+		void orOp();
+		void xorOp();
+		void andi();
+		void ori();
+		void xori();
+		void lui();
+		void lb();
+		void lw();
+		void lh();
+		void lbu();
+		void lhu();
+		void sb();
+		void sw();
+		void sh();
+		
+		void execute();           
+		
+		/* get index of sources and destination register */
+		
+		int get_src1_num_index() const;
+		int get_src2_num_index() const;
+		int get_dst_num_index()  const;
+		
+		/* get constant values from instruction */
+		
+		int getImm();
+		int getShamt();
+		int getJImm();
+		
+		/* this function returns value of write_back variable of FuncnIstr class*/ 
+		
+		int getWB() const;
+		
+		const uint32 PC;
+		uint32 new_PC;
+		uint32 v_src1;
+		uint32 v_src2;
+		uint32 v_dst;
+		uint32 CJump;
+		uint32 C;
+		uint32 Sh;
+		uint32 mem_addr;
+		
+		void (FuncInstr::*pointer)(); // pointer to function of execution
+		
+		
 };
 
-std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
+std::ostream& operator<<( std::ostream& out, FuncInstr& instr);   // overloading of "<<" operator 
 
 #endif //FUNC_INSTR_H
 
