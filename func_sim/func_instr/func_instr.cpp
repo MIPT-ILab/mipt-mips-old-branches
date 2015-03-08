@@ -21,18 +21,18 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
     // ISA Table of MIPS
 	// name  opcode  func   format    operation     pointer 
 	//												to Function
-    { "add",    0x0, 0x20,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::add   },
-    { "addu",   0x0, 0x21,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::addu  },
-    { "sub",    0x0, 0x22,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::sub   },
-    { "subu",   0x0, 0x23,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::subu  },
-    { "addi",   0x8, 0x0,   FORMAT_I, OUT_I_ARITHM, &FuncInstr::addi  },
-    { "addiu",  0x9, 0x0,   FORMAT_I, OUT_I_ARITHM, &FuncInstr::addiu },
-    { "sll",    0x0, 0x0,   FORMAT_R, OUT_R_SHAMT,  &FuncInstr::sll   },
-    { "srl",    0x0, 0x2,   FORMAT_R, OUT_R_SHAMT,  &FuncInstr::srl   },
-    { "beq",    0x4, 0x0,   FORMAT_I, OUT_I_BRANCH, &FuncInstr::beq   },
-    { "bne",    0x5, 0x0,   FORMAT_I, OUT_I_BRANCH, &FuncInstr::bne   },
-    { "j",      0x2, 0x0,   FORMAT_J, OUT_J_JUMP,   &FuncInstr::j     },
-    { "jr",     0x0, 0x8,   FORMAT_R, OUT_R_JUMP,   &FuncInstr::jr    },
+	{ "add",    0x0, 0x20,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::add   },
+	{ "addu",   0x0, 0x21,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::addu  },
+	{ "sub",    0x0, 0x22,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::sub   },
+	{ "subu",   0x0, 0x23,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::subu  },
+	{ "addi",   0x8, 0x0,   FORMAT_I, OUT_I_ARITHM, &FuncInstr::addi  },
+	{ "addiu",  0x9, 0x0,   FORMAT_I, OUT_I_ARITHM, &FuncInstr::addiu },
+	{ "sll",    0x0, 0x0,   FORMAT_R, OUT_R_SHAMT,  &FuncInstr::sll   },
+	{ "srl",    0x0, 0x2,   FORMAT_R, OUT_R_SHAMT,  &FuncInstr::srl   },
+	{ "beq",    0x4, 0x0,   FORMAT_I, OUT_I_BRANCH, &FuncInstr::beq   },
+	{ "bne",    0x5, 0x0,   FORMAT_I, OUT_I_BRANCH, &FuncInstr::bne   },
+	{ "j",      0x2, 0x0,   FORMAT_J, OUT_J_JUMP,   &FuncInstr::j     },
+	{ "jr",     0x0, 0x8,   FORMAT_R, OUT_R_JUMP,   &FuncInstr::jr    },
 	{ "lb",     0x20,0x0,   FORMAT_I, OUT_I_LOAD,   &FuncInstr::lb    },
 	{ "lw",     0x23,0x0,   FORMAT_I, OUT_I_LOAD,   &FuncInstr::lw    },
 	{ "lh",     0x21,0x0,   FORMAT_I, OUT_I_LOAD,   &FuncInstr::lh    },
@@ -125,8 +125,8 @@ void FuncInstr::initR()
 		return;
     }
     
-    std::ostringstream oss;
-    std::ostringstream oss1;
+	std::ostringstream oss;
+	std::ostringstream oss1;
 	std::ostringstream oss2;
 	std::ostringstream oss3;
 	
@@ -135,24 +135,24 @@ void FuncInstr::initR()
 	disasmName = oss.str();
 	
 	switch ( operation)
-    {
-        case OUT_R_ARITHM:
-            oss1 << regTable[ instr.asR.rd] ; 
-            oss2 << ", $" << regTable[ instr.asR.rs] ; 
-            oss3 << ", $" << regTable[ instr.asR.rt];
-            disasmrd = oss1.str();
+	{
+		case OUT_R_ARITHM:
+			oss1 << regTable[ instr.asR.rd] ; 
+			oss2 << ", $" << regTable[ instr.asR.rs] ; 
+			oss3 << ", $" << regTable[ instr.asR.rt];
+			disasmrd = oss1.str();
 			disasmrs = oss2.str();
 			disasmrt = oss3.str();
 			break;
-        case OUT_R_SHAMT:
+		case OUT_R_SHAMT:
 			oss1 << regTable[ instr.asR.rd] ;
-            oss2 << ", $" << regTable[ instr.asR.rt];
-            oss3 <<  ", " << dec << instr.asR.shamt;
-            disasmrd = oss1.str();
+			oss2 << ", $" << regTable[ instr.asR.rt];
+			oss3 <<  ", " << dec << instr.asR.shamt;
+			disasmrd = oss1.str();
 			disasmrt = oss2.str();
 			disasmShamt = oss3.str();
 			break;
-        case OUT_R_JUMP:  
+		case OUT_R_JUMP:  
 			oss1 << regTable[ instr.asR.rs];
 			disasmrs = oss1.str();
 			break;
@@ -164,38 +164,38 @@ void FuncInstr::initR()
 			disasmrt = oss2.str();
 			disasmrs = oss3.str();
 			break;
-    }
+	}
     
 }
 
 
 void FuncInstr::initI()
 {
-    std::ostringstream oss;
-    std::ostringstream oss1;
+	std::ostringstream oss;
+	std::ostringstream oss1;
 	std::ostringstream oss2;
 	std::ostringstream oss3;
 	
 	oss << isaTable[ isaNum].name << " $";
-    disasmName = oss.str();
+	disasmName = oss.str();
 	
 	pointer = isaTable[ isaNum].toFunction;
 	
 	switch ( operation)
     {
-        case OUT_I_ARITHM:
+		case OUT_I_ARITHM:
 			oss1 << regTable[ instr.asI.rt];
-            oss2 << ", $" << regTable[ instr.asI.rs];
-            oss3 << ", " << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
-            disasmrt = oss1.str();
+			oss2 << ", $" << regTable[ instr.asI.rs];
+			oss3 << ", " << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
+			disasmrt = oss1.str();
 			disasmrs = oss2.str();
 			disasmImm = oss3.str();
 			break;
-        case OUT_I_BRANCH:
-            oss1 << regTable[ instr.asI.rs];
-            oss2 << ", $" << regTable[ instr.asI.rt];
-            oss3 << ", " << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
-            disasmrs = oss1.str();
+		case OUT_I_BRANCH:
+			oss1 << regTable[ instr.asI.rs];
+			oss2 << ", $" << regTable[ instr.asI.rt];
+			oss3 << ", " << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
+			disasmrs = oss1.str();
 			disasmrt = oss2.str();
 			disasmImm = oss3.str();
 			break;
@@ -234,12 +234,12 @@ void FuncInstr::initI()
 
 void FuncInstr::initJ()
 {
-    std::ostringstream oss;
+	std::ostringstream oss;
 	
 	pointer = isaTable[ isaNum].toFunction;
 	
 	oss << isaTable[ isaNum].name << " "
-        << std::hex << "0x" <<instr.asJ.imm;
+		<< std::hex << "0x" <<instr.asJ.imm;
     
 	disasm = oss.str();
 }
@@ -639,7 +639,7 @@ void FuncInstr::execute()
 void FuncInstr::parseInstr()
 {
 	std::ostringstream oss1;
-    std::ostringstream oss2;
+	std::ostringstream oss2;
 	std::ostringstream oss3;
 	std::ostringstream oss4;
 	switch( operation)

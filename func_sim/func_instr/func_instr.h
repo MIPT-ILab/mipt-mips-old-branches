@@ -28,12 +28,12 @@ class FuncInstr
 
         enum OperationType
         {
-            OUT_R_ARITHM,
-            OUT_R_SHAMT,
-            OUT_R_JUMP,
-            OUT_I_ARITHM,
-            OUT_I_BRANCH,
-            OUT_J_JUMP,
+			OUT_R_ARITHM,
+			OUT_R_SHAMT,
+			OUT_R_JUMP,
+			OUT_I_ARITHM,
+			OUT_I_BRANCH,
+			OUT_J_JUMP,
 			OUT_I_LOAD,
 			OUT_I_STORE,
 			OUT_R_LOGIC,
@@ -66,20 +66,21 @@ class FuncInstr
             } asJ;
             uint32 raw;
 
-            _instr(uint32 bytes) {
-                 raw = bytes;
+            _instr(uint32 bytes) 
+			{
+				raw = bytes;
             }
         } instr;
 
         struct ISAEntry
         {
-            std::string name;
+			std::string name;
 
-            uint8 opcode;
-            uint8 funct;
+			uint8 opcode;
+			uint8 funct;
 
-            Format format;
-            OperationType operation;
+			Format format;
+			OperationType operation;
 			
 			void ( FuncInstr::*toFunction)();    
         };
@@ -93,7 +94,7 @@ class FuncInstr
 		/* strings are necessary for dump method */ 
 		
 		std::string disasm;
-        std::string disasmImm;
+		std::string disasmImm;
 		std::string disasmShamt;
 		std::string disasmrd;
 		std::string disasmrs;
@@ -104,25 +105,24 @@ class FuncInstr
 		std::string disasmName;
 		
 		void initFormat();
-        void initR();
-        void initI();
-        void initJ();
-        void initUnknown();
-		
+		void initR();
+		void initI();
+		void initJ();
+		void initUnknown();
 		
 		int write_back;       // this variable controls wb method of class MIPS
  		
 	public:
 		FuncInstr( uint32 bytes, uint32 PC = 0);
-        std::string Dump( std::string indent = " ") const;
+		std::string Dump( std::string indent = " ") const;
 		
 		void parseInstr(); // this function needs to parse instruction for dump 
 		
 		/* functions for execution by CPU */
 		
 		void add(); 
-        void sub(); 
-        void subu();
+		void sub(); 
+		void subu();	
 		void addu();
 		void addiu();
 		void sll();
@@ -132,7 +132,7 @@ class FuncInstr
 		void addi();
 		void j();
 		void jr();
-        void andOp();
+		void andOp();
 		void orOp();
 		void xorOp();
 		void andi();
