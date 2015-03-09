@@ -16,7 +16,23 @@
 
 #include <types.h>
 #include <func_memory.h>
-#include <func_sim.h>
+//#include <func_sim.h>
+enum RegNum {
+    ZERO = 0,
+    AT,
+    V0, V1,
+    A0, A1, A2, A3,
+    T0, T1, T2, T3, T4, T5, T6, T7,
+    S0, S1, S2, S3, S4, S5, S6, S7,
+    T8, T9,
+    K0, K1,
+    GP,
+    SP,
+    FP,
+    RA,
+    MAXREG
+};
+
 
 
 class FuncInstr
@@ -45,8 +61,12 @@ private:
         J,
         JR,
         LB,
+		LH,
         LW,
+		LBU,
+		LHU,
         SB,
+		SH,
         SW
     };
     union
@@ -109,15 +129,18 @@ public:
     ~FuncInstr();
     void add() { v_dst = v_src + v_tgt;};
     void sub() { v_dst = v_tgt - v_src;};
-    void addi() { v_dst = v_src + cnst;};
+    void addi() { v_tgt = v_src + cnst;};
     void sll() { v_dst = v_tgt << bytes.asR.s2;};
     void srl() { v_dst = v_tgt >> bytes.asR.s2;};
-    void beq() { if ( v_src == v_tgt) PC_delta = cnst + 4;};
-    void bnq() { if (v_src != v_tgt) PC_delta = cnst + 4;};
-    void lui() { v_tgt = (bytes.asI.imm << 16);};
-    void and() { v_dst = v_src & v_tgt;};
-    void or() { v_dst = v_src | v_tgt;};
-    void xor() { v_dst = v_src ^ v_tgt;};
+    void beq() { if ( v_src == v_tgt) PC_delta = ( ( int16)cnst << 2) + 4; 
+				else PC_delta = 4;};
+    void bne() { if (v_src != v_tgt) PC_delta = ( (int16)cnst << 2) + 4; 
+				else PC_delta = 4;
+				cout << "PC_delta = " << PC_delta << endl;};
+    void lui() { v_tgt = ( bytes.asI.imm << 16);};
+    void _and() { v_dst = v_src & v_tgt;};
+    void _or() { v_dst = v_src | v_tgt;};
+    void _xor() { v_dst = v_src ^ v_tgt;};
     void andi() { v_tgt = v_src & cnst;};
     void ori() { v_tgt = v_src | cnst;};
     void xori() { v_tgt = v_src ^ cnst;};
@@ -157,7 +180,7 @@ public:
     uint32 v_tgt;
     uint32 v_dst;
     uint32 mem_addr;
-    uint32 PC_delta;
+    int32 PC_delta;
     uint32 cnst; //const
     
     

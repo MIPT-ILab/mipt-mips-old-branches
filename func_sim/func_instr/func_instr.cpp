@@ -32,10 +32,14 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
     { "bne ", 0x5, 0, FuncInstr::FORMAT_I, FuncInstr::BNE, FuncInstr::I_BRANCH },
     { "j ", 0x2, 0, FuncInstr::FORMAT_J, FuncInstr::J, FuncInstr::J_JUMP },
     { "jr ", 0x0, 0x8, FuncInstr::FORMAT_R, FuncInstr::JR, FuncInstr::R_JUMP },
-    { "lb", 0x20, 0, FuncInstr::FORMAT_I, FuncInstr::LB, FuncInstr::I_MEMORY },
-    { "lw", 0x23, 0, FuncInstr::FORMAT_I, FuncInstr::LW, FuncInstr::I_MEMORY },
-    { "sb", 0x28, 0, FuncInstr::FORMAT_I, FuncInstr::SB, FuncInstr::I_MEMORY },
-    { "sw", 0x2b, 0, FuncInstr::FORMAT_I, FuncInstr::SW, FuncInstr::I_MEMORY }
+    { "lb ", 0x20, 0, FuncInstr::FORMAT_I, FuncInstr::LB, FuncInstr::I_MEMORY },
+	{ "lh ", 0x21, 0, FuncInstr::FORMAT_I, FuncInstr::LH, FuncInstr::I_MEMORY },
+    { "lw ", 0x23, 0, FuncInstr::FORMAT_I, FuncInstr::LW, FuncInstr::I_MEMORY },
+	{ "lbu ", 0x24, 0, FuncInstr::FORMAT_I, FuncInstr::LBU, FuncInstr::I_MEMORY },
+	{ "lhu ", 0x25, 0, FuncInstr::FORMAT_I, FuncInstr::LHU, FuncInstr::I_MEMORY },
+    { "sb ", 0x28, 0, FuncInstr::FORMAT_I, FuncInstr::SB, FuncInstr::I_MEMORY },
+	{ "sh ", 0x29, 0, FuncInstr::FORMAT_I, FuncInstr::SH, FuncInstr::I_MEMORY },
+    { "sw ", 0x2b, 0, FuncInstr::FORMAT_I, FuncInstr::SW, FuncInstr::I_MEMORY }
 };
 const FuncInstr::Reg FuncInstr::regTable[] =
 {
@@ -76,7 +80,10 @@ const FuncInstr::Reg FuncInstr::regTable[] =
 FuncInstr::FuncInstr( uint32 bytes):
     opcMask( 0xff << 26),
     funcMask( 0x3f),
-    exe( NULL)
+    exe( NULL),
+	v_src( 0),
+	v_tgt( 0),
+	v_dst( 0)
 {
     if ( bytes == ~0ull)
         exit( EXIT_FAILURE);
@@ -134,45 +141,45 @@ void FuncInstr::ParseR()
     {
         case 0x20:
             name = isaTable[ADD].name;
-            exe = &add;
+            exe = &FuncInstr::add;
             break;
         case 0x21:
             name = isaTable[ADDU].name;
-            exe = &add;
+            exe = &FuncInstr::add;
             break;
         case 0x22:
             name = isaTable[SUB].name;
-            exe = &sub;
+            exe = &FuncInstr::sub;
             break;
         case 0x23:
             name = isaTable[SUBU].name;
-            exe = &sub;
+            exe = &FuncInstr::sub;
             break;
         case 0x0:
             name = isaTable[SLL].name;
             cnst = bytes.asR.s2;
-            exe = &sll;
+            exe = &FuncInstr::sll;
             break;
         case 0x2:
             name = isaTable[SRL].name;
             cnst = bytes.asR.s2;
-            exe = &srl;
+            exe = &FuncInstr::srl;
             break;
         case 0x24:
             name = isaTable[AND].name;
-            exe = &and;
+            exe = &FuncInstr::_and;
             break;
         case 0x25:
             name = isaTable[OR].name;
-            exe = &or;
+            exe = &FuncInstr::_or;
             break;
         case 0x26:
             name = isaTable[XOR].name;
-            exe = &xor;
+            exe = &FuncInstr::_xor;
             break;
         case 0x8:
             name = isaTable[JR].name;
-            exe = &jr;
+            exe = &FuncInstr::jr;
             break;
         default:
             cerr << "ERROR: wrong command R\n";
@@ -189,57 +196,82 @@ void FuncInstr::ParseI()
     {
         case 0x8:
             name = isaTable[ADDI].name;
-            exe = &addi;
+            exe = &FuncInstr::addi;
             operation = I_ARITHM;
             break;
         case 0x9:
             name = isaTable[ADDIU].name;
-            exe = &addi;
+            exe = &FuncInstr::addi;
             operation = I_ARITHM;
             break;
         case 0x4:
             name = isaTable[BEQ].name;
-            exe = &beq;
+            exe = &FuncInstr::beq;
             operation = I_BRANCH;
             break;
+		case 0x5:
+			name = isaTable[BNE].name;
+			exe = &FuncInstr::bne;
+			operation = I_BRANCH;
+			break;
         case 0xf:
             name = isaTable[LUI].name;
-            exe = &lui;
+            exe = &FuncInstr::lui;
             operation = I_LUI;
             break;
         case 0xc:
             name = isaTable[ANDI].name;
-            exe = &andi;
+            exe = &FuncInstr::andi;
             operation = I_ARITHM;
             break;
          case 0xd:
             name = isaTable[ORI].name;
-            exe = &ori;
+            exe = &FuncInstr::ori;
             operation = I_ARITHM;
             break;
         case 0xe:
             name = isaTable[XORI].name;
-            exe = &xori;
+            exe = &FuncInstr::xori;
             operation = I_ARITHM;
             break;
         case 0x20:
             name = isaTable[LB].name;
-            exe = &lb;
+            exe = &FuncInstr::lb;
             operation = I_MEMORY;
             break;
+		case 0x21:
+			name = isaTable[LH].name;
+			exe = &FuncInstr::lw;
+			operation = I_MEMORY;
+			break;
         case 0x23:
             name = isaTable[LW].name;
-            exe = &lw;
+            exe = &FuncInstr::lw;
             operation = I_MEMORY;
             break;
+		case 0x24:
+			name = isaTable[LBU].name;
+			exe = &FuncInstr::lb;
+			operation = I_MEMORY;
+			break;
+		case 0x25:
+			name = isaTable[LHU].name;
+			exe = &FuncInstr::lw;
+			operation = I_MEMORY;
+			break;
         case 0x28:
             name = isaTable[SB].name;
-            exe = &sb;
+            exe = &FuncInstr::sb;
             operation = I_MEMORY;
             break;
+		case 0x29:
+			name = isaTable[SH].name;
+			exe = &FuncInstr::sw;
+			operation = I_MEMORY;
+			break;
         case 0x2b:
             name = isaTable[SW].name;
-            exe = &sw;
+            exe = &FuncInstr::sw;
             operation = I_MEMORY;
             break;
         default:
@@ -250,11 +282,12 @@ void FuncInstr::ParseI()
 
 void FuncInstr::ParseJ()
 {
+	operation = J_JUMP;
     switch ( bytes.asJ.opcode )
     {
         case 0x2:
             name = isaTable[J].name;
-            cnst = bytes.asJ.addr;
+            cnst = bytes.asJ.addr;			
             exe = NULL;
             break;
         default:
@@ -285,6 +318,8 @@ inline std::string FuncInstr::Dump( std::string indent)
         case I_MEMORY:
             dumpstr << name << reg1 << " [" << v_tgt << "], " << cnst << "(" << reg2 << " [" << v_src << "])";
             break;
+		case I_LUI:
+			dumpstr << name << reg1 << " [" << v_tgt << "], " << cnst << endl;
     }
     return indent + dumpstr.str();
 }
