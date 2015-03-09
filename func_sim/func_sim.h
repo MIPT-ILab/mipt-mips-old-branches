@@ -36,7 +36,7 @@ enum RegNum
 	sp,
 	fp,
 	ra, 
-    MAX_REG = 32
+	MAX_REG = 32
 };
 
 /* Class RF implements Register File */

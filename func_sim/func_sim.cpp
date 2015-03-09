@@ -229,7 +229,7 @@ void MIPS::run( const string& tr, int instr_to_run)
 		wb( instr);	// writeback 
 		updatePC( instr); // update PC 
 		std::cout << instr << endl;	// dump		
-    }
+	}
 }
 
 

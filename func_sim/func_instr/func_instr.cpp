@@ -19,8 +19,7 @@
 const FuncInstr::ISAEntry FuncInstr::isaTable[] =
 {
     // ISA Table of MIPS
-	// name  opcode  func   format    operation     pointer 
-	//												to Function
+	// name  opcode  func   format    operation     pointer to Function
 	{ "add",    0x0, 0x20,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::add   },
 	{ "addu",   0x0, 0x21,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::addu  },
 	{ "sub",    0x0, 0x22,  FORMAT_R, OUT_R_ARITHM, &FuncInstr::sub   },
