@@ -37,7 +37,7 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 
     memory = new uint8** [1 << set_bits];
     memset(memory, 0, sizeof(uint8**) * (1 << set_bits));
-    
+
     std::vector<ElfSection> sections_array;
     ElfSection::getAllElfSections( executable_file_name, sections_array);
 
@@ -136,11 +136,11 @@ string FuncMemory::dump( string indent) const
 {
     std::ostringstream oss;
     oss << std::setfill( '0') << hex;
-    
+
     uint64 set_cnt = 1 << set_bits;
     uint64 page_cnt = 1 << page_bits;
     uint64 offset_cnt = 1 << offset_bits;
-    
+
     for ( size_t set = 0; set < set_cnt; ++set)
     {
         if (memory[set] != NULL)
@@ -153,7 +153,7 @@ string FuncMemory::dump( string indent) const
                     {
                         if (memory[set][page][offset])
                         {
-                            oss << "addr 0x" << get_addr( set, page, offset) 
+                            oss << "addr 0x" << get_addr( set, page, offset)
                                 << ": data 0x" << memory[set][page][offset] << std::endl;
                         }
                     }
