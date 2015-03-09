@@ -26,7 +26,22 @@ const FuncInstr::ISAEntry FuncInstr::isaTable[] =
     { "beq",    0x4, 0x0,   FORMAT_I, OUT_I_BRANCH},
     { "bne",    0x5, 0x0,   FORMAT_I, OUT_I_BRANCH},
     { "j",      0x2, 0x0,   FORMAT_J, OUT_J_JUMP},
-    { "jr",     0x0, 0x8,   FORMAT_R, OUT_R_JUMP}
+    { "jr",     0x0, 0x8,   FORMAT_R, OUT_R_JUMP},
+    { "lui",    0xF, 0x0,   FORMAT_I, OUT_I_SHAMT},
+    { "and",    0x0, 0x24,  FORMAT_R, OUT_R_LOGICAL},
+    { "or",     0x0, 0x25,  FORMAT_R, OUT_R_LOGICAL},
+    { "xor",    0x0, 0x26,  FORMAT_R, OUT_R_LOGICAL},
+    { "andi",   0xC, 0x0,   FORMAT_I, OUT_I_LOGICAL},
+    { "ori",    0xD, 0x0,   FORMAT_I, OUT_I_LOGICAL},
+    { "xori",   0xE, 0x0,   FORMAT_I, OUT_I_LOGICAL},
+    { "lb",     0x20, 0x0,  FORMAT_I, OUT_I_LOAD},
+    { "lh",     0x21, 0x0,  FORMAT_I, OUT_I_LOAD},
+    { "lw",     0x23, 0x0,  FORMAT_I, OUT_I_LOAD},
+    { "lbu",    0x24, 0x0,  FORMAT_I, OUT_I_LOAD},
+    { "lhu",    0x25, 0x0,  FORMAT_I, OUT_I_LOAD},
+    { "sb",     0x28, 0x0,  FORMAT_I, OUT_I_STORE},
+    { "sh",     0x29, 0x0,  FORMAT_I, OUT_I_STORE},
+    { "sw",     0x2b, 0x0,  FORMAT_I, OUT_I_STORE}
 };
 const uint32 FuncInstr::isaTableSize = sizeof(isaTable) / sizeof(isaTable[0]);
 
@@ -46,7 +61,7 @@ const char *FuncInstr::regTable[] =
     "ra"
 };
 
-FuncInstr::FuncInstr( uint32 bytes) : instr(bytes)
+FuncInstr::FuncInstr( uint32 bytes, uint32 PC) : instr( bytes), PC(PC)
 {
     initFormat(); 
     switch ( format)
@@ -108,17 +123,22 @@ void FuncInstr::initR()
     switch ( operation)
     {
         case OUT_R_ARITHM:
-            oss << regTable[instr.asR.rd] << ", $" \
-                << regTable[instr.asR.rs] << ", $" \
+            oss << regTable[instr.asR.rd] << ", $" 
+                << regTable[instr.asR.rs] << ", $" 
                 << regTable[instr.asR.rt];
             break;
         case OUT_R_SHAMT:
-            oss << regTable[instr.asR.rd] << ", $" \
-                << regTable[instr.asR.rt] << ", " \
+            oss << regTable[instr.asR.rd] << ", $" 
+                << regTable[instr.asR.rt] << ", " 
                 << dec << instr.asR.shamt;
             break;
         case OUT_R_JUMP:
             oss << regTable[instr.asR.rs];
+            break;
+        case OUT_R_LOGICAL:
+            oss << regTable[instr.asR.rd] <<", $"
+                << regTable[instr.asR.rt] <<", $"
+                << regTable[instr.asR.rs];
             break;
     }
     disasm = oss.str();
@@ -137,6 +157,21 @@ void FuncInstr::initI()
                 << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
             break;
         case OUT_I_BRANCH:
+            oss << regTable[instr.asI.rs] << ", $"
+                << regTable[instr.asI.rt] << ", "
+                << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
+            break;
+        case OUT_I_LOAD:
+            oss << regTable[instr.asI.rt] << ", "
+                << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec << "($"
+                << regTable[instr.asI,rs] << ")";
+            break;
+        case OUT_I_STORE:
+            oss << regTable[instr.asI.rt] << ", "
+                << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec << "($"
+                << regTable[instr.asI,rs] << ")";
+            break;
+        case OUT_I_LOGICAL:
             oss << regTable[instr.asI.rs] << ", $"
                 << regTable[instr.asI.rt] << ", "
                 << std::hex << "0x" << static_cast< signed int>( instr.asI.imm) << std::dec;
@@ -168,3 +203,175 @@ std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
     return out << instr.Dump( "");
 }
 
+void FuncInstr::add() { v_dst = v_src1 + v_src2; }
+
+void FuncInstr::addu() { v_dst = v_src1 + v_src2; }
+
+void FuncInstr::sub() { v_dst = v_src2 - v_src1; }
+
+void FuncInstr::subu() { v_dst = v_src2 - v_src1; }
+
+void FuncInstr::addi() { v_dst = v_src1 + instr.asI.imm; }
+
+void FuncInstr::addiu() { v_dst = v_src1 + instr.asI.imm; }
+
+void FuncInstr::sll() { v_dst = v_src1 << instr.asR.shamt; }
+
+void FuncInstr::srl() { v_dst = v_src1 >> instr.asR.shamt; }
+
+void FuncInstr::lui() { v_dst = instr.asI.imm << 16; }
+
+void FuncInstr::_and() { v_dst = v_src1 & v_src2; }
+
+void FuncInstr::_or() { v_dst = v_src1 | v_src2; }
+
+void FuncInstr::_xor() { v_dst = v_src1 ^ v_src2; }
+
+void FuncInstr::andi() { v_dst = v_src1 & instr.asI.imm; }
+
+void FuncInstr::ori() { v_dst = v_src1 | instr.asI.imm; }
+
+void FuncInstr::xori() { v_dst = v_src1 ^ instr.asI.imm; }
+
+void FuncInstr::beq() 
+{
+    if ( v_src1 == v_src2)
+        PC = PC + ( instr.asI.imm << 2);
+}
+
+void FuncInstr::bne() 
+{
+    if ( v_src1 != v_src2)
+        PC = PC + ( instr.asI.imm << 2);
+}
+
+void FuncInstr::j() 
+{
+    PC = 0;
+    jaddr = ( instr.asJ.imm << 2);
+}
+
+void FuncInstr::jr() 
+{
+    PC = 0;
+    jaddr = 0;
+}
+
+void FuncInstr::lb() 
+{   
+    bytes = 1;
+    ld = true;
+    mem_addr = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::lh() 
+{
+    bytes = 2;
+    ld = true;
+    mem_addr = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::lw() 
+{
+    bytes = 4;
+    ld = true;
+    mem_addr = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::lbu() {
+    bytes = 1;
+    ld = true;
+    mem_addr = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::lhu() {
+    bytes = 2;
+    ld = true;
+    mem_addr = v_src1 + instr.asI.imm;
+}
+
+void FuncInstr::sb() {
+    bytes = 1;
+    ld = false;
+    mem_addr = v_src1 + instr.asI.imm;
+    v_dst = v_src1;
+}
+
+void FuncInstr::sh()
+{
+    bytes = 2;
+    ld = false;
+    mem_addr = v_src1 + instr.asI.imm;
+    v_dst = v_src1;
+}
+
+void FuncInstr::sw()
+{
+    bytes = 4;
+    ld = false;
+    mem_addr = v_src1 + instr.asI.imm;
+    v_dst = v_src1;
+}
+
+int get_src2_num_index() const
+{
+    switch ( operation)
+    {
+        case OUT_R_ARITHM:
+        case OUT_R_SHAMT:
+        case OUT_R_LOGICAL:
+        case OUT_I_BRANCH:
+        return RegNum(instr.asR.rt);
+        break;
+        default:
+        return RegNum(MAX_REG)
+        break;
+    }
+}
+
+int get_src1_num_index() const
+{
+    switch ( operation)
+    {
+        case OUT_R_ARITHM:
+        case OUT_R_SHAMT:
+        case OUT_R_LOGICAL:
+        case OUT_I_ARITHM:
+        case OUT_I_LOGICAL:
+        case OUT_I_LOAD:
+        case OUT_I_STORE:
+        case OUT_I_BRANCH
+            return RegNum(instr.asR.rs);
+        break;
+        
+        default:
+            return RegNum(MAX_REG)
+        break;
+    }
+}
+
+int get_dst_num_index() const
+{
+    switch ( operation)
+    {
+        case OUT_R_ARITHM:
+        case OUT_R_SHAMT:
+        case OUT_R_LOGICAL
+            return RegNum(instr.asR.rd)
+        break;
+        
+        case OUT_I_ARITHM:
+        case OUT_I_SHAMT:
+        case OUT_I_LOGICAL:
+            return RegNum(instr.asI.rt)
+        break;
+        
+        case OUT_I_STORE:
+            return RegNum(instr.asI.rt)
+        break;
+
+        default;
+            return RegNum (MAX_REG)
+        break;
+    }
+}
