@@ -26,19 +26,18 @@ void MIPS::run( const string& tr, uint32 instr_to_run) {
     this->PC = mem->startPC();
     for ( uint32 i = 0; i < instr_to_run; i++) {
         uint32 instr_bytes;
-        instr_bytes = fetch(); // Fetch READY
-        FuncInstr instr( instr_bytes); // Decode and read sources READY
-        read_reg( instr);
-	instr.execute(); // Execute READY
-        ld_st( instr); // Memory access READY
-        wb( instr); // Writeback READY
-        updatePC( instr); // Update PC CHECK READY
-        std::cout << instr << std::endl; // Dump READY
+        instr_bytes = fetch(); // Fetch
+        FuncInstr instr( instr_bytes, PC); // Decode and read sources
+        read_reg( instr); // Get values of working registers
+        instr.execute(); // Execute
+        ld_st( instr); // Memory access
+        wb( instr); // Writeback
+        updatePC( instr); // Update PC
+        std::cout << instr << std::endl; // Dump
     }
 }
 
-// load information from memory READY
-// it may be easier, but it is better than nothing
+// load information from memory
 void MIPS::load( FuncInstr& instr) {
     switch ( instr.type)
     {
@@ -60,7 +59,7 @@ void MIPS::load( FuncInstr& instr) {
     }
 }
 
-// store information in memory READY
+// store information in memory
 void MIPS::store( const FuncInstr& instr) {
     switch ( instr.type)
     {
@@ -76,7 +75,7 @@ void MIPS::store( const FuncInstr& instr) {
     }
 }
 
-// calls load for loads, store for stores, nothing otherwise READY
+// calls load for loads, store for stores, nothing otherwise
 void MIPS::ld_st( FuncInstr& instr) {
     switch ( instr.memOp)
     {
@@ -91,24 +90,19 @@ void MIPS::ld_st( FuncInstr& instr) {
     }
 }
 
-// update PC READY
+// update PC
 void MIPS::updatePC( const FuncInstr& instr) {
-    if ( instr.PC_delta)
-        PC += instr.PC_delta;
-    else if ( instr.jaddr)
-        PC = ( PC & 0xF0000000) | instr.jaddr;
-    else
-        PC = mem->read( instr.v_dst);
+    PC = instr.PC_new;
 }
 
-// get values of working registers READY
+// get values of working registers
 void MIPS::read_reg( FuncInstr& instr) {
     instr.v_dst = rf->read( instr.i_dst);
-    instr.v_src1 = rf->read( instr.i_src1);
-    instr.v_src2 = rf->read( instr.i_src2);
+    instr.v_src1 = instr.b_src1 = rf->read( instr.i_src1);
+    instr.v_src2 = instr.b_src2 = rf->read( instr.i_src2);
 }
 
-// save value of dst register READY
+// save value of dst register
 void MIPS::wb(const FuncInstr& instr) {
     rf->write( instr.i_dst, instr.v_dst);
 }
@@ -120,22 +114,22 @@ uint32 MIPS::fetch() const {
 
 // methods of RF class
 
-// prepare RF to work READY
+// prepare RF to work
 RF::RF() {
     array[ 0] = 0; // set $zero register to 0
 }
 
-// get value from register READY
+// get value from register
 uint32 RF::read( int index) const {
     return array[ index];
 }
 
-// clears register to 0 value READY
+// clears register to 0 value
 void RF::reset( int index) {
     array[ index] = 0;
 }
 
-// write value to register if it is not a $zero register READY
+// write value to register if it is not a $zero register
 void RF::write( int index, uint32 data) {
     if ( index != 0)
         array[ index] = data;

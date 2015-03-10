@@ -1,7 +1,7 @@
-# 
-# Building the disasm for MIPS binaries
-# @author Pavel Kryukov <pavel.kryukov@phystech.com>
-# Copyright 2014 MIPT-MIPS iLab Project
+#
+# Building the single-cycle implementation of MIPS
+# @author Alexander Pronin <alexander.pronin.mipt@gmail.com>
+# MIPT-MIPS 2015
 #
 
 # specifying relative path to the TRUNK
@@ -47,25 +47,6 @@ func_sim.o: func_sim.cpp func_sim.h types.h
 
 main.o: main.cpp func_memory.h types.h func_instr.h func_sim.h
 	$(CXX) -c $< $(INCL)
-
-#
-# Enter for building func_memory unit test
-#
-test: unit_test
-	@echo ""
-	@echo "Running ./$<\n"
-	@./$<
-	@echo "Unit testing for the moduler functional memory passed SUCCESSFULLY!"
-
-unit_test: unit_test.o func_memory.o elf_parser.o func_instr.o
-	@# don't forget to link ELF library using "-l elf"
-	@# and use "-lpthread" options for Google Test
-	$(CXX) $^ -lpthread $(GTEST_LIB) -o $@ -l elf
-	@echo "---------------------------------"
-	@echo "$@ is built SUCCESSFULLY"
-
-unit_test.o: unit_test.cpp func_instr.h
-	$(CXX) -c $< $(INCL_GTEST) $(INCL) 
 
 clean:
 	@-rm *.o

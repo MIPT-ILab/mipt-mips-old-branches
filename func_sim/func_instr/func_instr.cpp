@@ -68,10 +68,11 @@ const char *FuncInstr::regTable[] =
     "ra"
 };
 
-// start work with the operation READY
-FuncInstr::FuncInstr( uint32 bytes) : instr(bytes)
+// start work with the operation
+FuncInstr::FuncInstr( uint32 bytes, uint32 PC) : instr(bytes)
 {
-    PC_delta = 4;
+    PC_old = PC;
+    PC_new = 4 + PC_old;
     memOp = nothing;
     initFormat(); 
     switch ( format)
@@ -91,13 +92,13 @@ FuncInstr::FuncInstr( uint32 bytes) : instr(bytes)
     }
 }
 
-// get dump of operation READY
+// get dump of operation
 std::string FuncInstr::Dump( std::string indent) const
 {
     return indent + disasm;
 }
 
-// get information about operation format READY
+// get information about operation format
 void FuncInstr::initFormat()
 {
     for ( size_t i = 0; i < isaTableSize; i++) {
@@ -113,7 +114,7 @@ void FuncInstr::initFormat()
     format = FORMAT_UNKNOWN;
 }
 
-// prepare the dump of operation and get ready to execute it READY
+// prepare operation to execute it
 void FuncInstr::initR()
 {
     // find instr by functor
@@ -160,6 +161,7 @@ void FuncInstr::initR()
     }
 }
 
+// prepare dump string
 void FuncInstr::DumpR()
 {   
     ostringstream oss;
@@ -192,7 +194,7 @@ void FuncInstr::DumpR()
 }
 
 
-// prepare the dump of operation and get ready to execute it READY
+// prepare operation to execute it
 void FuncInstr::initI()
 {
     switch ( operation)
@@ -229,6 +231,7 @@ void FuncInstr::initI()
     }
 }
 
+// prepare dump string
 void FuncInstr::DumpI()
 {
     std::ostringstream oss;
@@ -267,12 +270,13 @@ void FuncInstr::DumpI()
     disasm = oss.str();
 }
 
-// prepare the dump of operation and get ready to execute it READY
+// prepare operation to execute it
 void FuncInstr::initJ()
 {
     
 }
 
+// prepare dump string
 void FuncInstr::DumpJ()
 {
     std::ostringstream oss;
@@ -282,7 +286,7 @@ void FuncInstr::DumpJ()
     disasm = oss.str();
 }
 
-// give the message about error if the operation is unknown READY
+// give the message about error if the operation is unknown
 void FuncInstr::initUnknown()
 {
     std::ostringstream oss;
@@ -293,13 +297,13 @@ void FuncInstr::initUnknown()
     exit(EXIT_FAILURE);
 }
 
-// usefull thing for easy dump READY
+// usefull thing for easy dump
 std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
     return out << instr.Dump( "");
 }
 
-// print imm in hex READY
+// print imm in hex
 std::string FuncInstr::outImm()
 {
     std::ostringstream oss;
@@ -307,23 +311,23 @@ std::string FuncInstr::outImm()
     return oss.str();
 }
 
-// print value of src1 in hex READY
+// print value of src1 in hex
 std::string FuncInstr::outSrc1()
 {
     std::ostringstream oss;
-    oss << " [" << std::hex << "0x" << static_cast< signed int>( v_src1) << std::dec << "]";
+    oss << " [" << std::hex << "0x" << static_cast< signed int>( b_src1) << std::dec << "]";
     return oss.str();
 }
 
-// print value of src2 in hex READY
+// print value of src2 in hex
 std::string FuncInstr::outSrc2()
 {
     std::ostringstream oss;
-    oss << " [" << std::hex << "0x" << static_cast< signed int>( v_src2) << std::dec << "]";
+    oss << " [" << std::hex << "0x" << static_cast< signed int>( b_src2) << std::dec << "]";
     return oss.str();
 }
 
-// print value of dst in hex READY
+// print value of dst in hex
 std::string FuncInstr::outDst()
 {
     std::ostringstream oss;
@@ -331,13 +335,13 @@ std::string FuncInstr::outDst()
     return oss.str();
 }
 
-// execute the operation READY
+// execute the operation
 void FuncInstr::execute() {
-    preDump();
     ( this->*function)();
+    preDump();
 }
 
-
+// operations
 
 void FuncInstr::add() {
     v_dst = v_src1 + v_src2;
@@ -401,22 +405,20 @@ void FuncInstr::xori() {
 
 void FuncInstr::beq() {
     if ( v_src1 == v_src2)
-        PC_delta += ( instr.asI.imm << 2);
+        PC_new += ( instr.asI.imm << 2);
 }
 
 void FuncInstr::bne() {
     if ( v_src1 != v_src2)
-        PC_delta += ( instr.asI.imm << 2);
+        PC_new += ( instr.asI.imm << 2);
 }
 
 void FuncInstr::j() {
-    PC_delta = 0;
-    jaddr = ( instr.asJ.imm << 2);
+    PC_new = ( PC_old & 0xf0000000) | ( instr.asJ.imm << 2);
 }
 
 void FuncInstr::jr() {
-    PC_delta = 0;
-    jaddr = 0;
+    PC_new = v_src1;
 }
 
 void FuncInstr::lb() {

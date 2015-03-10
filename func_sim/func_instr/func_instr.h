@@ -23,17 +23,20 @@ class FuncInstr
 {
     public:
         uint32 v_src1;
+        uint32 b_src1; // saves src1 before execution to make better dump
         uint32 v_src2;
+        uint32 b_src2; // saves src2 before execution to make better dump
         uint32 v_dst;
-        uint32 mem_addr;
-        uint32 PC_delta;
+        uint32 mem_addr; // memory address to read/write
+        uint32 PC_new;
+        uint32 PC_old;
 
+        // index of register
         uint32 i_dst;
         uint32 i_src1;
         uint32 i_src2;
-        
-        uint32 jaddr;
 
+        // memory result type
         enum _type
         {
             BYTE,
@@ -43,6 +46,7 @@ class FuncInstr
             UHWORD
         } type;
 
+        // memory operation type
         enum LoadStore
         {
             nothing,
@@ -50,9 +54,9 @@ class FuncInstr
             store
         } memOp;
 
-        FuncInstr( uint32 bytes); // READY
-        std::string Dump( std::string indent = " ") const; // READY
-        void execute(); // READY
+        FuncInstr( uint32 bytes, uint32 PC = 0); // read operation
+        std::string Dump( std::string indent = " ") const; // get dump string
+        void execute(); // execute operation
 
     private:
         
@@ -128,18 +132,19 @@ class FuncInstr
 
         std::string disasm;
                                                                
-        void initFormat(); //READY
-        void initR(); // READY
-        void initI(); // READY
-        void initJ(); // READY
-        void initUnknown(); // READY
+        void initFormat();
+        void initR();
+        void initI();
+        void initJ(); // now it's become useless, but I holding it for possible operations in future
+        void initUnknown();
 
-        std::string outSrc1(); // READY
-        std::string outSrc2(); // READY
-        std::string outDst(); // READY
-        std::string outImm(); // READY
-        void ( FuncInstr::*function)();
+        std::string outSrc1(); // write value from src1 before execution
+        std::string outSrc2(); // write value from src2 before execution
+        std::string outDst(); // write value from dst after execution
+        std::string outImm(); // write value of imm
+        void ( FuncInstr::*function)(); // operation to execute
 
+        // operations
         void add();
         void addu();
         void sub();
@@ -174,6 +179,7 @@ class FuncInstr
         void sh();
         void sw();
 
+        // dump operations
         void preDump();
         void DumpR();
         void DumpI();

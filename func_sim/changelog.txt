@@ -67,3 +67,23 @@ Changes in main.cpp:
 - completed
 
 Now program is ready for use. There is one problem: it is still working with old PC model.
+
+03/10/15 18:54 version 1.4:
+
+
+Changes in func_sim.h and func_sim.cpp:
+- added comments
+- new PC model
+
+Changes in func_instr.h and func_instr.cpp:
+- added comments
+- new PC model
+
+Changes in main.cpp:
+- added comments
+
+Changes in Makefile:
+- deleted some useless operations that will not work
+- added comments
+
+Now task is completed at all.
