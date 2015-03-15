@@ -61,7 +61,7 @@ FuncMemory::FuncMemory( const char* executable_file_name,
 }
 
 FuncMemory::~FuncMemory()
-{
+{/*
     if ( pages_set)
     {
         for ( uint64 i = 0; i < sets_n; i++)
@@ -79,7 +79,7 @@ FuncMemory::~FuncMemory()
             delete[] pages_set[ i];
         }
     }
-    delete[] pages_set;
+    delete[] pages_set;*/
 }
 
 uint64 FuncMemory::read( uint64 addr, unsigned short num_of_bytes) const
