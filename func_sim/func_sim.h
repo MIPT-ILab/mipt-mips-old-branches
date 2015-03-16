@@ -1,7 +1,5 @@
-
 #ifndef FUNC_SIM_H
 #define FUNC_SIM_H
-
 
 #include <types.h>
 #include <func_memory.h>
@@ -43,9 +41,7 @@ class MIPS {
     friend class FuncInstr;
         RF* rf;
         uint32 PC;
-        FuncMemory* mem;
-        
-
+        FuncMemory* mem;      
     public:
         MIPS();
         ~MIPS();
@@ -57,13 +53,7 @@ class MIPS {
         void run( const string&, uint32 instr_to_run);
         uint32 fetch() const { return mem->read( PC); }
         void updatePC( const FuncInstr& instr) { PC = instr->new_PC; }
-        uint32 read(RegNum index);
-        
-         
-   
-
-
-
-};
+        uint32 read(RegNum index);   
+    };
 
  #endif // FUNC_SIM_H

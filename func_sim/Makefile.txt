@@ -15,11 +15,13 @@ OBJ_DIR := obj
 C_FILES := $(SRC_DIR)/elf_parser/elf_parser.cpp $(SRC_DIR)/func_instr/func_instr.cpp $(SRC_DIR)/func_memory/func_memory.cpp $(SRC_DIR)/func_sim.cpp $(SRC_DIR)/main.cpp
 OBJS_FILES := ${C_FILES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o}
 
+INCL := -I $(SRC_DIR) -I $(TRUNK)/common/ -I $(SRC_DIR)/elf_parser/ -I $(SRC_DIR)/func_memory/ -I $(SRC_DIR)/func_instr/
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-        $(CC) $(CFLAGS) $< -c -o $@
+        $(CC) $(CFLAGS) $(INCL) $< -c -o $@
 
 $(BIN_DIR)/program: $(OBJS_FILES)
-        $(CC) $(LDFLAGS) $^ -o $@
+        $(CC)  $(LDFLAGS) $(INCL) $^ -o $@
 
 all: build_dirs $(BIN_DIR)/program
 
@@ -35,4 +37,4 @@ build_dirs:
 clean:
         rm -rf $(BIN_DIR)
         rm -rf $(OBJ_DIR)
-        rm -rf $(OBJ_DIR)
+        
