@@ -20,7 +20,7 @@ enum RegNum {
     $sp,
     $fp,
     $ra,
-    MAX_REG = 32
+    MAX_REG
 };
 
 class FuncInstr;
@@ -29,9 +29,10 @@ class RF {
         uint32 array[MAX_REG];
     public:
         RF();
-
-        uint32 read( RegNum index);
+        
+        uint32 read( RegNum index) const;
         void write( RegNum index, uint32 data);
+        void reset( RegNum index); // clears register to 0 value          
         void reset( RegNum index)
         void dump( char * file);
         void resetAll() { for(int i = 0; i < MAX_REG; i++)    array[i] = 0;   }
@@ -43,20 +44,23 @@ class MIPS {
         RF* rf;
         uint32 PC;
         FuncMemory* mem;
+        
+
+    public:
+        MIPS();
+        ~MIPS();
         void load( FuncInstr& instr);
         void store( const FuncInstr& instr);
         void read_src( FuncInstr& instr);
         void ld_st( FuncInstr& instr);
         void wb( FuncInstr& instr);
-
-    public:
-        MIPS();
-        ~MIPS();
-
         void run( const string&, uint32 instr_to_run);
-        uint32 fetch() { return (uint32)mem->read(PC); };
-        void updatePC( const FuncInstr& instr);
+        uint32 fetch() const { return mem->read( PC); }
+        void updatePC( const FuncInstr& instr) { PC = instr->new_PC; }
         uint32 read(RegNum index);
+        
+         
+   
 
 
 
