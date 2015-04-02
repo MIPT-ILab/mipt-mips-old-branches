@@ -14,3 +14,20 @@ Changes in perf_sim.h and perf_sim.cpp:
 - main functions haven't been implemented yet
 
 The task hasn't been done yet. Program doesn't work because of it.
+
+
+
+04/03/15 02:39 version 1.1:
+
+Continue working with project. Created new object:
+- rf.h
+
+Changes in perf_sim.h:
+- added some functions for implementation
+- main functions haven't been implemented yet
+
+Changes in rf.h:
+- main idea was taken from func_sim register file
+- it is ready to work
+
+The task hasn't been done yet. Program doesn't work because of it.
