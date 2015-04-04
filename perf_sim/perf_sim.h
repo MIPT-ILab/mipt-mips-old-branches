@@ -1,51 +1,45 @@
 /*
  * func_sim.cpp - mips single-cycle simulator
  * @author Pavel Kryukov pavel.kryukov@phystech.edu
- * Copyright 2015 MIPT-MIPS 
+ * Copyright 2015 MIPT-MIPS
  */
 
-#ifndef FUNC_SIM_H
-#define FUNC_SIM_H
+#ifndef PERF_SIM_H
+#define PERF_SIM_H
 
 #include <func_instr.h>
 #include <func_memory.h>
 #include <rf.h>
 
-class MIPS
-{
-        RF* rf;
-        uint32 PC;
-        FuncMemory* mem;
+generic <typename rp_p2m_type, wp_m2n_type>
+class PerfMIPS_module {
+    ReadPort<rp_p2m_type>* rp_previous_2_me;
+    ReadPort<bool>* rp_next_2_me_stall;
 
-        uint32 fetch() const { return mem->read(PC); }
-        void read_src(FuncInstr& instr) const {
-            rf->read_src1(instr); 
-            rf->read_src2(instr); 
-	}
+    WritePort<wp_m2n_type>* wp_me_2_next;
+    WritePort<bool>* wp_me_2_previous_stall;
 
-        void load(FuncInstr& instr) const {
-            instr.set_v_dst(mem->read(instr.get_mem_addr(), instr.get_mem_size()));
-        }
+    };
 
-        void store(const FuncInstr& instr) {
-            mem->write(instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());
-        }
 
-	void load_store(FuncInstr& instr) {
-            if (instr.is_load())
-                load(instr);
-            else if (instr.is_store())
-                store(instr);
-        }
 
-        void wb(const FuncInstr& instr) {
-            rf->write_dst(instr);
-        }
-   public:
-        MIPS();
-        void run(const std::string& tr, uint32 instrs_to_run);
-        ~MIPS();
-};
-            
+
+class PerfMIPS {
+        // Ports
+        ReadPort<uint32>*       rp_fetch_2_decode;
+        ReadPort<FuncInstr>*    rp_decode_2_execute;
+        ReadPort<FuncInstr>*    rp_execute_2_memory;
+        ReadPort<FuncInstr>*    rp_memory_2_writeback;
+
+        WritePort<uint32>*      wp_fetch_2_decode;
+        WritePort<FuncInstr>*   wp_decode_2_execute;
+        WritePort<FuncInstr>*   wp_execute_2_memory;
+        WritePort<FuncInstr>*   wp_memory_2_writeback;
+
+        // Stall ports
+        ReadPort<bool>* rp_decode_2_fetch_stall;
+        WritePort<bool>* wp_decode_2_fetch_stall;
+    };
+
 #endif
- 
+
