@@ -19,7 +19,15 @@ class PerfMIPS_module {
     WritePort<wp_m2n_type>* wp_me_2_next;
     WritePort<bool>* wp_me_2_previous_stall;
 
-    };
+    void *(*clock_module)(int *);
+
+    PerfMIPS_module(ReadPort<rp_p2m_type>* rp_previous_2_me_init,
+                    WritePort<wp_m2n_type>* wp_me_2_next_init){
+        rp_previous_2_me = rp_previous_2_me_init;
+        wp_me_2_next = wp_me_2_next_init;
+    }
+
+};
 
 
 
@@ -37,9 +45,16 @@ class PerfMIPS {
         WritePort<FuncInstr>*   wp_memory_2_writeback;
 
         // Stall ports
-        ReadPort<bool>* rp_decode_2_fetch_stall;
-        WritePort<bool>* wp_decode_2_fetch_stall;
-    };
+        ReadPort<bool>*     rp_decode_2_fetch_stall;
+        WritePort<bool>*    wp_decode_2_fetch_stall;
+
+        // Modules
+        PerfMIPS_module<uint32, uint32>         fetch;
+        PerfMIPS_module<uint32, FuncInstr>      decode;
+        PerfMIPS_module<FuncInstr, FuncInstr>   execute;
+        PerfMIPS_module<FuncInstr, FuncInstr>   memory;
+        PerfMIPS_module<FuncInstr, FuncInstr>   writeback;
+};
 
 #endif
 
