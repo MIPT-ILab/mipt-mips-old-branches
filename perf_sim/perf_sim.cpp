@@ -1,7 +1,174 @@
 #include <iostream>
-
 #include <func_sim.h>
 
+void fetch_clock(int cycle){
+        mem = new FuncMemory(tr.c_str());
+        PC = mem->startPC();
+        uint32 instr_bytes = fetch();
+
+        bool is_stall;
+        /* If the next module tells us to stall, we stops
+           and send stall signals to previous module */
+        rp_next_2_me_stall->read( &is_stall, cycle);
+        if ( is_stall) {
+             wp_me_2_previous_stall->write( true, cycle);
+             return;
+        }
+
+        /* If nothing cames from previous stage
+           execute, memory and writeback modules have to jump out here */
+        if ( rp_previous_2_me->read( &module_data, cycle))
+            return;
+
+        /* But, decode stage doesn't jump out
+           It takes non-updated bytes from module_data
+           and re-decodes them */
+        // rp_previous_2_me->read( &module_data, cycle)
+
+        // Here we process data.
+
+        if (...) {
+             /* This branch is chosen if everything is OK and
+                we may continue promotion to the next pipeline stages */
+             wp_me_2_next->write( module_data, cycle);
+        }
+        else {
+             // Otherwise, nothing is done and we have to stall pipeline
+             wp_me_2_previous_stall->write( true, cycle);
+        }
+}
+
+void decode_clock(int cycle){
+        bool is_stall;
+        /* If the next module tells us to stall, we stops
+           and send stall signals to previous module */
+        rp_next_2_me_stall->read( &is_stall, cycle);
+        if ( is_stall) {
+             wp_me_2_previous_stall->write( true, cycle);
+             return;
+        }
+
+        /* If nothing cames from previous stage
+           execute, memory and writeback modules have to jump out here */
+        if ( rp_previous_2_me->read( &module_data, cycle))
+            return;
+
+        /* But, decode stage doesn't jump out
+           It takes non-updated bytes from module_data
+           and re-decodes them */
+        // rp_previous_2_me->read( &module_data, cycle)
+
+        // Here we process data.
+
+        if (...) {
+             /* This branch is chosen if everything is OK and
+                we may continue promotion to the next pipeline stages */
+             wp_me_2_next->write( module_data, cycle);
+        }
+        else {
+             // Otherwise, nothing is done and we have to stall pipeline
+             wp_me_2_previous_stall->write( true, cycle);
+        }
+}
+
+void execute_clock(int cycle){
+        bool is_stall;
+        /* If the next module tells us to stall, we stops
+           and send stall signals to previous module */
+        rp_next_2_me_stall->read( &is_stall, cycle);
+        if ( is_stall) {
+             wp_me_2_previous_stall->write( true, cycle);
+             return;
+        }
+
+        /* If nothing cames from previous stage
+           execute, memory and writeback modules have to jump out here */
+        if ( rp_previous_2_me->read( &module_data, cycle))
+            return;
+
+        /* But, decode stage doesn't jump out
+           It takes non-updated bytes from module_data
+           and re-decodes them */
+        // rp_previous_2_me->read( &module_data, cycle)
+
+        // Here we process data.
+
+        if (...) {
+             /* This branch is chosen if everything is OK and
+                we may continue promotion to the next pipeline stages */
+             wp_me_2_next->write( module_data, cycle);
+        }
+        else {
+             // Otherwise, nothing is done and we have to stall pipeline
+             wp_me_2_previous_stall->write( true, cycle);
+        }
+}
+
+void memory_clock(int cycle){
+        bool is_stall;
+        /* If the next module tells us to stall, we stops
+           and send stall signals to previous module */
+        rp_next_2_me_stall->read( &is_stall, cycle);
+        if ( is_stall) {
+             wp_me_2_previous_stall->write( true, cycle);
+             return;
+        }
+
+        /* If nothing cames from previous stage
+           execute, memory and writeback modules have to jump out here */
+        if ( rp_previous_2_me->read( &module_data, cycle))
+            return;
+
+        /* But, decode stage doesn't jump out
+           It takes non-updated bytes from module_data
+           and re-decodes them */
+        // rp_previous_2_me->read( &module_data, cycle)
+
+        // Here we process data.
+
+        if (...) {
+             /* This branch is chosen if everything is OK and
+                we may continue promotion to the next pipeline stages */
+             wp_me_2_next->write( module_data, cycle);
+        }
+        else {
+             // Otherwise, nothing is done and we have to stall pipeline
+             wp_me_2_previous_stall->write( true, cycle);
+        }
+}
+
+void writeback_clock(int cycle){
+        bool is_stall;
+        /* If the next module tells us to stall, we stops
+           and send stall signals to previous module */
+        rp_next_2_me_stall->read( &is_stall, cycle);
+        if ( is_stall) {
+             wp_me_2_previous_stall->write( true, cycle);
+             return;
+        }
+
+        /* If nothing cames from previous stage
+           execute, memory and writeback modules have to jump out here */
+        if ( rp_previous_2_me->read( &module_data, cycle))
+            return;
+
+        /* But, decode stage doesn't jump out
+           It takes non-updated bytes from module_data
+           and re-decodes them */
+        // rp_previous_2_me->read( &module_data, cycle)
+
+        // Here we process data.
+
+        if (...) {
+             /* This branch is chosen if everything is OK and
+                we may continue promotion to the next pipeline stages */
+             wp_me_2_next->write( module_data, cycle);
+        }
+        else {
+             // Otherwise, nothing is done and we have to stall pipeline
+             wp_me_2_previous_stall->write( true, cycle);
+        }
+}
 
 PerfMIPS::PerfMIPS() {
         // Ports initialization
@@ -20,9 +187,9 @@ PerfMIPS::PerfMIPS() {
         wp_decode_2_fetch_stall = new ReadPort<bool>("DECODE_2_FETCH_STALL", PORT_LATENCY);
 
         // Init modules
-        fetch = new PerfMIPS_module(NULL, wp_fetch_2_decode);
-        decode = new PerfMIPS_module(rp_fetch_2_decode, wp_decode_2_execute);
-        execute = new PerfMIPS_module(rp_decode_2_execute, wp_execute_2_memory)
-        memory = new PerfMIPS_module(rp_execute_2_memory, wp_memory_2_writeback);
-        writeback = new PerfMIPS_module(rp_memory_2_writeback, NULL);
-    }
+        fetch = new PerfMIPS_module(NULL, wp_fetch_2_decode, &fetch_clock);
+        decode = new PerfMIPS_module(rp_fetch_2_decode, wp_decode_2_execute, &decode_clock);
+        execute = new PerfMIPS_module(rp_decode_2_execute, wp_execute_2_memory, &execute_clock)
+        memory = new PerfMIPS_module(rp_execute_2_memory, wp_memory_2_writeback, &memory_clock);
+        writeback = new PerfMIPS_module(rp_memory_2_writeback, NULL, &writeback_clock);
+}
