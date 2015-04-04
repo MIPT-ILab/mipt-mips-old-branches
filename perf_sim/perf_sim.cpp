@@ -1,7 +1,7 @@
 #include <iostream>
 #include <func_sim.h>
 
-void fetch_clock(int cycle){
+void clock_fetch(int cycle){
         mem = new FuncMemory(tr.c_str());
         PC = mem->startPC();
         uint32 instr_bytes = fetch();
@@ -38,7 +38,7 @@ void fetch_clock(int cycle){
         }
 }
 
-void decode_clock(int cycle){
+void clock_decode(int cycle){
         bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
@@ -71,7 +71,7 @@ void decode_clock(int cycle){
         }
 }
 
-void execute_clock(int cycle){
+void clock_execute(int cycle){
         bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
@@ -104,7 +104,7 @@ void execute_clock(int cycle){
         }
 }
 
-void memory_clock(int cycle){
+void clock_memory(int cycle){
         bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
@@ -137,7 +137,7 @@ void memory_clock(int cycle){
         }
 }
 
-void writeback_clock(int cycle){
+void clock_writeback(int cycle){
         bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
@@ -169,6 +169,21 @@ void writeback_clock(int cycle){
              wp_me_2_previous_stall->write( true, cycle);
         }
 }
+
+PerfMIPS::run(char* filename, int instr_num) {
+        // .. init
+        executed_instrs = 0; // this variable is stored inside PerfMIPS class
+        cycle = 0;
+        while (executed_instr <= instrs_to_run) {
+              fetch->clock(cycle);
+              decode->clock(cycle);
+              execute->clock(cycle);
+              memory->clock(cycle);
+              writeback->clock(cycle); // each instruction writeback increases executed_instrs variable
+              ++cycle;
+        }
+        // ..
+    }
 
 PerfMIPS::PerfMIPS() {
         // Ports initialization

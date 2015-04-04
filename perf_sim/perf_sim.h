@@ -16,7 +16,78 @@
 #define PORT_FANOUT 1
 #define PORT_LATENCY 1
 
+template <typename rp_p2m_type, wp_m2n_type>
+class PerfMIPS_module {
+    ReadPort<rp_p2m_type>* rp_previous_2_me;
+    ReadPort<bool>* rp_next_2_me_stall;
+
+    WritePort<wp_m2n_type>* wp_me_2_next;
+    WritePort<bool>* wp_me_2_previous_stall;
+
+    void *(*clock_module)(int *);
+    void clock_module();
+
+
+    PerfMIPS_module(ReadPort<rp_p2m_type>* rp_p2m,
+                    WritePort<wp_m2n_type>* wp_m2n,
+                    ReadPort<bool>* rp_n2m_s,
+                    WritePort<bool>* wp_m2p_s,
+                    void *(*clock_module_init)(int *)){
+        rp_previous_2_me = rp_p2m;
+        wp_me_2_next = wp_m2n;
+
+        rp_next_2_me_stall = rp_n2m_s;
+        wp_me_2_previous_stall = wp_m2p_s;
+    }
+
+    void clock(int cycle){
+
+    }
+
+};
+
 class PerfMIPS {
+        RF* rf;
+        uint32 PC;
+        FuncMemory* mem;
+
+        int cycle;
+        int executed_instrs;
+
+        uint32 fetch() const { return mem->read(PC); }
+        void read_src(FuncInstr& instr) const {
+            rf->read_src1(instr);
+            rf->read_src2(instr);
+        }
+
+        void load(FuncInstr& instr) const {
+            instr.set_v_dst(mem->read(instr.get_mem_addr(), instr.get_mem_size()));
+        }
+
+        void store(const FuncInstr& instr) {
+            mem->write(instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());
+        }
+
+        void load_store(FuncInstr& instr) {
+            if (instr.is_load())
+                load(instr);
+            else if (instr.is_store())
+                store(instr);
+        }
+
+        void wb(const FuncInstr& instr) {
+            rf->write_dst(instr);
+        }
+
+        void run(char* filename, int instr_num);
+
+        void fetch_clock( int cycle);
+        void decode_clock( int cycle);
+        void execute_clock( int cycle);
+        void memory_clock( int cycle);
+        void writeback_clock( int cycle);
+
+
         // Ports
         ReadPort<uint32>*       rp_fetch_2_decode;
         ReadPort<FuncInstr>*    rp_decode_2_execute;
@@ -40,11 +111,11 @@ class PerfMIPS {
         WritePort<bool>*    wp_memory_2_writeback_stall;
 
         // Modules
-        PerfMIPS_module<uint32, uint32>         fetch;
-        PerfMIPS_module<uint32, FuncInstr>      decode;
-        PerfMIPS_module<FuncInstr, FuncInstr>   execute;
-        PerfMIPS_module<FuncInstr, FuncInstr>   memory;
-        PerfMIPS_module<FuncInstr, FuncInstr>   writeback;
+        PerfMIPS_module<uint32, uint32>*        fetch;
+        PerfMIPS_module<uint32, FuncInstr>*     decode;
+        PerfMIPS_module<FuncInstr, FuncInstr>*  execute;
+        PerfMIPS_module<FuncInstr, FuncInstr>*  memory;
+        PerfMIPS_module<FuncInstr, FuncInstr>*  writeback;
 };
 
 #endif
