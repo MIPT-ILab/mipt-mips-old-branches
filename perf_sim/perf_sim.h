@@ -16,6 +16,7 @@
 #define PORT_FANOUT 1
 #define PORT_LATENCY 1
 
+/*
 template <typename rp_p2m_type, wp_m2n_type>
 class PerfMIPS_module {
     ReadPort<rp_p2m_type>* rp_previous_2_me;
@@ -45,6 +46,7 @@ class PerfMIPS_module {
     }
 
 };
+*/
 
 class PerfMIPS {
         RF* rf;
@@ -81,12 +83,11 @@ class PerfMIPS {
 
         void run(char* filename, int instr_num);
 
-        void fetch_clock( int cycle);
-        void decode_clock( int cycle);
-        void execute_clock( int cycle);
-        void memory_clock( int cycle);
-        void writeback_clock( int cycle);
-
+        void clock_fetch( int cycle);
+        void clock_decode( int cycle);
+        void clock_execute( int cycle);
+        void clock_memory( int cycle);
+        void clock_writeback( int cycle);
 
         // Ports
         ReadPort<uint32>*       rp_fetch_2_decode;
@@ -100,22 +101,22 @@ class PerfMIPS {
         WritePort<FuncInstr>*   wp_memory_2_writeback;
 
         // Stall ports
-        ReadPort<bool>*     rp_fetch_2_decode_stall;
-        ReadPort<bool>*     rp_decode_2_execute_stall;
-        ReadPort<bool>*     rp_execute_2_memory_stall;
-        ReadPort<bool>*     rp_memory_2_writeback_stall;
+        ReadPort<bool>*     rp_decode_2_fetch_stall;
+        ReadPort<bool>*     rp_execute_2_decode_stall;
+        ReadPort<bool>*     rp_memory_2_execute_stall;
+        ReadPort<bool>*     rp_writeback_2_memory_stall;
 
-        WritePort<bool>*    wp_fetch_2_decode_stall;
-        WritePort<bool>*    wp_decode_2_execute_stall;
-        WritePort<bool>*    wp_execute_2_memory_stall;
-        WritePort<bool>*    wp_memory_2_writeback_stall;
+        WritePort<bool>*    wp_decode_2_fetch_stall;
+        WritePort<bool>*    wp_execute_2_decode_stall;
+        WritePort<bool>*    wp_memory_2_execute_stall;
+        WritePort<bool>*    wp_writeback_2_memory_stall;
 
         // Modules
-        PerfMIPS_module<uint32, uint32>*        fetch;
+        /*PerfMIPS_module<uint32, uint32>*        fetch;
         PerfMIPS_module<uint32, FuncInstr>*     decode;
         PerfMIPS_module<FuncInstr, FuncInstr>*  execute;
         PerfMIPS_module<FuncInstr, FuncInstr>*  memory;
-        PerfMIPS_module<FuncInstr, FuncInstr>*  writeback;
+        PerfMIPS_module<FuncInstr, FuncInstr>*  writeback;*/
 };
 
 #endif
