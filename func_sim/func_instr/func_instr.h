@@ -180,8 +180,8 @@ class FuncInstr
 
     public:
         FuncInstr( uint32 bytes, uint32 PC = 0);
-		std::string Dump( std::string indent = " ") const;
-		FuncInstr();
+        std::string Dump( std::string indent = " ") const;
+        FuncInstr();
         RegNum get_src1_num() const { return src1; }
         RegNum get_src2_num() const { return src2; }
         RegNum get_dst_num()  const { return dst;  }

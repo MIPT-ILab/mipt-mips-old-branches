@@ -264,7 +264,7 @@ bool FuncInstr::isJump() const
         default:
             return false;
             break;
-	}
+    }
 }
 
 

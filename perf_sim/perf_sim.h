@@ -97,22 +97,22 @@ class PerfMIPS
 		
 		void load( FuncInstr& instr) const 
 		{
-            instr.set_v_dst( mem->read( instr.get_mem_addr(), instr.get_mem_size()));
+			instr.set_v_dst( mem->read( instr.get_mem_addr(), instr.get_mem_size()));
 		}
 
-        void store( const FuncInstr& instr) 
+		void store( const FuncInstr& instr) 
 		{
-            mem->write( instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());
-        }
+			mem->write( instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());
+		}
 
 		void load_store( FuncInstr& instr) 
 		{
-            if ( instr.is_load())
-            {    
+			if ( instr.is_load())
+			{    
 				load( instr);
 			}
 			else if ( instr.is_store())
-            {    
+			{    
 				store( instr);
 			}
 		}
