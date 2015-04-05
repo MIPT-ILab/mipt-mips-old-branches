@@ -18,14 +18,15 @@ class RF {
     public:
         /**************/
         bool check( RegNum num) const { return array[(size_t)num].is_valid; }
-        void invalidate( RegNum num) { array[(size_t)num].is_valid = false; }
+        void invalidate( RegNum num) { if( REG_NUM_ZERO != num)array[(size_t)num].is_valid = false; }
 
         /**************/
         void write ( RegNum num, uint32 val) {
-            assert( array[(size_t)num].is_valid == false);
-            array[(size_t)num].is_valid = true;
-            if ( REG_NUM_ZERO != num)
+            if ( REG_NUM_ZERO != num){
+                assert( array[(size_t)num].is_valid == false);
+                array[(size_t)num].is_valid = true;
                 array[(size_t)num].value = val;
+            }
         }
 
         /**************/

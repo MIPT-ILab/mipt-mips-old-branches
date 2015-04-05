@@ -131,7 +131,7 @@ class PerfMIPS {
         PerfMIPS_module<FuncInstr, FuncInstr>*  writeback;*/
 public:
         PerfMIPS();
-        void run(const std::string& tr, int instrs_to_run);
+        void run(const std::string& tr, int instrs_to_run, bool silent_mode = true);
 
 };
 
