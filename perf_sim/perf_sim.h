@@ -7,9 +7,11 @@
 #ifndef FUNC_SIM_H
 #define FUNC_SIM_H
 
+
 #include <func_instr.h>
 #include <func_memory.h>
-#include <rf.h>
+#include <prf.h>
+#include <ports.h>
 
 class PerfMIPS
 {
@@ -17,8 +19,8 @@ class PerfMIPS
         uint32  PC;
         FuncMemory*  mem;
         bool  PC_is_valid;
-        const bool  is_silent;
-        uint32 executed_instrs
+        bool  is_silent;
+        uint32 executed_instrs;
 
         uint32 fetch() const { return mem->read(PC); }
         void read_src(FuncInstr& instr) const {
@@ -45,11 +47,11 @@ class PerfMIPS
             rf->write_dst(instr);
         }
 
-        bool src_check();
-        bool dst_check();
+        bool src_check( FuncInstr obj) const;
+        bool dst_check( FuncInstr obj) const;
 
         std::string fetch_dump( int cycle);
-        std::string pref_dump( std::string module, std::string disasm, int cycle );
+        std::string master_dump( std::string module, std::string disasm, int cycle );
 
         //Fetch module
         WritePort<uint32>*  wp_fetch_2_decode;
@@ -64,8 +66,8 @@ class PerfMIPS
         ReadPort<bool>*        rp_decode_2_fetch_stall;
         WritePort<bool>*       wp_execute_2_decode_stall;
 
-        uinr32     decode_data;  
-        FuncInstr  decode_obj;
+        uint32     decode_data;
+        FuncInstr  decode_obj;  
         bool       prev_dec;
         void clock_decode( int cycle);
 
@@ -95,14 +97,14 @@ class PerfMIPS
         ReadPort<bool>*       rp_writeback_2_memory_stall;
 
         FuncInstr  writeback_obj;
-        prev_wb;
+        bool prev_wb;
         void clock_writeback( int cycle);
 
     public:
         PerfMIPS();
         ~PerfMIPS();
 
-        void run(const std::string& tr, uint32 instrs_to_run);
+        void run(const std::string& tr, uint32 instrs_to_run, bool silent = true);
 };
             
 #endif

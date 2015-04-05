@@ -1,7 +1,7 @@
 /*
- * func_instr.h - instruction parser for mips
- * @author Pavel Kryukov pavel.kryukov@phystech.edu
- * Copyright 2014 MIPT-MIPS
+ * func_instr.cpp - mips function simulator
+ * @author Dmitry Ermilov ermilov@phystech.edu
+ * For MIPT-MIPS 2015
  */
 
 
@@ -128,12 +128,12 @@ class FuncInstr
         static const char *regTableName(RegNum);
         static const char *regTable[];
 
-	RegNum src1;
+	    RegNum src1;
         RegNum src2;
         RegNum dst;
 
         uint32 v_imm;
-	uint32 v_src1;
+	    uint32 v_src1;
         uint32 v_src2;
         uint32 v_dst;
         uint32 mem_addr;
@@ -180,8 +180,8 @@ class FuncInstr
         void calculate_addr() { mem_addr = v_src1 + v_imm; }
 
     public:
-        FuncInstr( uint32 bytes, uint32 PC = 0);
-        std::string Dump( std::string indent = " ") const;
+        FuncInstr( uint32 bytes = 0ull, uint32 PC = 0);
+        std::string Dump( std::string indent = "") const;
 
         RegNum get_src1_num() const { return src1; }
         RegNum get_src2_num() const { return src2; }
@@ -189,6 +189,7 @@ class FuncInstr
       
         bool is_load()  const { return operation == OUT_I_LOAD || operation == OUT_I_LOADU; }
         bool is_store() const { return operation == OUT_I_STORE; }
+        bool is_jump()  const { return operation == OUT_R_JUMP || operation == OUT_J_JUMP; }
 
         void set_v_src1(uint32 value) { v_src1 = value; }
         void set_v_src2(uint32 value) { v_src2 = value; }
@@ -201,7 +202,29 @@ class FuncInstr
         void set_v_dst(uint32 value)  { v_dst  = value; } // for loads
         uint32 get_v_src2() const { return v_src2; } // for stores
 	
-        void execute() { (this->*isaTable[isaNum].function)(); complete = true; };
+        void execute() { (this->*isaTable[isaNum].function)(); complete = true; }
+        bool is_complete() { return complete; }
+
+        FuncInstr& operator=( FuncInstr& obj)
+        {
+            format = obj.format;
+            operation = obj.operation;
+            instr.raw = obj.instr.raw;
+            isaNum = obj.isaNum;
+            src1 = obj.src1;
+            src2 = obj.src2;
+            dst = obj.dst;
+            v_imm = obj.v_imm;
+            v_src1 = obj.v_src1;
+            v_src2 = obj.v_src2;
+            v_dst = obj.v_dst;
+            mem_addr = obj.mem_addr;
+            mem_size = obj.mem_size;
+            complete = obj.complete;
+            new_PC = obj.new_PC;
+            disasm = obj.disasm;
+            return *this;
+        }
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);

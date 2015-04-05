@@ -1,37 +1,21 @@
-/*
- * main.cpp - mips scalar simulator
- * @author Dmitry Ermilov ermilov@phystech.edu
- * For MIPT-MIPS 2015
- */
-
-#include <iostream>
-#include <cstdlib>
+#include "func_sim.h"
 #include <cstring>
+#include <cstdlib>
 
-#include <perf_sim.h>
+using namespace std;
 
-int main( int argc, char* argv[])
+int main( int argc, char** argv) 
 {
-    if ( argc < 3 || argc > 4 || ( argc == 4 && strcmp( "-d", argv[3]) != 0))
+	if ( argc != 3)
     {
-        std::cout << "2 or 3 arguments required: mips_exe filename and amount" 
-                  << " of instrs to run, key \"-d\" optionally" << endl;
-        std::exit(EXIT_FAILURE);
+        std::cout << "2 arguments required: mips_exe filename and number of"   \
+        " instructions to perfom" << endl;
+        exit(EXIT_FAILURE);
     }
-
-    PerfMIPS* mips = new PerfMIPS();
     
-    Port<FuncInstr>::portMap->init();
-    Port<uint32>::portMap->init();
-    Port<bool>::portMap->init();
-
-    if  ( argc == 3)
-        mips->run(std::string(argv[1]), atoi(argv[2]));
-    else  
-    	mips->run(std::string(argv[1]), atoi(argv[2]), false);
-
+    MIPS* mips = new MIPS;
+    mips->run( argv[1],  atoi(argv[2]));
+    
     delete mips;
-
     return 0;
 }
-
