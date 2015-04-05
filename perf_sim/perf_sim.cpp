@@ -63,8 +63,6 @@ void  PerfMIPS::run(const std::string& tr, uint32 instrs_to_run, bool silent)
         clock_memory(cycle);
         clock_writeback(cycle);
         ++cycle;
-        if  ( cycle > 10)
-            break;
     }
     delete mem;
 }
