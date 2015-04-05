@@ -1,3 +1,9 @@
+/*
+ * perf_sim.cpp - mips pipeline simulator
+ * @author Ilya Belikov ilya.i.belikov@gmail.com
+ * Copyright 2015 MIPT-MIPS
+ */
+
 #include <iostream>
 #include <perf_sim.h>
 #include <cstring>

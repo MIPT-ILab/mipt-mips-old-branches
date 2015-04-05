@@ -1,6 +1,6 @@
 /*
- * func_sim.cpp - mips single-cycle simulator
- * @author Pavel Kryukov pavel.kryukov@phystech.edu
+ * perf_sim.h - mips pipeline simulator
+ * @author Ilya Belikov ilya.i.belikov@gmail.com
  * Copyright 2015 MIPT-MIPS
  */
 
@@ -16,37 +16,6 @@
 #define PORT_FANOUT 1
 #define PORT_LATENCY 1
 
-/*
-template <typename rp_p2m_type, wp_m2n_type>
-class PerfMIPS_module {
-    ReadPort<rp_p2m_type>* rp_previous_2_me;
-    ReadPort<bool>* rp_next_2_me_stall;
-
-    WritePort<wp_m2n_type>* wp_me_2_next;
-    WritePort<bool>* wp_me_2_previous_stall;
-
-    void *(*clock_module)(int *);
-    void clock_module();
-
-
-    PerfMIPS_module(ReadPort<rp_p2m_type>* rp_p2m,
-                    WritePort<wp_m2n_type>* wp_m2n,
-                    ReadPort<bool>* rp_n2m_s,
-                    WritePort<bool>* wp_m2p_s,
-                    void *(*clock_module_init)(int *)){
-        rp_previous_2_me = rp_p2m;
-        wp_me_2_next = wp_m2n;
-
-        rp_next_2_me_stall = rp_n2m_s;
-        wp_me_2_previous_stall = wp_m2p_s;
-    }
-
-    void clock(int cycle){
-
-    }
-
-};
-*/
 
 class PerfMIPS {
     RF* rf;
