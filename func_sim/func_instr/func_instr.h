@@ -128,8 +128,8 @@ class FuncInstr
         static const char *regTableName(RegNum);
         static const char *regTable[];
 
-		RegNum src1;
-        RegNum src2;
+        RegNum src1;
+		RegNum src2;
         RegNum dst;
 
         uint32 v_imm;
