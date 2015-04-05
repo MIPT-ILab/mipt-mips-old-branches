@@ -25,7 +25,7 @@ class MIPS
 
         void load(FuncInstr& instr) const {
             instr.set_v_dst(mem->read(instr.get_mem_addr(), instr.get_mem_size()));
-        }
+		}
 
         void store(const FuncInstr& instr) {
             mem->write(instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());

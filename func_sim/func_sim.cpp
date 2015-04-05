@@ -14,7 +14,7 @@ void MIPS::run(const std::string& tr, uint32 instrs_to_run)
     for (uint32 i = 0; i < instrs_to_run; ++i) {
         // fetch
         uint32 instr_bytes = fetch();
-   
+		
         // decode
         FuncInstr instr(instr_bytes, PC);
 

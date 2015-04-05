@@ -1,6 +1,6 @@
 /*
  * func_instr.cpp - instruction parser for mips
- * @author Pavel Kryukov pavel.kryukov@phystech.edu
+ * @author Semyon Abramov semyon.abramov@gmail.com
  * Copyright 2015 MIPT-MIPS
  */
 
@@ -155,7 +155,7 @@ void FuncInstr::initR()
             break;
         case OUT_R_JUMP:
             src1  = (RegNum)instr.asR.rs;
-
+			
             oss << regTableName(src1);
             break;
     }
@@ -191,19 +191,18 @@ void FuncInstr::initI()
 
         case OUT_I_CONST:
             dst  = (RegNum)instr.asI.rt;
-
             oss << regTable[dst] << std::hex 
                 << ", 0x" << v_imm << std::dec;
             break;
 
         case OUT_I_LOAD:
         case OUT_I_LOADU:
-            src1 = (RegNum)instr.asI.rs;
-            dst  = (RegNum)instr.asI.rt;
+            src1 = (RegNum)instr.asI.rs;      
+			dst  = (RegNum)instr.asI.rt;
             
             oss << regTable[dst] << ", 0x"
                 << std::hex << v_imm
-                << "(" << regTable[src2] << ")" << std::dec;
+                << "(" << regTable[src1] << ")" << std::dec;
             break;
         
         case OUT_I_STORE:
@@ -243,4 +242,29 @@ std::ostream& operator<< ( std::ostream& out, const FuncInstr& instr)
 {
     return out << instr.Dump( "");
 }
+
+FuncInstr::FuncInstr() : instr( 0x0), PC( 0x0)
+{
+    /* constructor without parameters*/
+}
+
+bool FuncInstr::isJump() const
+{
+    switch ( operation)
+    {
+        case OUT_R_JUMP:
+            return true;
+            break;
+        case OUT_I_BRANCH:
+            return true;
+            break;
+        case OUT_J_JUMP:
+            return true;
+            break;
+        default:
+            return false;
+            break;
+	}
+}
+
 

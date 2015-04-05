@@ -1,7 +1,7 @@
 /*
  * func_instr.h - instruction parser for mips
- * @author Pavel Kryukov pavel.kryukov@phystech.edu
- * Copyright 2014 MIPT-MIPS
+ * @author Semyon Abramov semyon.abramov.mipt@gmail.com 
+ * 2015 MIPT-MIPS 
  */
 
 
@@ -128,12 +128,12 @@ class FuncInstr
         static const char *regTableName(RegNum);
         static const char *regTable[];
 
-	RegNum src1;
+		RegNum src1;
         RegNum src2;
         RegNum dst;
 
         uint32 v_imm;
-	uint32 v_src1;
+		uint32 v_src1;
         uint32 v_src2;
         uint32 v_dst;
         uint32 mem_addr;
@@ -141,7 +141,7 @@ class FuncInstr
 
         bool complete;
 
-        const uint32 PC;
+        uint32 PC;       
         uint32 new_PC;
 
         std::string disasm;
@@ -158,8 +158,7 @@ class FuncInstr
         void execute_subu()  { v_dst = v_src1 - v_src2; }
         void execute_addi()  { v_dst = (int32)v_src1 + (int16)v_imm; }
         void execute_addiu() { v_dst = v_src1 + v_imm; }
-
-        void execute_sll()   { v_dst = v_src1 << v_imm; }
+		void execute_sll()   { v_dst = v_src1 << v_imm; }
         void execute_srl()   { v_dst = v_src1 >> v_imm; }
         void execute_lui()   { v_dst = v_imm  << 0x10; }
 
@@ -172,17 +171,17 @@ class FuncInstr
         void execute_ori()   { v_dst = v_src1 | v_imm; }
         void execute_xori()  { v_dst = v_src1 ^ v_imm; }
 
-        void execute_beq()    { if (v_src1 == v_src2) new_PC += (v_imm << 2); }
-        void execute_bne()    { if (v_src1 != v_src2) new_PC += (v_imm << 2); }
-        void execute_j()      { new_PC = (PC & 0xf0000000) | (v_imm << 2); }
-        void execute_jr()     { new_PC = v_src1; }
+        void execute_beq()   { if (v_src1 == v_src2) new_PC += (v_imm << 2); }
+        void execute_bne()   { if (v_src1 != v_src2) new_PC += (v_imm << 2); }
+        void execute_j()   	 { new_PC = (PC & 0xf0000000) | (v_imm << 2); }
+        void execute_jr()    { new_PC = v_src1; }
 
         void calculate_addr() { mem_addr = v_src1 + v_imm; }
 
     public:
         FuncInstr( uint32 bytes, uint32 PC = 0);
-        std::string Dump( std::string indent = " ") const;
-
+		std::string Dump( std::string indent = " ") const;
+		FuncInstr();
         RegNum get_src1_num() const { return src1; }
         RegNum get_src2_num() const { return src2; }
         RegNum get_dst_num()  const { return dst;  }
@@ -201,7 +200,18 @@ class FuncInstr
         void set_v_dst(uint32 value)  { v_dst  = value; } // for loads
         uint32 get_v_src2() const { return v_src2; } // for stores
 	
-        void execute() { (this->*isaTable[isaNum].function)(); complete = true; };
+        void execute() 
+        { 
+            (this->*isaTable[isaNum].function)(); complete = true; 
+        };
+		
+        /* control dependency tracker's method */
+        bool isJump() const;
+		
+        /* accessory methods for dump in perf_sim */
+        void invalidateComplete( ){	complete = false; }
+        void validateComplete(){ complete = true; }
+		
 };
 
 std::ostream& operator<<( std::ostream& out, const FuncInstr& instr);
