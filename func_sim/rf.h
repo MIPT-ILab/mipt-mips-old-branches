@@ -1,6 +1,7 @@
 /*
  * rf.h - mips register file
  * @author Pavel Kryukov pavel.kryukov@phystech.edu
+ * @modified Mikhail Lyubogoschev lyubogoshchev@phystech.edu
  * Copyright 2015 MIPT-MIPS 
  */
 
@@ -11,6 +12,8 @@
 
 class RF
 {
+        //Structure is built to add validity byte to every register ISA has
+        //and to solve the data hazard
         struct Reg {
             uint32 value;
             bool   is_valid;
@@ -22,8 +25,8 @@ class RF
             return array[(size_t)num].value;
         }
         bool check( RegNum num) const { return array[(size_t)num].is_valid; }
-        void invalidate( RegNum num) { if ( num) array[(size_t)num].is_valid = false; }
-        void validate( RegNum num) { if ( num) array[(size_t)num].is_valid = true; }
+        void invalidate( RegNum num) { if ( num) array[(size_t)num].is_valid = false; } // The register $zero shouldn't be
+        void validate( RegNum num) { if ( num) array[(size_t)num].is_valid = true; }    // modified or made invalid
         void write ( RegNum num, uint32 val) {
             assert( array[(size_t)num].is_valid);
             if ( num)
@@ -32,9 +35,9 @@ class RF
                 array[(size_t)num].is_valid = true;
             }
         }
-    
-    //    uint32 array[REG_NUM_MAX];
-    //public:
+        // I've dicided to keep all the functions from the implementation of
+        // MIPS functional simulator, but just modified them 
+        // in order to add the verification of validity
         inline bool read_src1( FuncInstr& instr) const
         {
             RegNum reg_num = instr.get_src1_num();

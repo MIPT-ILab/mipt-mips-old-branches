@@ -21,7 +21,7 @@ class PerfMIPS
 {
         RF* rf;
         uint32 PC;
-        bool PC_is_valid;
+        bool PC_is_valid; //value, needed to solve control hazards
         /*struct Pc {
             uint32 value;
             bool is_valid;
@@ -72,15 +72,17 @@ class PerfMIPS
         void wb(const FuncInstr& instr) {
             rf->write_dst(instr);
         }
+        //Variables for current module_values
         uint32 fetch_data;
         FuncInstr decode_data;
+        uint32 decode_int;
         FuncInstr execute_data;
         FuncInstr memory_data;
-        bool decode_failed;
-        uint32 decode_int;
+        
         uint64 executed_instr;
-        uint64 cycle;
-        bool silent_mode;
+        bool decode_failed; //Variable needed for solving control hazards
+        uint64 cycle; 
+        bool silent_mode; //Variable, describing if silent mode is on
 
         void clock_fetch  ( uint64 cycle);
         void clock_decode ( uint64 cycle);

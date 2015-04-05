@@ -1,3 +1,9 @@
+/*
+ * perf_sim.cpp - the imlementation of mips pipeline simulator
+ * @author Mikhail Lyubogoschev lyubogoshchev@phystech.edu
+ * Copyright 2015 MIPT-MIPS 
+ */
+
 #include <iostream>
 #include <perf_sim.h>
 
@@ -46,11 +52,10 @@ void PerfMIPS::clock_fetch( uint64 cycle)
     if ( PC_is_valid)
     {
         fetch_data = mem->read(PC);
-        FuncInstr instr(fetch_data);
         wp_fetch_2_decode->write( fetch_data, cycle); 
     }
-    FuncInstr instr(fetch_data);
-    if ( !silent_mode) cout << "fetch   cycle " << cycle <<":  " << hex << showbase << fetch_data << noshowbase << dec << endl;
+    if ( !silent_mode) 
+        cout << "fetch   cycle " << cycle <<":  " << hex << "0x" << fetch_data << dec << endl;
 }
 
 
@@ -64,22 +69,22 @@ void PerfMIPS::clock_decode( uint64 cycle)
         wp_decode_2_fetch_stall->write( true, cycle);
         return;
     }
-    if ( !decode_failed) 
-    {   
-        rp_fetch_2_decode->read( &decode_int, cycle);
-        decode_data = FuncInstr( decode_int, PC);
+    if ( !decode_failed) // decode_failed flag is set true, if the sources
+    {                    // for the instruction aren't ready
+        rp_fetch_2_decode->read( &decode_int, cycle); // In that case there is no need
+        decode_data = FuncInstr( decode_int, PC);     // to read from port and call the constructor for FuncInstr
     }
     if ( !silent_mode) cout << "decode  cycle " << cycle <<":  " << decode_data << endl;
     if ( PC_is_valid)
     {   
-        if ( !read_src( decode_data))
-        {
+        if ( !read_src( decode_data)) // If the sources aren't ready - we should 
+        {                             // stall fetch and wait for sources
             rp_fetch_2_decode->read( &decode_int, cycle);
             decode_failed = true; 
             wp_decode_2_fetch_stall->write( true, cycle);
             return;
         }
-        decode_failed = false;
+        decode_failed = false; // After sources are ready - we should go on processing data
         rf->invalidate( decode_data.get_dst_num());
         PC_is_valid = decode_data.is_jump() ? false : true;
         if ( PC_is_valid)
@@ -105,8 +110,8 @@ void PerfMIPS::clock_execute( uint64 cycle)
         wp_execute_2_decode_stall->write( true, cycle);
         return;
     }
-    if ( !rp_decode_2_execute->read( &execute_data, cycle))
-    {
+    if ( !rp_decode_2_execute->read( &execute_data, cycle)) // We should return from the function
+    {                                                       // in case there is nothing to proceed
         if ( !silent_mode) cout << "execute cycle " << cycle <<":  " << "stall - no read" << endl;
         return;
     }
@@ -147,14 +152,15 @@ void PerfMIPS::clock_wback( uint64 cycle)
         return;
     }
     wb( instr);
-    if ( !PC_is_valid && instr.is_jump())
-    {  
-        PC_is_valid = true;
+    if ( !PC_is_valid && instr.is_jump()) // In case current instruction is jump-type 
+    {                                     // program updates the PC and deblocks the
+        PC_is_valid = true;               // next instructions, as control hazard is solved
         this->PC = instr.get_new_PC() - 4;
     }
     executed_instr++;
     if ( !silent_mode) cout << "wback   cycle " << cycle <<":  ";
-    cout << instr << endl;
+    if ( !silent_mode || instr.get_raw_bytes() != 0)    // There is no need to see NOPs in the output
+        cout << instr << endl;
     wp_wback_2_memory_stall->write( false, cycle);
 }
 

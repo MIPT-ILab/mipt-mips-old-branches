@@ -186,6 +186,7 @@ class FuncInstr
         RegNum get_src1_num() const { return src1; }
         RegNum get_src2_num() const { return src2; }
         RegNum get_dst_num()  const { return dst;  }
+        uint32 get_raw_bytes() const { return instr.raw; }
       
         bool is_load()  const { return operation == OUT_I_LOAD || operation == OUT_I_LOADU; }
         bool is_store() const { return operation == OUT_I_STORE; }

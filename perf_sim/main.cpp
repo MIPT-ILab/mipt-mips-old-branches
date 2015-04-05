@@ -13,8 +13,8 @@ int main( int argc, char* argv[])
     }
 
     PerfMIPS* mips = new PerfMIPS();
-    if ( argc == 4 && !strcmp( "-d", argv[3]))
-        mips->run(std::string(argv[1]), atoi(argv[2]), false);
+    if ( argc == 4 && !strcmp( "-d", argv[3]))                  // The behavior of the program depends
+        mips->run(std::string(argv[1]), atoi(argv[2]), false);  // on the amount of arguments given
     else
         mips->run(std::string(argv[1]), atoi(argv[2]));
     delete mips;
