@@ -337,7 +337,7 @@ void PerfMIPS::clock_writeback( int cycle)
 void PerfMIPS::run( const std::string& tr, int instrs_to_run, bool silent)
 {
 	mem = new FuncMemory( tr.c_str());
-    PC->value = mem->startPC();
+	PC->value = mem->startPC();
 	silent_output = silent;
 	executed_instr = 0;
 	cycle = 0;  

@@ -133,7 +133,7 @@ class FuncInstr
         RegNum dst;
 
         uint32 v_imm;
-		uint32 v_src1;
+        uint32 v_src1;
         uint32 v_src2;
         uint32 v_dst;
         uint32 mem_addr;
@@ -158,7 +158,7 @@ class FuncInstr
         void execute_subu()  { v_dst = v_src1 - v_src2; }
         void execute_addi()  { v_dst = (int32)v_src1 + (int16)v_imm; }
         void execute_addiu() { v_dst = v_src1 + v_imm; }
-		void execute_sll()   { v_dst = v_src1 << v_imm; }
+        void execute_sll()   { v_dst = v_src1 << v_imm; }
         void execute_srl()   { v_dst = v_src1 >> v_imm; }
         void execute_lui()   { v_dst = v_imm  << 0x10; }
 

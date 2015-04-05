@@ -6,7 +6,7 @@
  */
 
 
- #ifndef PERF_SIM
+#ifndef PERF_SIM
 #define PERF_SIM
 
 // Generic C++
