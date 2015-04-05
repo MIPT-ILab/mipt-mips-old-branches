@@ -141,7 +141,7 @@ class FuncInstr
 
         bool complete;
 
-        const uint32 PC;
+        uint32 PC;
         uint32 new_PC;
 
         std::string disasm;

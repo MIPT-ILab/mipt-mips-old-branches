@@ -51,7 +51,7 @@ class PerfMIPS
         
         uint32 fetch() const { return mem->read(PC); }
         bool read_src( FuncInstr& instr) const {
-            return ( rf->read_src1( instr)) && ( rf->read_src2( instr));
+            return ( rf->read_src1( instr)) && ( rf->read_src2( instr) && rf->check( instr.get_dst_num()));
 	    }
 
         void load(FuncInstr& instr) const {
@@ -73,10 +73,11 @@ class PerfMIPS
             rf->write_dst(instr);
         }
         uint32 fetch_data;
-        uint32 decode_data;
+        FuncInstr decode_data;
         FuncInstr execute_data;
         FuncInstr memory_data;
-
+        bool decode_failed;
+        uint32 decode_int;
         uint64 executed_instr;
         uint64 cycle;
         bool silent_mode;
