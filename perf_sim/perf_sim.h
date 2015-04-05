@@ -57,9 +57,8 @@ class PerfMIPS {
         int executed_instrs;
 
         uint32 fetch() const { return mem->read(PC); }
-        void read_src(FuncInstr& instr) const {
-            rf->read_src1(instr);
-            rf->read_src2(instr);
+        bool read_src(FuncInstr& instr) const {
+            return rf->read_src1(instr) && rf->read_src2(instr);
         }
 
         void load(FuncInstr& instr) const {
@@ -102,14 +101,14 @@ class PerfMIPS {
 
         // Stall ports
         ReadPort<bool>*     rp_decode_2_fetch_stall;
-        ReadPort<bool>*     rp_execute_2_decode_stall;
+        /*ReadPort<bool>*     rp_execute_2_decode_stall;
         ReadPort<bool>*     rp_memory_2_execute_stall;
-        ReadPort<bool>*     rp_writeback_2_memory_stall;
+        ReadPort<bool>*     rp_writeback_2_memory_stall;*/
 
         WritePort<bool>*    wp_decode_2_fetch_stall;
-        WritePort<bool>*    wp_execute_2_decode_stall;
+        /*WritePort<bool>*    wp_execute_2_decode_stall;
         WritePort<bool>*    wp_memory_2_execute_stall;
-        WritePort<bool>*    wp_writeback_2_memory_stall;
+        WritePort<bool>*    wp_writeback_2_memory_stall;*/
 
         // Modules
         /*PerfMIPS_module<uint32, uint32>*        fetch;

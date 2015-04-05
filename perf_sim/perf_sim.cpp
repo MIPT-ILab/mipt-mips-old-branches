@@ -13,14 +13,14 @@ void PerfMIPS::clock_fetch(int cycle){
 }
 
 void PerfMIPS::clock_decode(int cycle){
-        bool is_stall;
+        //bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
-        rp_execute_2_decode_stall->read( &is_stall, cycle);
-        if ( is_stall) {
+        //rp_execute_2_decode_stall->read( &is_stall, cycle);
+        /*if ( is_stall) {
              wp_decode_2_fetch_stall->write( true, cycle);
              return;
-        }
+        }*/
 
         /* But, decode stage doesn't jump out
            It takes non-updated bytes from module_data
@@ -28,9 +28,9 @@ void PerfMIPS::clock_decode(int cycle){
         rp_fetch_2_decode->read( &module_data, cycle)
 
         // Here we process data.
-        FuncInstr instr(instr_bytes, PC);
+        bool succ_read_src = read_src(module_data);
 
-        if (...) {
+        if (succ_read_src) {
              /* This branch is chosen if everything is OK and
                 we may continue promotion to the next pipeline stages */
              wp_decode_2_execute->write( module_data, cycle);
@@ -42,14 +42,14 @@ void PerfMIPS::clock_decode(int cycle){
 }
 
 void PerfMIPS::clock_execute(int cycle){
-        bool is_stall;
+        //bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
-        rp_memory_2_execute_stall->read( &is_stall, cycle);
+        /*rp_memory_2_execute_stall->read( &is_stall, cycle);
         if ( is_stall) {
              wp_execute_2_decode_stall->write( true, cycle);
              return;
-        }
+        }*/
 
         FuncInstr module_data;
         /* If nothing cames from previous stage
@@ -58,28 +58,27 @@ void PerfMIPS::clock_execute(int cycle){
             return;
 
         // Here we process data.
-        read_src(module_data);
+        module_data.execute();
+        wp_execute_2_memory->write( module_data, cycle);
 
-        if (...) {
-             /* This branch is chosen if everything is OK and
-                we may continue promotion to the next pipeline stages */
-             wp_execute_2_memory->write( module_data, cycle);
+        /*if (succ_read_src) {
+            wp_execute_2_memory->write( module_data, cycle);
         }
         else {
-             // Otherwise, nothing is done and we have to stall pipeline
-             wp_execute_2_decode_stall->write( true, cycle);
-        }
+            // Otherwise, nothing is done and we have to stall pipeline
+            wp_execute_2_decode_stall->write( true, cycle);
+        }*/
 }
 
 void PerfMIPS::clock_memory(int cycle){
-        bool is_stall;
+        //bool is_stall;
         /* If the next module tells us to stall, we stops
            and send stall signals to previous module */
-        rp_writeback_2_memory_stall->read( &is_stall, cycle);
+        /*rp_writeback_2_memory_stall->read( &is_stall, cycle);
         if ( is_stall) {
              wp_memory_2_execute_stall->write( true, cycle);
              return;
-        }
+        }*/
 
         FuncInstr module_data;
         /* If nothing cames from previous stage
@@ -89,16 +88,15 @@ void PerfMIPS::clock_memory(int cycle){
 
         // Here we process data.
         load_store(module_data);
+        wp_memory_2_writeback->write( module_data, cycle);
 
-        if (...) {
-             /* This branch is chosen if everything is OK and
-                we may continue promotion to the next pipeline stages */
+        /*if (...) {
              wp_memory_2_writeback->write( module_data, cycle);
         }
         else {
              // Otherwise, nothing is done and we have to stall pipeline
              wp_memory_2_execute_stall->write( true, cycle);
-        }
+        }*/
 }
 
 void PerfMIPS::clock_writeback(int cycle){
@@ -116,17 +114,16 @@ void PerfMIPS::clock_writeback(int cycle){
 }
 
 PerfMIPS::run(const std::string& tr, int instrs_to_run) {
-        // .. init
         mem = new FuncMemory(tr.c_str());
         PC = mem->startPC();
         executed_instrs = 0; // this variable is stored inside PerfMIPS class
         cycle = 0;
         while (executed_instr <= instrs_to_run) {
-              fetch->clock(cycle);
-              decode->clock(cycle);
-              execute->clock(cycle);
-              memory->clock(cycle);
-              writeback->clock(cycle); // each instruction writeback increases executed_instrs variable
+              clock_fetch(cycle);
+              clock_decode(cycle);
+              clock_execute(cycle);
+              clock_memory(cycle);
+              clock_writeback(cycle); // each instruction writeback increases executed_instrs variable
               ++cycle;
         }
         // ..
@@ -149,9 +146,9 @@ PerfMIPS::PerfMIPS() {
         wp_decode_2_fetch_stall = new ReadPort<bool>("DECODE_2_FETCH_STALL", PORT_LATENCY);
 
         // Init modules
-        fetch = new PerfMIPS_module(NULL, wp_fetch_2_decode, &fetch_clock);
+        /*fetch = new PerfMIPS_module(NULL, wp_fetch_2_decode, &fetch_clock);
         decode = new PerfMIPS_module(rp_fetch_2_decode, wp_decode_2_execute, &decode_clock);
         execute = new PerfMIPS_module(rp_decode_2_execute, wp_execute_2_memory, &execute_clock)
         memory = new PerfMIPS_module(rp_execute_2_memory, wp_memory_2_writeback, &memory_clock);
-        writeback = new PerfMIPS_module(rp_memory_2_writeback, NULL, &writeback_clock);
+        writeback = new PerfMIPS_module(rp_memory_2_writeback, NULL, &writeback_clock);*/
 }
