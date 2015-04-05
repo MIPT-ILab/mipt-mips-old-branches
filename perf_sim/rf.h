@@ -18,7 +18,7 @@ class RF {
     public:
         /**************/
         bool check( RegNum num) const { return array[(size_t)num].is_valid; }
-        void invalidate( RegNum num) { if( REG_NUM_ZERO != num)array[(size_t)num].is_valid = false; }
+        void invalidate( RegNum num) { if( REG_NUM_ZERO != num) array[(size_t)num].is_valid = false; }
 
         /**************/
         void write ( RegNum num, uint32 val) {
@@ -55,8 +55,8 @@ class RF {
         /**************/
         inline void reset( RegNum reg)
         {
-            array[reg].value = 0;
-            array[reg].is_valid = true;
+            array[ reg].value = 0;
+            array[ reg].is_valid = true;
         }
 
         /**************/
@@ -65,6 +65,7 @@ class RF {
             for ( size_t i = 0; i < REG_NUM_MAX; ++i)
                 reset((RegNum)i);
         }
+
     };
 
 #endif

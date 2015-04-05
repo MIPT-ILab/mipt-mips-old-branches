@@ -49,90 +49,79 @@ class PerfMIPS_module {
 */
 
 class PerfMIPS {
-        RF* rf;
-        uint32 PC;
-        bool PC_is_valid;
-        FuncMemory* mem;
+    RF* rf;
+    uint32 PC;
+    bool PC_is_valid;
+    FuncMemory* mem;
 
-        bool silent;
+    bool silent;
 
-        int cycle;
-        int executed_instrs;
-        int num_of_instructions;
+    int cycle;
+    int executed_instrs;
+    int num_of_instructions;
 
-        uint32 fetch(bool* is_valid) const {
-            *is_valid = PC_is_valid;
-            return mem->read(PC);
-        }
+    uint32 fetch( bool* is_valid) const {
+        *is_valid = PC_is_valid;
+        return mem->read( PC);
+    }
 
-        void invalidate_PC(){ PC_is_valid = false;}
-        void update_PC(uint32 new_PC){
-            PC = new_PC;
-            PC_is_valid = true;
-        }
+    void invalidate_PC() { PC_is_valid = false;}
+    void update_PC( uint32 new_PC) {
+        PC = new_PC;
+        PC_is_valid = true;
+    }
 
 
-        bool read_src(FuncInstr& instr) const {
-            return rf->read_src1(instr) && rf->read_src2(instr);
-        }
+    bool read_src( FuncInstr& instr) const {
+        return rf->read_src1( instr) && rf->read_src2( instr);
+    }
 
-        void load(FuncInstr& instr) const {
-            instr.set_v_dst(mem->read(instr.get_mem_addr(), instr.get_mem_size()));
-        }
+    void load( FuncInstr& instr) const {
+        instr.set_v_dst( mem->read( instr.get_mem_addr(), instr.get_mem_size()));
+    }
 
-        void store(const FuncInstr& instr) {
-            mem->write(instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());
-        }
+    void store( const FuncInstr& instr) {
+        mem->write( instr.get_v_src2(), instr.get_mem_addr(), instr.get_mem_size());
+    }
 
-        void load_store(FuncInstr& instr) {
-            if (instr.is_load())
-                load(instr);
-            else if (instr.is_store())
-                store(instr);
-        }
+    void load_store( FuncInstr& instr) {
+        if ( instr.is_load())
+            load( instr);
+        else if ( instr.is_store())
+            store( instr);
+    }
 
-        void wb(const FuncInstr& instr) {
-            rf->write_dst(instr);
-        }
+    void wb( const FuncInstr& instr) {
+        rf->write_dst( instr);
+    }
 
-        void clock_fetch( int cycle);
-        void clock_decode( int cycle);
-        void clock_execute( int cycle);
-        void clock_memory( int cycle);
-        void clock_writeback( int cycle);
+    void clock_fetch( int cycle);
+    void clock_decode( int cycle);
+    void clock_execute( int cycle);
+    void clock_memory( int cycle);
+    void clock_writeback( int cycle);
 
-        // Ports
-        ReadPort<uint32>*       rp_fetch_2_decode;
-        ReadPort<FuncInstr>*    rp_decode_2_execute;
-        ReadPort<FuncInstr>*    rp_execute_2_memory;
-        ReadPort<FuncInstr>*    rp_memory_2_writeback;
+    // Ports
+    ReadPort<uint32>*       rp_fetch_2_decode;
+    ReadPort<FuncInstr>*    rp_decode_2_execute;
+    ReadPort<FuncInstr>*    rp_execute_2_memory;
+    ReadPort<FuncInstr>*    rp_memory_2_writeback;
 
-        WritePort<uint32>*      wp_fetch_2_decode;
-        WritePort<FuncInstr>*   wp_decode_2_execute;
-        WritePort<FuncInstr>*   wp_execute_2_memory;
-        WritePort<FuncInstr>*   wp_memory_2_writeback;
+    WritePort<uint32>*      wp_fetch_2_decode;
+    WritePort<FuncInstr>*   wp_decode_2_execute;
+    WritePort<FuncInstr>*   wp_execute_2_memory;
+    WritePort<FuncInstr>*   wp_memory_2_writeback;
 
-        // Stall ports
-        ReadPort<bool>*     rp_decode_2_fetch_stall;
-        /*ReadPort<bool>*     rp_execute_2_decode_stall;
-        ReadPort<bool>*     rp_memory_2_execute_stall;
-        ReadPort<bool>*     rp_writeback_2_memory_stall;*/
+    // Stall ports
+    ReadPort<bool>*     rp_decode_2_fetch_stall;
 
-        WritePort<bool>*    wp_decode_2_fetch_stall;
-        /*WritePort<bool>*    wp_execute_2_decode_stall;
-        WritePort<bool>*    wp_memory_2_execute_stall;
-        WritePort<bool>*    wp_writeback_2_memory_stall;*/
+    WritePort<bool>*    wp_decode_2_fetch_stall;
 
-        // Modules
-        /*PerfMIPS_module<uint32, uint32>*        fetch;
-        PerfMIPS_module<uint32, FuncInstr>*     decode;
-        PerfMIPS_module<FuncInstr, FuncInstr>*  execute;
-        PerfMIPS_module<FuncInstr, FuncInstr>*  memory;
-        PerfMIPS_module<FuncInstr, FuncInstr>*  writeback;*/
 public:
-        PerfMIPS();
-        void run(const std::string& tr, int instrs_to_run, bool silent_mode = true);
 
+    PerfMIPS();
+    void run( const std::string& tr, int instrs_to_run, bool silent_mode = true);
+    ~PerfMIPS();
 };
 
 #endif
