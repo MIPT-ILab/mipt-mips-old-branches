@@ -69,6 +69,25 @@ const char *FuncInstr::regTableName(RegNum reg) {
     return regTable[static_cast<size_t>(reg)];
 }
 
+FuncInstr::FuncInstr(): 
+format(FORMAT_R),
+operation(OUT_R_ARITHM),
+instr(0),
+isaNum(0),
+src1(REG_NUM_MAX),
+src2(REG_NUM_MAX),
+dst(REG_NUM_MAX),
+v_imm(0),
+v_src1(0),
+v_src2(0),
+v_dst(0),
+mem_addr(0),
+mem_size(0),
+complete(false),
+PC(0),
+new_PC(0),
+disasm("\0") {};
+
 FuncInstr::FuncInstr( uint32 bytes, uint32 PC) : instr(bytes), PC(PC)
 {
     src1 = src2 = dst = REG_NUM_ZERO;
