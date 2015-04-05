@@ -55,3 +55,15 @@ Changes in Makefile:
 - renamed main file to perf_sim
 
 Program is working, but it hasn't been checked by valgrind.
+
+
+
+04/05/15 4:15 version 1.3:
+
+The task is complete.
+
+Changes in main.cpp:
+- fixed memory leak
+
+Program is working. It also has small memory leaks connected with ports.h library.
+I will try to fix them if I have enough time.

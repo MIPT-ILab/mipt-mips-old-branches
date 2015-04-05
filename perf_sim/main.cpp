@@ -37,6 +37,7 @@ int main( int argc, char** argv) {
         }
         PerfMIPS* mips = new PerfMIPS;
         mips->run( argv[ file], atoi( argv[ file + 1]), silent);
+        delete mips;
     }
     return 0;
 }
