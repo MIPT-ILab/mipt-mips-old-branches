@@ -141,7 +141,8 @@ class FuncInstr
 
         bool complete;
 
-        const uint32 PC;
+        //const 
+	uint32 PC;
         uint32 new_PC;
 
         std::string disasm;
@@ -181,12 +182,17 @@ class FuncInstr
 
     public:
         FuncInstr( uint32 bytes, uint32 PC = 0);
+	FuncInstr();
         std::string Dump( std::string indent = " ") const;
 
         RegNum get_src1_num() const { return src1; }
         RegNum get_src2_num() const { return src2; }
         RegNum get_dst_num()  const { return dst;  }
-      
+     
+	bool is_jump() const { 
+		return (operation == OUT_J_JUMP || operation == OUT_I_BRANCH) ? true : false; 
+	} 
+	 
         bool is_load()  const { return operation == OUT_I_LOAD || operation == OUT_I_LOADU; }
         bool is_store() const { return operation == OUT_I_STORE; }
 
