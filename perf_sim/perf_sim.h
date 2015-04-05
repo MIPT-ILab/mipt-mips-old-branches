@@ -58,6 +58,7 @@ class PerfMIPS {
 
         int cycle;
         int executed_instrs;
+        int num_of_instructions;
 
         uint32 fetch(bool* is_valid) const {
             *is_valid = PC_is_valid;

@@ -22,26 +22,26 @@ class RF {
 
         /**************/
         void write ( RegNum num, uint32 val) {
-             assert( array[(size_t)num].is_valid == false);
-             array[(size_t)num].is_valid = true;
-             if ( REG_NUM_ZERO != num)
+            assert( array[(size_t)num].is_valid == false);
+            array[(size_t)num].is_valid = true;
+            if ( REG_NUM_ZERO != num)
                 array[(size_t)num].value = val;
         }
 
         /**************/
         inline bool read_src1( FuncInstr& instr) const
         {
-           size_t reg_num = instr.get_src1_num();
-           instr.set_v_src1( array[reg_num].value);
-           return array[reg_num].is_valid;
+            size_t reg_num = instr.get_src1_num();
+            instr.set_v_src1( array[reg_num].value);
+            return array[reg_num].is_valid;
         }
 
         /**************/
         inline bool read_src2( FuncInstr& instr) const
         {
-           size_t reg_num = instr.get_src2_num();
-           instr.set_v_src2( array[reg_num].value);
-           return array[reg_num].is_valid;
+            size_t reg_num = instr.get_src2_num();
+            instr.set_v_src2( array[reg_num].value);
+            return array[reg_num].is_valid;
         }
 
         /**************/
@@ -55,6 +55,7 @@ class RF {
         inline void reset( RegNum reg)
         {
             array[reg].value = 0;
+            array[reg].is_valid = true;
         }
 
         /**************/
