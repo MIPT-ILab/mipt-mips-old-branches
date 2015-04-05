@@ -9,8 +9,8 @@
 
 #include <func_instr.h>
 #include <func_memory.h>
+#include <ports.h>
 #include <rf.h>
-#include <perf_module.h>
 
 #define PORT_BW 1
 #define PORT_FANOUT 1
@@ -51,12 +51,26 @@ class PerfMIPS_module {
 class PerfMIPS {
         RF* rf;
         uint32 PC;
+        bool PC_is_valid;
         FuncMemory* mem;
+
+        bool silent;
 
         int cycle;
         int executed_instrs;
 
-        uint32 fetch() const { return mem->read(PC); }
+        uint32 fetch(bool* is_valid) const {
+            *is_valid = PC_is_valid;
+            return mem->read(PC);
+        }
+
+        void invalidate_PC(){ PC_is_valid = false;}
+        void update_PC(uint32 new_PC){
+            PC = new_PC;
+            PC_is_valid = true;
+        }
+
+
         bool read_src(FuncInstr& instr) const {
             return rf->read_src1(instr) && rf->read_src2(instr);
         }
@@ -79,8 +93,6 @@ class PerfMIPS {
         void wb(const FuncInstr& instr) {
             rf->write_dst(instr);
         }
-
-        void run(char* filename, int instr_num);
 
         void clock_fetch( int cycle);
         void clock_decode( int cycle);
@@ -116,6 +128,10 @@ class PerfMIPS {
         PerfMIPS_module<FuncInstr, FuncInstr>*  execute;
         PerfMIPS_module<FuncInstr, FuncInstr>*  memory;
         PerfMIPS_module<FuncInstr, FuncInstr>*  writeback;*/
+public:
+        PerfMIPS();
+        void run(const std::string& tr, int instrs_to_run);
+
 };
 
 #endif

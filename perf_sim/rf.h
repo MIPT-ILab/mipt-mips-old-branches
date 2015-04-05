@@ -14,18 +14,17 @@ class RF {
             uint32 value;
             bool   is_valid;
             Reg() : value(0ull), is_valid(true) { }
-        } array[REG_MAX_NUM];
+        } array[REG_NUM_MAX];
     public:
-        //uint32 read( Reg_Num);
         /**************/
-        bool check( Reg_Num num) const { return array[(size_t)num].is_valid; }
-        void invalidate( Reg_Num num) { array[(size_t)num].is_valid = false; }
+        bool check( RegNum num) const { return array[(size_t)num].is_valid; }
+        void invalidate( RegNum num) { array[(size_t)num].is_valid = false; }
 
         /**************/
-        void write ( Reg_Num num, uint32 val) {
+        void write ( RegNum num, uint32 val) {
              assert( array[(size_t)num].is_valid == false);
              array[(size_t)num].is_valid = true;
-             if ( REG_NUM_ZERO != reg_num)
+             if ( REG_NUM_ZERO != num)
                 array[(size_t)num].value = val;
         }
 
@@ -49,7 +48,7 @@ class RF {
         inline void write_dst( const FuncInstr& instr)
         {
             size_t reg_num = instr.get_dst_num();
-            write(reg_num, instr.get_v_dst);
+            write((RegNum)reg_num, instr.get_v_dst());
         }
 
         /**************/
