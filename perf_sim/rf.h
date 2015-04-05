@@ -16,26 +16,29 @@ class RF
             uint32 value;
             bool   is_valid;
             Reg() : value( 0ull), is_valid( true) { }    
-        } array[ REG_MAX_NUM];
+        } array[ REG_NUM_MAX];
     public:
-        uint32 read( Reg_Num num) { return array[ ( size_t) num].value; }
 
-        bool check( Reg_Num num) const { return array[ ( size_t) num].is_valid; }
+        uint32 read( RegNum num) { return array[ ( size_t) num].value; }                         // get data from register
 
-        void invalidate( Reg_Num num) { array[ ( size_t) num].is_valid = false; }   // zero register checks are in perf_mips
+        bool check( RegNum num) const { return array[ ( size_t) num].is_valid; }                 // check register validity
 
-        void write ( Reg_Num num, uint32 val) {                                     // zero register checks are in perf_mips
-            assert( array[(size_t)num].is_valid == false);
-            array[ ( size_t) num].value    = val;
-            array[ ( size_t) num].is_valid = true;
+        void invalidate( RegNum num) { if ( num) array[ ( size_t) num].is_valid = false; }       // set invalid state to register
+
+        void write ( RegNum num, uint32 val) {                                                   // write value to register
+            if ( num) {
+                assert( array[ ( size_t) num].is_valid == false);
+                array[ ( size_t) num].value    = val;
+                array[ ( size_t) num].is_valid = true;
+            }
         }
 
-        void reset( RegNum reg) {
+        void reset( RegNum reg) {                                                                // reset register
             array[ reg].is_valid = true;
             array[ reg].value = 0;
         }
  
-        RF() {
+        RF() {                                                                                   // prepare register file
             for ( size_t i = 0; i < REG_NUM_MAX; ++i)
                 reset( ( RegNum) i);
         }

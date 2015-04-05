@@ -31,3 +31,27 @@ Changes in rf.h:
 - it is ready to work
 
 The task hasn't been done yet. Program doesn't work because of it.
+
+
+
+04/05/15 03:27 version 1.2:
+
+The task is almost complete.
+
+Changes in perf_sim.h and perf_sim.cpp:
+- added comments
+- added implementations of pipeline blocks
+
+Changes in rf.h:
+- added comments
+
+Changes in main.cpp:
+- added support of -d key
+
+Changes in func_instr.h:
+- found bug which didn't allow us to use copy constructor
+
+Changes in Makefile:
+- renamed main file to perf_sim
+
+Program is working, but it hasn't been checked by valgrind.

@@ -14,14 +14,19 @@
 
 #include <ports.h>
 #include <func_instr.h>
-#include <func_mem.h>
+#include <func_memory.h>
 #include <types.h>
 #include <rf.h>
+#include <log.h>
 
 class PerfMIPS {
         RF* rf;                                        // registers
         uint32 PC;                                     // current PC
+        bool jump_ahead;                               // jump check
+
         FuncMemory* mem;                               // memory
+
+        bool is_silent;                                // silent mod on/off
 
         int executed_instrs;                           // number of executed instructions
 
@@ -30,10 +35,10 @@ class PerfMIPS {
     
         ReadPort<bool>* rp_decode_2_fetch_stall;       // read decode to fetch stall
     
-        FuncInstr* fetchInstr;                         // current instruction in fetch
+        uint32 fetchInstr;                             // current instruction in fetch
         void clock_fetch( int cycle);                  // execute fetch block
 
-        uint32 fetch() const { return mem->read(PC); } // execute fetch
+        uint32 fetch() const { return mem->read( PC); }// execute fetch
 
         // decode
         ReadPort<uint32>*     rp_fetch_2_decode;       // read fetch to decode
@@ -42,16 +47,24 @@ class PerfMIPS {
         ReadPort<bool>*  rp_execute_2_decode_stall;    // read execute to decode stall
         WritePort<bool>* wp_decode_2_fetch_stall;      // write decode to fetch stall
 
+        /* if all operations aren't 1 clk length we have to do similar
+           as decodeNext variables, but there won't be other stalls
+           except decode to fetch stalls
+        */
+
+        uint32 decodeNext;                             // next instruction
         FuncInstr* decodeInstr;                        // current instruction in decode
         void clock_decode( int cycle);                 // execute decode block
 
         void read_src( FuncInstr& instr) const {       // read sources
             size_t reg_num = instr.get_src1_num();
-            instr.set_v_src1( rf->read( ( Reg_Num) reg_num));
+            instr.set_v_src1( rf->read( ( RegNum) reg_num));
 
             reg_num = instr.get_src2_num();
-            instr.set_v_src2( rf->read( ( Reg_Num) reg_num));
+            instr.set_v_src2( rf->read( ( RegNum) reg_num));
 	    }
+        
+        bool next_is_valid;                            // current decodeInstr state
 
         // execute
         ReadPort<FuncInstr>*  rp_decode_2_execute;     // read decode to execute
@@ -97,7 +110,7 @@ class PerfMIPS {
         void clock_writeback( int cycle);              // execute writeback block
 
         void wb( const FuncInstr& instr) {             // do writeback
-            rf->write_dst( instr);
+            rf->write( instr.get_dst_num(), instr.get_v_dst());
         }
 
     public:
