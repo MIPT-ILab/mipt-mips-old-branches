@@ -1,0 +1,110 @@
+Disassembly of section .reginfo:
+
+00400094 <.reginfo>:
+  400094:	a0010f14 	sb	at,3860(zero)
+	...
+  4000a8:	004181c0 	0x4181c0
+
+Disassembly of section .text:
+
+004000b0 <_ftext>:
+  4000b0:	3c080041 	lui	t0,0x41
+  4000b4:	25080190 	addiu	t0,t0,400
+  4000b8:	8d040000 	lw	a0,0(t0)
+  4000bc:	24020004 	li	v0,4
+  4000c0:	0000000c 	syscall
+  4000c4:	24020005 	li	v0,5
+  4000c8:	0000000c 	syscall
+  4000cc:	00404021 	move	t0,v0
+  4000d0:	01002021 	move	a0,t0
+  4000d4:	23bdfff4 	addi	sp,sp,-12
+  4000d8:	afa80000 	sw	t0,0(sp)
+  4000dc:	afbf0008 	sw	ra,8(sp)
+  4000e0:	0c10004e 	jal	400138 <factorial>
+  4000e4:	00000000 	nop
+  4000e8:	8fb00004 	lw	s0,4(sp)
+  4000ec:	3c090041 	lui	t1,0x41
+  4000f0:	25290194 	addiu	t1,t1,404
+  4000f4:	8d240000 	lw	a0,0(t1)
+  4000f8:	24020004 	li	v0,4
+  4000fc:	0000000c 	syscall
+  400100:	8fa40000 	lw	a0,0(sp)
+  400104:	24020001 	li	v0,1
+  400108:	0000000c 	syscall
+  40010c:	3c0a0041 	lui	t2,0x41
+  400110:	254a0198 	addiu	t2,t2,408
+  400114:	8d440000 	lw	a0,0(t2)
+  400118:	24020004 	li	v0,4
+  40011c:	0000000c 	syscall
+  400120:	02002021 	move	a0,s0
+  400124:	24020001 	li	v0,1
+  400128:	0000000c 	syscall
+  40012c:	23bd000c 	addi	sp,sp,12
+  400130:	2402000a 	li	v0,10
+  400134:	0000000c 	syscall
+
+00400138 <factorial>:
+  400138:	8fa80000 	lw	t0,0(sp)
+  40013c:	00000000 	nop
+  400140:	11000010 	beqz	t0,400184 <returnOne>
+  400144:	00000000 	nop
+  400148:	2108ffff 	addi	t0,t0,-1
+  40014c:	23bdfff4 	addi	sp,sp,-12
+  400150:	afa80000 	sw	t0,0(sp)
+  400154:	afbf0008 	sw	ra,8(sp)
+  400158:	0c10004e 	jal	400138 <factorial>
+  40015c:	00000000 	nop
+  400160:	8fbf0008 	lw	ra,8(sp)
+  400164:	8fa90004 	lw	t1,4(sp)
+  400168:	8faa000c 	lw	t2,12(sp)
+  40016c:	00000000 	nop
+  400170:	012a0019 	multu	t1,t2
+  400174:	00005812 	mflo	t3
+  400178:	afab0010 	sw	t3,16(sp)
+  40017c:	03e00008 	jr	ra
+  400180:	23bd000c 	addi	sp,sp,12
+
+00400184 <returnOne>:
+  400184:	24080001 	li	t0,1
+  400188:	03e00008 	jr	ra
+  40018c:	afa80004 	sw	t0,4(sp)
+
+Disassembly of section .data:
+
+00410190 <_fdata>:
+  410190:	0041019c 	0x41019c
+
+00410194 <msgres1>:
+  410194:	004101af 	0x4101af
+
+00410198 <msgres2>:
+  410198:	004101c7 	0x4101c7
+
+0041019c <msgprompt_data>:
+  41019c:	69736f50 	0x69736f50
+  4101a0:	65766974 	0x65766974
+  4101a4:	746e6920 	jalx	1b9a480 <_gp+0x17822c0>
+  4101a8:	72656765 	0x72656765
+  4101ac:	5400203a 	0x5400203a
+
+004101af <msgres1_data>:
+  4101af:	6854      	li	s0,84
+  4101b1:	2065      	beqz	s0,41027e <__bss_start+0xae>
+  4101b3:	6176      	btnez	4102a2 <__bss_start+0xd2>
+  4101b5:	756c      	cmpi	a1,108
+  4101b7:	2065      	beqz	s0,410284 <__bss_start+0xb4>
+  4101b9:	666f      	0x666f
+  4101bb:	6620      	0x6620
+  4101bd:	6361      	addiu	sp,776
+  4101bf:	6f74      	li	a3,116
+  4101c1:	6972      	li	s1,114
+  4101c3:	6c61      	li	a0,97
+  4101c5:	0028      	addiu	s0,sp,160
+
+004101c7 <msgres2_data>:
+  4101c7:	2029      	beqz	s0,41021c <__bss_start+0x4c>
+  4101c9:	7369      	cmpi	v1,105
+  4101cb:	0020      	addiu	s0,sp,128
+  4101cd:	0000      	addiu	s0,sp,0
+	...
+
