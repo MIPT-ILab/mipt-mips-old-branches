@@ -1,0 +1,6 @@
+
+To run factorial and fibonacci tests, enter 
+  make factorial 
+or 
+  make fibonacci
+
